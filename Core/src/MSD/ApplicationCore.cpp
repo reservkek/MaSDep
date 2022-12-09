@@ -1,3 +1,4 @@
+#include <iostream>
 #include "ApplicationCore.h"
 #include "Events/ApplicationEvent.h"
 
@@ -23,7 +24,7 @@ namespace MSD {
 			for (Layer* layer : m_LayerStack)
 			{
 				layer->OnUpdate();
-			}
+	}
 
 			m_Window->OnUpdate();
 		};

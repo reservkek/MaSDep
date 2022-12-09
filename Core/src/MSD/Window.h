@@ -3,6 +3,7 @@
 #include "Core.h"
 #include "Events/Event.h"
 #include "GLFW/glfw3.h"
+#include <string>
 
 namespace MSD {
 
@@ -20,6 +21,8 @@ namespace MSD {
 
 	class MSD_API Window
 	{
+	private:
+		GLFWwindow* m_Window;
 	public:
 		using EventCallbackFn = std::function<void(Event&)>;
 
