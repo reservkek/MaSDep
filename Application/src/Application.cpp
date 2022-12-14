@@ -2,10 +2,18 @@
 
 using namespace MSD;
 
+class ExampleLayer : public Layer
+{
+
+};
+
 class Application : public MSD::ApplicationCore
 {
 public:
-	Application() {}
+	Application()
+	{
+		PushOverlay(new ImGuiLayer());
+	}
 	~Application() {}
 };
 

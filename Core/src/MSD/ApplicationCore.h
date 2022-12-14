@@ -4,8 +4,7 @@
 
 #include "Window.h"
 #include "LayerSystem/LayerStack.h"
-#include "Events/Event.h"
-#include "GLFW/glfw3.h"
+#include "Events/ApplicationEvent.h"
 
 namespace MSD {
 
@@ -20,11 +19,19 @@ namespace MSD {
 
 		void PushLayer(Layer* layer);
 		void PushOverlay(Layer* layer);
+
+		inline Window& GetWindow() { return *m_Window; }
+
+		inline static ApplicationCore& Get() { return *s_Instance; }
 	private:
+		
+		bool OnWindowClose(WindowCloseEvent& e);
+
 		std::unique_ptr<Window> m_Window;
 		bool m_Running = true;
 
 		LayerStack m_LayerStack;
+		static ApplicationCore* s_Instance;
 	};
 
 }

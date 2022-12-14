@@ -21,8 +21,6 @@ namespace MSD {
 
 	class MSD_API Window
 	{
-	private:
-		GLFWwindow* m_Window;
 	public:
 		using EventCallbackFn = std::function<void(Event&)>;
 
@@ -33,6 +31,7 @@ namespace MSD {
 
 		inline unsigned int GetWidth() const { return m_Data.Width; }
 		inline unsigned int GetHeight() const { return m_Data.Height; }
+		inline GLFWwindow* GetID() const { return m_Window; }
 
 		void SetEventCallBack(const EventCallbackFn& callback) { m_Data.EventCallback = callback; }
 
