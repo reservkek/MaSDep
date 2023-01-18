@@ -64,7 +64,7 @@
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <UndefineAllPreprocessorDefinitions>false</UndefineAllPreprocessorDefinitions>
       <UndefinePreprocessorDefinitions>MSD_PLATFORM_WINDOWS: _DEBUG</UndefinePreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)Core\vendor\GLFW\include;&amp;(SolutionDir)Core\vendor\imgui;$(SolutionDir)Core\src\MSD;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Core\vendor\GLFW\include;$(SolutionDir)Core\vendor\imgui;$(SolutionDir)Core\src\MSD;$(SolutionDir)Glad\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -85,7 +85,7 @@
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <UndefineAllPreprocessorDefinitions>false</UndefineAllPreprocessorDefinitions>
       <UndefinePreprocessorDefinitions>MSD_PLATFORM_WINDOWS: _DEBUG</UndefinePreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)Core\vendor\GLFW\include;&amp;(SolutionDir)Core\vendor\imgui;$(SolutionDir)Core\src\MSD;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Core\vendor\GLFW\include;$(SolutionDir)Core\vendor\imgui;$(SolutionDir)Core\src\MSD;$(SolutionDir)Glad\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

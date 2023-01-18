@@ -6,6 +6,8 @@
 #include "LayerSystem/LayerStack.h"
 #include "Events/ApplicationEvent.h"
 
+#include "ImGui/ImGuiLayer.h"
+
 namespace MSD {
 
 	class MSD_API ApplicationCore

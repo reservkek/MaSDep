@@ -20,6 +20,7 @@
 
 #pragma once
 #include "../../vendor/imgui/imgui.h"
+#include "../../vendor/imgui/imgui_internal.h"
 
 // IMGUI_IMPL_API
 

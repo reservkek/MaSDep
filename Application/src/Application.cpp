@@ -1,8 +1,6 @@
 #include "MSD.h"
 
-using namespace MSD;
-
-class ExampleLayer : public Layer
+class ExampleLayer : public MSD::Layer
 {
 
 };
@@ -12,7 +10,7 @@ class Application : public MSD::ApplicationCore
 public:
 	Application()
 	{
-		PushOverlay(new ImGuiLayer());
+		PushOverlay(new MSD::ImGuiLayer());
 	}
 	~Application() {}
 };

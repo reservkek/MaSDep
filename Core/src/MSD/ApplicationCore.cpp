@@ -13,6 +13,7 @@ namespace MSD {
 
 		m_Window = std::unique_ptr<Window>(Window::Create());
 		m_Window->SetEventCallBack(BIND_EVENT_FN(ApplicationCore::OnEvent));
+
 	}
 
 	ApplicationCore::~ApplicationCore()
@@ -27,8 +28,10 @@ namespace MSD {
 			for (Layer* layer : m_LayerStack)
 			{
 				layer->OnUpdate();
-
 			}
+
+
+
 			m_Window->OnUpdate();
 			glClearColor(1, 0, 1, 1);
 			glClear(GL_COLOR_BUFFER_BIT);
