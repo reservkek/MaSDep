@@ -6,6 +6,7 @@
 #include <sstream>
 #include <iostream>
 #include <vector>
+#include <map>
 
 #ifdef MSD_PLATFORM_WINDOWS
 	#ifdef MSD_BUILD_DLL

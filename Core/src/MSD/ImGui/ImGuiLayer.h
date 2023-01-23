@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Core.h"
+
 #include "../LayerSystem/Layer.h"
 #include "../Events/MouseEvent.h"
 #include "../Events/KeyEvent.h"
@@ -8,11 +10,14 @@
 #include "imgui_impl_opengl3.h"
 #include "imgui_impl_glfw.h"
 
+#include "ApplicationCore.h"
+
 namespace MSD {
 
 	class MSD_API ImGuiLayer : public Layer
 	{
 	public:
+
 		ImGuiLayer();
 		~ImGuiLayer();
 
@@ -26,14 +31,17 @@ namespace MSD {
 		void MainMenuBar();
 		void MainPanel();
 		void ModelParametersWindow(bool* p_open);
-
 	private:
+		int val = 0;
+
 		bool show = true;
 		bool show_app_main_menu_bar = false;
 		bool show_app_console = false;
 		bool show_app_model_parameters = false;
 		bool show_app_model_status = false;
 		bool show_app_property_editor = false;
+
+		bool running = false;
 
 		double m_Time = 0.0;
 	};

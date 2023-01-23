@@ -1,7 +1,7 @@
-#include <iostream>
 #include "ApplicationCore.h"
 
 #include "glad/glad.h"
+#include <thread>
 
 namespace MSD {
 
@@ -14,6 +14,37 @@ namespace MSD {
 		m_Window = std::unique_ptr<Window>(Window::Create());
 		m_Window->SetEventCallBack(BIND_EVENT_FN(ApplicationCore::OnEvent));
 
+		m_Model = new AngMSD();
+		std::cout << m_Model->GetTimeTicksCounter() << std::endl;
+	}
+
+	void ApplicationCore::ModelUpdate()
+	{
+		while (m_Running)
+		{
+			m_Model->OnUpdate();
+		}
+	}
+
+	void ModelUpdateWrapper()
+	{
+		ApplicationCore::Get().ModelUpdate();
+	}
+
+	void ApplicationCore::WindowUpdate()
+	{
+		while (m_Running)
+		{
+			for (Layer* layer : m_LayerStack)
+			{
+				layer->OnUpdate();
+			}
+
+			m_Window->OnUpdate();
+
+			glClearColor(1, 0, 1, 1);
+			glClear(GL_COLOR_BUFFER_BIT);
+		};
 	}
 
 	ApplicationCore::~ApplicationCore()
@@ -23,19 +54,12 @@ namespace MSD {
 
 	void ApplicationCore::Run()
 	{
-		while (m_Running)
-		{
-			for (Layer* layer : m_LayerStack)
-			{
-				layer->OnUpdate();
-			}
+		std::thread* calculationThread = new std::thread(ModelUpdateWrapper);
 
+		WindowUpdate();
 
-
-			m_Window->OnUpdate();
-			glClearColor(1, 0, 1, 1);
-			glClear(GL_COLOR_BUFFER_BIT);
-		};
+		calculationThread->join();
+		delete calculationThread;
 	}
 
 	void ApplicationCore::OnEvent(Event& e)

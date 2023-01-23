@@ -1,8 +1,6 @@
 #include "ImGuiLayer.h"
-#include "Core.h"
 
 #include "GLFW/glfw3.h"
-#include "ApplicationCore.h"
 
 namespace MSD {
 
@@ -50,7 +48,7 @@ namespace MSD {
 			style.Colors[ImGuiCol_WindowBg].w = 1.0f;
 		}
 
-        ApplicationCore& app = ApplicationCore::Get();
+		ApplicationCore& app = ApplicationCore::Get();
         GLFWwindow* window = static_cast<GLFWwindow*>(app.GetWindow().GetID());
 
 		ImGui_ImplOpenGL3_Init("#version 130");
@@ -125,9 +123,21 @@ namespace MSD {
 		{
 			if (ImGui::BeginMenuBar()) {
 				ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(5.0f, 8.0f));
-				if (ImGui::Button("Run Program"))
+				if (ImGui::Button(!running ? "Run Program###Run" : "Stop Program###Run"))
 				{
+					ApplicationCore& app = ApplicationCore::Get();
+					AngMSD& model = app.GetModel();
 
+					if (running)
+					{
+						model.Stop();
+						running = false;
+					}
+					else
+					{
+						model.Run();
+						running = true;
+					}
 				}
 				ImGui::PopStyleVar();
 				ImGui::EndMenuBar();
@@ -139,11 +149,42 @@ namespace MSD {
 
 	void ImGuiLayer::ModelParametersWindow(bool* p_open)
 	{
+
 		if (!ImGui::Begin("Model Parameters", p_open))
 		{
 			ImGui::End();
 			return;
 		}
+		ApplicationCore& app = ApplicationCore::Get();
+		AngMSD& model = app.GetModel();
+
+		ImGui::Text("Ticks: %d", model.timetickscounter);
+		ImGui::Text("Magnetrons: %d", model.m_Magnetrons.size());
+		ImGui::Separator();
+
+		if (ImGui::Button("Add Magnetron"))
+		{
+			model.AddMagnetron();
+		}
+
+		unsigned int count = 0;
+		for (auto i_magnetron : model.m_Magnetrons)
+		{
+			count++;
+			if (!i_magnetron->GetIndex()) { i_magnetron->SetIndex(model.m_MagnetronIndex); }
+			std::string countstr = "Magnetron " + std::to_string(i_magnetron->GetIndex());
+			if (ImGui::CollapsingHeader((const char*)countstr.c_str(), ImGuiTreeNodeFlags_DefaultOpen))
+			{
+				ImGui::PushID(count);
+				if (ImGui::Button("Delete"))
+				{
+					model.DeleteMagnetron(count);
+				}
+				ImGui::PopID();
+			}
+		}
+		ImGui::Separator();
+
 		ImGui::End();
 	}
 
@@ -156,8 +197,6 @@ namespace MSD {
 		
 		ImGui::DockSpaceOverViewport();
 
-		static bool show = true; 
-		ImGui::ShowDemoWindow(&show);
 
 		if (show_app_model_parameters) ModelParametersWindow(&show_app_model_parameters);
 

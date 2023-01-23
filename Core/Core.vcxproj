@@ -48,11 +48,13 @@
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)bin\$(Platform)-$(Configuration)-$(SolutionName)\</OutDir>
     <IntDir>$(SolutionDir)bin-int\$(Platform)-$(Configuration)-$(ProjectName)\</IntDir>
+    <GenerateManifest>false</GenerateManifest>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)bin\$(Platform)-$(Configuration)-$(SolutionName)\</OutDir>
     <IntDir>$(SolutionDir)bin-int\$(Platform)-$(Configuration)-$(ProjectName)\</IntDir>
+    <GenerateManifest>false</GenerateManifest>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -60,10 +62,10 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>MSD_PLATFORM_WINDOWS;MSD_BUILD_DLL;GLFW_INCLUDE_NONE;   MSD_PLATFORM_WINDOWS: _DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <UndefineAllPreprocessorDefinitions>false</UndefineAllPreprocessorDefinitions>
-      <UndefinePreprocessorDefinitions>MSD_PLATFORM_WINDOWS: _DEBUG</UndefinePreprocessorDefinitions>
+      <UndefinePreprocessorDefinitions>MSD_PLATFORM_WINDOWS: _DEBUG;MSD_PLATFORM_WINDOWS: NDEBUG;%(UndefinePreprocessorDefinitions)</UndefinePreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(SolutionDir)Core\vendor\GLFW\include;$(SolutionDir)Core\vendor\imgui;$(SolutionDir)Core\src\MSD;$(SolutionDir)Glad\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -71,6 +73,10 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)Core\vendor\GLFW\lib-vc2022;$(SolutionDir)bin\$(Platform)-$(Configuration)-$(SolutionName)\</AdditionalLibraryDirectories>
       <AdditionalDependencies>glfw3.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;glad.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <EntryPointSymbol>
+      </EntryPointSymbol>
+      <AllowIsolation>true</AllowIsolation>
+      <IgnoreEmbeddedIDL>true</IgnoreEmbeddedIDL>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -81,10 +87,10 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>MSD_PLATFORM_WINDOWS;MSD_BUILD_DLL;GLFW_INCLUDE_NONE;   MSD_PLATFORM_WINDOWS: NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <UndefineAllPreprocessorDefinitions>false</UndefineAllPreprocessorDefinitions>
-      <UndefinePreprocessorDefinitions>MSD_PLATFORM_WINDOWS: _DEBUG</UndefinePreprocessorDefinitions>
+      <UndefinePreprocessorDefinitions>MSD_PLATFORM_WINDOWS: _DEBUG;MSD_PLATFORM_WINDOWS: NDEBUG;%(UndefinePreprocessorDefinitions)</UndefinePreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(SolutionDir)Core\vendor\GLFW\include;$(SolutionDir)Core\vendor\imgui;$(SolutionDir)Core\src\MSD;$(SolutionDir)Glad\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -94,6 +100,10 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)Core\vendor\GLFW\lib-vc2022;$(SolutionDir)bin\$(Platform)-$(Configuration)-$(SolutionName)\</AdditionalLibraryDirectories>
       <AdditionalDependencies>glfw3.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;glad.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <EntryPointSymbol>
+      </EntryPointSymbol>
+      <AllowIsolation>true</AllowIsolation>
+      <IgnoreEmbeddedIDL>true</IgnoreEmbeddedIDL>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -104,6 +114,9 @@
     <ClCompile Include="src\MSD\ImGui\imgui_impl_opengl3.cpp" />
     <ClCompile Include="src\MSD\LayerSystem\Layer.cpp" />
     <ClCompile Include="src\MSD\LayerSystem\LayerStack.cpp" />
+    <ClCompile Include="src\MSD\MathModels\AngularMSD\AngularMSD.cpp" />
+    <ClCompile Include="src\MSD\MathModels\AngularMSD\Magnetron.cpp" />
+    <ClCompile Include="src\MSD\MathModels\AngularMSD\MSDMath.cpp" />
     <ClCompile Include="src\MSD\Window.cpp" />
     <ClCompile Include="vendor\imgui\imgui.cpp" />
     <ClCompile Include="vendor\imgui\imgui_demo.cpp" />
@@ -126,7 +139,11 @@
     <ClInclude Include="src\MSD\ImGui\imgui_impl_opengl3_loader.h" />
     <ClInclude Include="src\MSD\LayerSystem\Layer.h" />
     <ClInclude Include="src\MSD\LayerSystem\LayerStack.h" />
+    <ClInclude Include="src\MSD\MathModels\AngularMSD\AngularMSD.h" />
+    <ClInclude Include="src\MSD\MathModels\AngularMSD\Magnetron.h" />
+    <ClInclude Include="src\MSD\MathModels\AngularMSD\MSDMath.h" />
     <ClInclude Include="src\MSD\Window.h" />
+    <ClInclude Include="vendor\color.hpp" />
     <ClInclude Include="vendor\GLFW\include\GLFW\glfw3.h" />
     <ClInclude Include="vendor\GLFW\include\GLFW\glfw3native.h" />
     <ClInclude Include="vendor\imgui\imconfig.h" />
