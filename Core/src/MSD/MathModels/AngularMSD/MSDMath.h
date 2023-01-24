@@ -2,11 +2,15 @@
 
 #include "Core.h"
 
+#include "imgui.h"
+
 namespace MSD {
+	constexpr float PI = 3.14159265358979f;
+
 	// 3D VECTOR DATATYPE /////////////////
 	struct MSD_API vec3
 	{
-		double x, y, z;
+		float x, y, z;
 		
 		vec3(double x = 0, double y = 0, double z = 0);
 

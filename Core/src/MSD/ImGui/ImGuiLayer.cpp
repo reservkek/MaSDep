@@ -17,7 +17,8 @@ namespace MSD {
 	{
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
-		ImGui::StyleColorsDark();
+		ImGui::StyleColorsLight();
+		/*ImGui::StyleColorsDark();*/
 
 		ImGuiIO& io = ImGui::GetIO(); (void)io;
 
@@ -115,7 +116,7 @@ namespace MSD {
 	void ImGuiLayer::MainPanel()
 	{
 		ImGuiViewportP* viewport = (ImGuiViewportP*)(void*)ImGui::GetMainViewport();
-		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_MenuBar;
+		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoBringToFrontOnFocus;
 		float height = ImGui::GetFrameHeight();
 
 		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.0f, 8.0f));
@@ -147,6 +148,45 @@ namespace MSD {
 		};
 	}
 
+	void ImGuiLayer::MagnetronParameters(Magnetron* magnetron)
+	{
+		ImGui::InputFloat("Radius", magnetron->GetRadius());
+		float* pos[3] = { magnetron->GetPosX(), magnetron->GetPosY(), magnetron->GetPosZ() };
+		ImGui::InputFloat3("Magnetron position", *pos);
+		float* normal[3] = { magnetron->GetNormalX(), magnetron->GetNormalY(), magnetron->GetNormalZ() };
+		ImGui::InputFloat3("Magnetron normal vector", *normal);
+		ImGui::InputFloat("###rotate", magnetron->GetRotationAngle());
+		ImGui::SameLine();
+		if (ImGui::Button("Rotate clockwise"))
+		{
+			magnetron->Rotate();
+		}
+	}
+
+	void ImGuiLayer::SubstrateParameters(Substrate* substrate)
+	{
+		if (ImGui::CollapsingHeader("Substrate", ImGuiTreeNodeFlags_DefaultOpen))
+		{
+			float* pos[3] = { substrate->GetPosX(), substrate->GetPosY(), substrate->GetPosZ() };
+			ImGui::InputFloat3("Magnetron position", *pos);
+			float* normal[3] = { substrate->GetNormalX(), substrate->GetNormalY(), substrate->GetNormalZ() };
+			ImGui::InputFloat3("Magnetron normal vector", *normal);
+			ImGui::InputFloat("###rotate", substrate->GetRotationAngle());
+			ImGui::SameLine();
+			if (ImGui::Button("Rotate clockwise"))
+			{
+				substrate->Rotate();
+			}
+			ImGui::PushItemWidth(100.0f);
+			ImGui::InputFloat("RPM", substrate->GetRPM());
+			ImGui::SameLine();
+			ImGui::Dummy(ImVec2(20.0f,ImGui::GetFrameHeight()));
+			ImGui::SameLine();
+			ImGui::InputFloat("Sub RPM", substrate->GetSubRPM());
+			ImGui::PopItemWidth();
+		}
+	}
+
 	void ImGuiLayer::ModelParametersWindow(bool* p_open)
 	{
 
@@ -155,10 +195,13 @@ namespace MSD {
 			ImGui::End();
 			return;
 		}
+
 		ApplicationCore& app = ApplicationCore::Get();
 		AngMSD& model = app.GetModel();
 
-		ImGui::Text("Ticks: %d", model.timetickscounter);
+		m_ProgressBar = model.GetCurrentProgress();
+
+		ImGui::Text("Ticks: %d", model.timeTicksCounter);
 		ImGui::Text("Magnetrons: %d", model.m_Magnetrons.size());
 		ImGui::Separator();
 
@@ -176,14 +219,18 @@ namespace MSD {
 			if (ImGui::CollapsingHeader((const char*)countstr.c_str(), ImGuiTreeNodeFlags_DefaultOpen))
 			{
 				ImGui::PushID(count);
+				MagnetronParameters(i_magnetron);
 				if (ImGui::Button("Delete"))
 				{
 					model.DeleteMagnetron(count);
+					if (count != 1) { model.m_MagnetronIndex = model.m_Magnetrons.back()->GetIndex(); }
+					else { model.m_MagnetronIndex = 0; }
 				}
 				ImGui::PopID();
 			}
 		}
 		ImGui::Separator();
+		SubstrateParameters(model.m_Substrate);
 
 		ImGui::End();
 	}
@@ -196,7 +243,6 @@ namespace MSD {
 		MainPanel();
 		
 		ImGui::DockSpaceOverViewport();
-
 
 		if (show_app_model_parameters) ModelParametersWindow(&show_app_model_parameters);
 

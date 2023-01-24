@@ -115,7 +115,7 @@
     <ClCompile Include="src\MSD\LayerSystem\Layer.cpp" />
     <ClCompile Include="src\MSD\LayerSystem\LayerStack.cpp" />
     <ClCompile Include="src\MSD\MathModels\AngularMSD\AngularMSD.cpp" />
-    <ClCompile Include="src\MSD\MathModels\AngularMSD\Magnetron.cpp" />
+    <ClCompile Include="src\MSD\MathModels\AngularMSD\MSDObjects.cpp" />
     <ClCompile Include="src\MSD\MathModels\AngularMSD\MSDMath.cpp" />
     <ClCompile Include="src\MSD\Window.cpp" />
     <ClCompile Include="vendor\imgui\imgui.cpp" />
@@ -140,7 +140,7 @@
     <ClInclude Include="src\MSD\LayerSystem\Layer.h" />
     <ClInclude Include="src\MSD\LayerSystem\LayerStack.h" />
     <ClInclude Include="src\MSD\MathModels\AngularMSD\AngularMSD.h" />
-    <ClInclude Include="src\MSD\MathModels\AngularMSD\Magnetron.h" />
+    <ClInclude Include="src\MSD\MathModels\AngularMSD\MSDObjects.h" />
     <ClInclude Include="src\MSD\MathModels\AngularMSD\MSDMath.h" />
     <ClInclude Include="src\MSD\Window.h" />
     <ClInclude Include="vendor\color.hpp" />
