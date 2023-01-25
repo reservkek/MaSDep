@@ -26,7 +26,7 @@ namespace MSD {
 	double Magnitude(const vec3& a);
 	double DotProduct(const vec3& a, const vec3& b);
 	double Angle(const vec3& a, const vec3& b);
-	double Approx(const double& value, std::map<double, double> map);
+	float Approx(const float& radius, std::map<float, float> map);
 	vec3 Normalize(const vec3& a);
 	vec3 CrossProduct(const vec3& a, const vec3& b);
 	vec3 FindVector(const vec3& a, const vec3& b, bool reflected = false);

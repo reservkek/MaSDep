@@ -5,8 +5,10 @@
 #include <functional>
 #include <sstream>
 #include <iostream>
+#include <fstream>
 #include <vector>
 #include <map>
+#include <algorithm>
 
 #ifdef MSD_PLATFORM_WINDOWS
 	#ifdef MSD_BUILD_DLL

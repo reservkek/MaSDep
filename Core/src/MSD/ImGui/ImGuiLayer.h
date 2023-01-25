@@ -34,6 +34,7 @@ namespace MSD {
 		void MagnetronParameters(Magnetron* magnetron);
 		void SubstrateParameters(Substrate* substrate);
 		void ModelParametersWindow(bool* p_open);
+		void ModelResultsWindow(bool* p_open);
 	private:
 		int val = 0;
 
@@ -41,12 +42,10 @@ namespace MSD {
 		bool show_app_main_menu_bar = false;
 		bool show_app_console = false;
 		bool show_app_model_parameters = false;
-		bool show_app_model_status = false;
+		bool show_app_model_results = false;
 		bool show_app_property_editor = false;
 
-		bool running = false;
-
-		float m_ProgressBar;
+		float m_ProgressBar = 0;
 
 		double m_Time = 0.0;
 	};
