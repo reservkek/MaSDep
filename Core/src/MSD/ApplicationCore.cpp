@@ -15,7 +15,6 @@ namespace MSD {
 		m_Window->SetEventCallBack(BIND_EVENT_FN(ApplicationCore::OnEvent));
 
 		m_Model = new AngMSD();
-		std::cout << m_Model->GetTimeTicksCounter() << std::endl;
 	}
 
 	void ApplicationCore::ModelUpdate()

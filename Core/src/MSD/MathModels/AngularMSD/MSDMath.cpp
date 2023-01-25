@@ -122,16 +122,16 @@ namespace MSD {
 		return b;
 	}
 
-	double Approx(const double& value, std::map<double, double> map)
+	float Approx(const float& radius, std::map<float, float> map)
 	{
 		if (map.begin() == map.end())
 		{
 			return 100.0;
 		}
 
-		std::map<double, double>::iterator iterUpper, iterLower;
+		std::map<float, float>::iterator iterUpper, iterLower;
 		double res;
-		iterUpper = map.upper_bound(value);
+		iterUpper = map.upper_bound(radius);
 		if (iterUpper == map.end())
 		{
 			--iterUpper;
@@ -142,7 +142,7 @@ namespace MSD {
 		};
 		iterLower = iterUpper;
 		--iterLower;
-		res = iterLower->second + (iterUpper->second - iterLower->second) / (iterUpper->first - iterLower->first) * (value - iterLower->first);
+		res = iterLower->second + (iterUpper->second - iterLower->second) / (iterUpper->first - iterLower->first) * (radius - iterLower->first);
 		if (res < 0) res = 0;
 		return res;
 	}

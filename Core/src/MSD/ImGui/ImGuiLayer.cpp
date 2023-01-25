@@ -17,6 +17,7 @@ namespace MSD {
 	{
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
+		ImPlot::CreateContext();
 		ImGui::StyleColorsLight();
 		/*ImGui::StyleColorsDark();*/
 
@@ -35,7 +36,7 @@ namespace MSD {
         };
 
 		io.Fonts->Clear();
-        io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\Tahoma.ttf", 14.0f, &font_config, ranges);
+        io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\Segoeui.ttf", 16.0f, &font_config, ranges);
 
 		io.BackendFlags |= ImGuiBackendFlags_HasMouseCursors;
 		io.BackendFlags |= ImGuiBackendFlags_HasSetMousePos;
@@ -100,7 +101,7 @@ namespace MSD {
 			if (ImGui::BeginMenu("Model"))
 			{
 				ImGui::MenuItem("Model parameters", NULL, &show_app_model_parameters);
-				ImGui::MenuItem("Status", NULL, &show_app_model_status);
+				ImGui::MenuItem("Results", NULL, &show_app_model_results);
 				ImGui::EndMenu();
 			}
 			if (ImGui::BeginMenu("Tools"))
@@ -123,21 +124,20 @@ namespace MSD {
 		if (ImGui::BeginViewportSideBar("toolbar", viewport, ImGuiDir_Up, height+11.0f, window_flags))
 		{
 			if (ImGui::BeginMenuBar()) {
+				ApplicationCore& app = ApplicationCore::Get();
+				AngMSD& model = app.GetModel();
+				bool& running = app.GetModel().GetStatus();
+
 				ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(5.0f, 8.0f));
 				if (ImGui::Button(!running ? "Run Program###Run" : "Stop Program###Run"))
 				{
-					ApplicationCore& app = ApplicationCore::Get();
-					AngMSD& model = app.GetModel();
-
 					if (running)
 					{
 						model.Stop();
-						running = false;
 					}
 					else
 					{
 						model.Run();
-						running = true;
 					}
 				}
 				ImGui::PopStyleVar();
@@ -177,7 +177,7 @@ namespace MSD {
 			{
 				substrate->Rotate();
 			}
-			ImGui::PushItemWidth(100.0f);
+			ImGui::PushItemWidth(110.0f);
 			ImGui::InputFloat("RPM", substrate->GetRPM());
 			ImGui::SameLine();
 			ImGui::Dummy(ImVec2(20.0f,ImGui::GetFrameHeight()));
@@ -201,8 +201,13 @@ namespace MSD {
 
 		m_ProgressBar = model.GetCurrentProgress();
 
-		ImGui::Text("Ticks: %d", model.timeTicksCounter);
+		ImGui::PushStyleColor(ImGuiCol_PlotHistogram, ImVec4(0.26f, 0.59f, 0.98f, 0.40f));
+		ImGui::ProgressBar(m_ProgressBar);
+		ImGui::PopStyleColor();
+		ImGui::Text("Ticks: %d", model.m_TimeTicksCounter);
 		ImGui::Text("Magnetrons: %d", model.m_Magnetrons.size());
+		ImGui::InputFloat("Rotation Limit", &model.m_RotationLimit);
+		ImGui::InputInt("Time Limit", &model.m_TimeLimit);
 		ImGui::Separator();
 
 		if (ImGui::Button("Add Magnetron"))
@@ -223,7 +228,7 @@ namespace MSD {
 				if (ImGui::Button("Delete"))
 				{
 					model.DeleteMagnetron(count);
-					if (count != 1) { model.m_MagnetronIndex = model.m_Magnetrons.back()->GetIndex(); }
+					if (model.m_Magnetrons.size() != 0) { model.m_MagnetronIndex = model.m_Magnetrons.back()->GetIndex(); }
 					else { model.m_MagnetronIndex = 0; }
 				}
 				ImGui::PopID();
@@ -231,6 +236,48 @@ namespace MSD {
 		}
 		ImGui::Separator();
 		SubstrateParameters(model.m_Substrate);
+
+		ImGui::End();
+	}
+
+	void ImGuiLayer::ModelResultsWindow(bool* p_open)
+	{
+		if (!ImGui::Begin("Model results", p_open))
+		{
+			ImGui::End();
+			return;
+		}
+
+		ApplicationCore& app = ApplicationCore::Get();
+		AngMSD& model = app.GetModel();
+
+		std::vector<float>& vec = model.m_SubstrateBuffer->GetDepEvolution();
+		if (ImGui::CollapsingHeader("Deposition Evolution"))
+		{
+			if (ImPlot::BeginPlot("Deposition Evolution"))
+			{
+				if (vec.size() != 0) ImPlot::PlotLine("", vec.data(), vec.size());
+				ImPlot::EndPlot();
+			}
+		}
+		
+
+		unsigned int count = 0;
+		for (auto i_magnetron : model.m_Magnetrons)
+		{
+			std::vector<float>& vec2 = i_magnetron->GetDepRates();
+			count++;
+			if (!i_magnetron->GetIndex()) { i_magnetron->SetIndex(model.m_MagnetronIndex); }
+			std::string countstr = "Magnetron " + std::to_string(i_magnetron->GetIndex());
+			if (ImGui::CollapsingHeader((const char*)countstr.c_str(), ImGuiTreeNodeFlags_DefaultOpen))
+			{
+				if (ImPlot::BeginPlot("Deposition Rate"))
+				{
+					if (vec.size() != 0) ImPlot::PlotLine("", vec2.data(), vec2.size());
+					ImPlot::EndPlot();
+				}
+			}
+		}
 
 		ImGui::End();
 	}
@@ -245,6 +292,7 @@ namespace MSD {
 		ImGui::DockSpaceOverViewport();
 
 		if (show_app_model_parameters) ModelParametersWindow(&show_app_model_parameters);
+		if (show_app_model_results) ModelResultsWindow(&show_app_model_results);
 
 		End();
 	}

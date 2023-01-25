@@ -17,15 +17,17 @@ namespace MSD {
 			for (auto i_magnetron : m_Magnetrons) delete i_magnetron;
 		};
 		
-		inline int GetTimeTicksCounter() const { return timeTicksCounter; }
+		inline int GetTimeTicksCounter() const { return m_TimeTicksCounter; }
 		inline float GetCurrentProgress() const { return m_CurrentProgress; }
-		inline bool GetStatus() { return m_ModelRunning; }
+		inline bool& GetStatus() { return m_ModelRunning; }
 
 		inline static AngMSD& GetModelID() { return *s_Instance; }
 
 		void CalculateFlux(Magnetron* magnetron, Substrate* substrate);
 		void Run();
 		void Stop();
+		void Clear();
+		void Complete();
 		void OnUpdate();
 
 		void AddMagnetron();
@@ -33,25 +35,21 @@ namespace MSD {
 
 		extern friend class ImGuiLayer;
 
-		// TO DO:
-		// Implement File Explorer Dialogue window
-		const char* a = "input.txt";
-
 	private:
 
 		// Время в модели
-		int timeTicksCounter = 0; // Счётчик времени в тиках
-		unsigned int const timeRatio = 5; // Количество тиков в секунду
-		double const timePerTick = 1.0 / timeRatio; // Количество времени за 1 тик.
-		unsigned int timeLimit = 60; // Лимит моделирования во времени в секундах
-		float currentTime = 0;
+		int m_TimeTicksCounter = 0; // Счётчик времени в тиках
+		unsigned int const m_TicksPerSecond = 5; // Количество тиков в секунду
+		float const m_TimePerTick = 1.0f / m_TicksPerSecond; // Количество времени за 1 тик.
+		int m_TimeLimit = 60; // Лимит моделирования во времени в секундах
+		float m_CurrentTime = 0;
 
 		// Пространство в модели
 		unsigned int spaceRatio = 100; // Разделение 1 метра пространства на виртуальные отрезки
 
 		// Другие параметры
-		float rotationLimit = 0;
-		float rotationCounter = 0;
+		float m_RotationLimit = 1;
+		float m_RotationCounter = 0;
 
 		float m_IntegrationDelta = 0.1;
 
@@ -69,11 +67,11 @@ namespace MSD {
 		unsigned int m_MagnetronIndex = 0;
 
 		// Буфер для расчёта
-		Substrate* m_SubstrateBuffer = nullptr;
+		Substrate* m_SubstrateBuffer = new Substrate();
 		std::vector<Magnetron*> m_MagnetronsBuffer;
 
 		static AngMSD* s_Instance;
 		bool m_ModelRunning = false;
+		bool m_ToBeCleared = false;
 	};
-
 }

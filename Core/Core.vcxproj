@@ -118,6 +118,9 @@
     <ClCompile Include="src\MSD\MathModels\AngularMSD\MSDObjects.cpp" />
     <ClCompile Include="src\MSD\MathModels\AngularMSD\MSDMath.cpp" />
     <ClCompile Include="src\MSD\Window.cpp" />
+    <ClCompile Include="vendor\imguiplot\implot.cpp" />
+    <ClCompile Include="vendor\imguiplot\implot_demo.cpp" />
+    <ClCompile Include="vendor\imguiplot\implot_items.cpp" />
     <ClCompile Include="vendor\imgui\imgui.cpp" />
     <ClCompile Include="vendor\imgui\imgui_demo.cpp" />
     <ClCompile Include="vendor\imgui\imgui_draw.cpp" />
@@ -146,6 +149,8 @@
     <ClInclude Include="vendor\color.hpp" />
     <ClInclude Include="vendor\GLFW\include\GLFW\glfw3.h" />
     <ClInclude Include="vendor\GLFW\include\GLFW\glfw3native.h" />
+    <ClInclude Include="vendor\imguiplot\implot.h" />
+    <ClInclude Include="vendor\imguiplot\implot_internal.h" />
     <ClInclude Include="vendor\imgui\imconfig.h" />
     <ClInclude Include="vendor\imgui\imgui.h" />
     <ClInclude Include="vendor\imgui\imgui_internal.h" />

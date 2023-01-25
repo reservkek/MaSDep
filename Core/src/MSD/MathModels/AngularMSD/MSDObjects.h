@@ -17,7 +17,10 @@ namespace MSD {
 
 		void SetIndex(unsigned int val) { m_Index = val; }
 		void Rotate();
-		void InputSputRates(const char* str);
+		void WriteDepRate();
+		void WriteGamma(const float& gamma);
+		void WritePhi(const float& phi);
+		void InputSputRates(const char* filepath, const float& integrationDelta);
 		float FindSputRate(const float& radius);
 
 		int GetIndex() const { return m_Index; }
@@ -29,6 +32,9 @@ namespace MSD {
 		float* GetNormalY() { return &(msdnormal.x); }
 		float* GetNormalZ() { return &(msdnormal.x); }
 		float* GetRotationAngle() { return &(m_RotationAngle); }
+		float& GetCurrentDepRate() { return m_CurrentDepRate; }
+		const char** GetInputFilePath() { return &m_InputFilePath; }
+		std::vector<float>& GetDepRates() { return m_DepRates; }
 
 		vec3 GetPos() const { return msdpos; }
 		vec3 GetNormal() const { return msdnormal; }
@@ -38,6 +44,17 @@ namespace MSD {
 	private:
 		vec3 msdpos, msdnormal;
 		float m_Radius;
+
+		std::map<float, float> m_SputRates;
+		std::map<float, float> m_InputSputRates;
+
+		float m_CurrentDepRate = 0;
+		std::vector<float> m_DepRates; // Deposition rates onto substrate;
+
+		std::vector<float> m_GammaAngles;
+		std::vector<float> m_PhiAngles;
+
+		const char* m_InputFilePath = "C:/Users/eeo5/Documents/input.txt";
 
 		unsigned int m_Index = 0;
 		float m_RotationAngle = 0;
@@ -50,6 +67,8 @@ namespace MSD {
 			const float& rpm = 0, const float& subrpm = 0);
 
 		void Rotate();
+		void Update();
+		void WriteDepEvolution();
 
 		float* GetPosX() { return &(subpos.x); }
 		float* GetPosZ() { return &(subpos.z); }
@@ -64,6 +83,8 @@ namespace MSD {
 		float& GetTotalAngleDelta() { return m_TotalAngleDelta; }
 		float& GetTotalSubAngle() { return m_TotalSubAngle; }
 		float& GetTotalSubAngleDelta() { return m_TotalSubAngleDelta; }
+		float& GetTotalDeposited() { return m_TotalDeposited; }
+		std::vector<float>& GetDepEvolution() { return m_DepEvolution; }
 
 		vec3 GetPos() const { return subpos; };
 		vec3 GetNormal() const { return subnormal; };
@@ -76,7 +97,8 @@ namespace MSD {
 		float m_TotalAngleDelta = 0;
 		float m_TotalSubAngle = 0;
 		float m_TotalSubAngleDelta = 0;
-
 		float m_TotalDeposited = 0;
+
+		std::vector<float> m_DepEvolution;
 	};
 }
