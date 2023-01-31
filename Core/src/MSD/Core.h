@@ -6,12 +6,9 @@
 #include <sstream>
 #include <iostream>
 #include <fstream>
-#include <filesystem>
 #include <vector>
 #include <map>
 #include <algorithm>
-#include <stdlib.h>
-
 
 #ifdef MSD_PLATFORM_WINDOWS
 	#ifdef MSD_BUILD_DLL
