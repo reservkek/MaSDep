@@ -2,7 +2,7 @@
 
 namespace MSD {
 
-	vec3::vec3(float x, float y, float z)
+	vec3::vec3(double x, double y, double z)
 		: x(x), y(y), z(z)
 	{
 	}
@@ -15,12 +15,12 @@ namespace MSD {
 		return *this;
 	}
 
-	vec3 vec3::operator*(const float& a)
+	vec3 vec3::operator*(const double& a)
 	{
 		return vec3(x * a, y * a, z * a);
 	}
 
-	vec3 vec3::operator+(const float& a) const
+	vec3 vec3::operator+(const double& a) const
 	{
 		return vec3(x + a, y + a, z + a);
 	}
@@ -38,7 +38,7 @@ namespace MSD {
 		return vec3(-x, -y, -z);
 	}
 
-	float Magnitude(const MSD::vec3& a)
+	double Magnitude(const MSD::vec3& a)
 	{
 		return sqrt(a.x * a.x + a.y * a.y + a.z * a.z);
 	}
@@ -46,14 +46,14 @@ namespace MSD {
 	MSD::vec3 Normalize(const MSD::vec3& a)
 	{
 		MSD::vec3 normalized;
-		float magnitude = sqrt(a.x * a.x + a.y * a.y + a.z * a.z);
+		double magnitude = sqrt(a.x * a.x + a.y * a.y + a.z * a.z);
 		normalized.x = a.x / magnitude;
 		normalized.y = a.y / magnitude;
 		normalized.z = a.z / magnitude;
 		return normalized;
 	}
 
-	float DotProduct(const MSD::vec3& a, const MSD::vec3& b)
+	double DotProduct(const MSD::vec3& a, const MSD::vec3& b)
 	{
 		return a.x * b.x + a.y * b.y + a.z * b.z;
 	}
@@ -69,10 +69,9 @@ namespace MSD {
 		return c;
 	}
 
-	float Angle(const MSD::vec3& a, const MSD::vec3& b)
+	double Angle(const MSD::vec3& a, const MSD::vec3& b)
 	{
-		float cosTheta = MSD::DotProduct(a, b) / (MSD::Magnitude(a) * MSD::Magnitude(b));
-		if (acos(cosTheta) != acos(cosTheta)) return 0;
+		double cosTheta = MSD::DotProduct(a, b) / (MSD::Magnitude(a) * MSD::Magnitude(b));
 		return acos(cosTheta);
 	}
 
@@ -114,7 +113,7 @@ namespace MSD {
 		return MSD::Normalize(MSD::vec3(0, 1, -a.z / a.y));
 	}
 
-	MSD::vec3 RotateAroundZ(const MSD::vec3& a, const float& angle)
+	MSD::vec3 RotateAroundZ(const MSD::vec3& a, const double& angle)
 	{
 		MSD::vec3 b;
 		b.x = cos(angle) * a.x - sin(angle) * a.y;
@@ -131,7 +130,7 @@ namespace MSD {
 		}
 
 		std::map<float, float>::iterator iterUpper, iterLower;
-		float res;
+		double res;
 		iterUpper = map.upper_bound(radius);
 		if (iterUpper == map.end())
 		{
