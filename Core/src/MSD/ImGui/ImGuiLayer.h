@@ -12,8 +12,6 @@
 
 #include "ApplicationCore.h"
 
-#include "../NFD/include/nfd.h"
-
 namespace MSD {
 
 	class MSD_API ImGuiLayer : public Layer
@@ -37,28 +35,19 @@ namespace MSD {
 		void SubstrateParameters(Substrate* substrate);
 		void ModelParametersWindow(bool* p_open);
 		void ModelResultsWindow(bool* p_open);
-		void FilePathErrPopup(bool* p_open);
-		void DynamicPlot(ImPlotCond cond);
-
-		bool ExportCSV(const char* path, std::vector<float>** data, int number_of_vectors);
-
-		ImPlotCond FindPlotCond();
 	private:
 		int val = 0;
 
+		bool show = true;
 		bool show_app_main_menu_bar = false;
 		bool show_app_console = false;
 		bool show_app_model_parameters = false;
 		bool show_app_model_results = false;
 		bool show_app_property_editor = false;
-		bool show_file_path_err = false;
 
 		float m_ProgressBar = 0;
 
 		double m_Time = 0.0;
-
-		nfdchar_t* outPath = NULL;
-		nfdresult_t result = NFD_ERROR;
 	};
 
 }
