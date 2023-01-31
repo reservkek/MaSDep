@@ -2,6 +2,7 @@
 
 #include "GLFW/glfw3.h"
 
+namespace fs = std::filesystem;
 namespace MSD {
 
 	ImGuiLayer::ImGuiLayer()
@@ -13,6 +14,7 @@ namespace MSD {
 	{
 	}
 
+	// IMGUI LAYER CREATION AND RENDERING FUNCTIONS
 	void ImGuiLayer::OnAttach()
 	{
 		IMGUI_CHECKVERSION();
@@ -23,24 +25,24 @@ namespace MSD {
 
 		ImGuiIO& io = ImGui::GetIO(); (void)io;
 
-        ImFontConfig font_config;
-        font_config.OversampleH = 1;
-        font_config.OversampleV = 1;
-        font_config.PixelSnapH = 1;
+		ImFontConfig font_config;
+		font_config.OversampleH = 1;
+		font_config.OversampleV = 1;
+		font_config.PixelSnapH = 1;
 
-        static const ImWchar ranges[] =
-        {
-            0x0020, 0x00FF, // Basic Latin + Latin Supplement
-            0x0400, 0x044F, // Cyrillic
-            0,
-        };
+		static const ImWchar ranges[] =
+		{
+			0x0020, 0x00FF, // Basic Latin + Latin Supplement
+			0x0400, 0x044F, // Cyrillic
+			0,
+		};
 
 		io.Fonts->Clear();
-        io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\Segoeui.ttf", 16.0f, &font_config, ranges);
+		io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\Segoeui.ttf", 16.0f, &font_config, ranges);
 
 		io.BackendFlags |= ImGuiBackendFlags_HasMouseCursors;
 		io.BackendFlags |= ImGuiBackendFlags_HasSetMousePos;
-        io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 		io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
 		ImGuiStyle& style = ImGui::GetStyle();
@@ -51,7 +53,7 @@ namespace MSD {
 		}
 
 		ApplicationCore& app = ApplicationCore::Get();
-        GLFWwindow* window = static_cast<GLFWwindow*>(app.GetWindow().GetID());
+		GLFWwindow* window = static_cast<GLFWwindow*>(app.GetWindow().GetID());
 
 		ImGui_ImplOpenGL3_Init("#version 130");
 		ImGui_ImplGlfw_InitForOpenGL(window, true);
@@ -66,6 +68,22 @@ namespace MSD {
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
+	}
+
+	void ImGuiLayer::OnUpdate()
+	{
+		Begin();
+
+		MainMenuBar();
+		MainPanel();
+
+		ImGui::DockSpaceOverViewport();
+
+		if (show_file_path_err) FilePathErrPopup(&show_file_path_err);
+		if (show_app_model_parameters) ModelParametersWindow(&show_app_model_parameters);
+		if (show_app_model_results) ModelResultsWindow(&show_app_model_results);
+
+		End();
 	}
 
 	void ImGuiLayer::End()
@@ -87,6 +105,11 @@ namespace MSD {
 		}
 	}
 
+	///////////////////
+	// IMGUI WINDOWS //
+	///////////////////
+
+	// MAIN MENU
 	void ImGuiLayer::MainMenuBar()
 	{
 		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.0f, 5.0f));
@@ -114,6 +137,7 @@ namespace MSD {
 		ImGui::PopStyleVar();
 	}
 
+	// MAIN PANEL
 	void ImGuiLayer::MainPanel()
 	{
 		ImGuiViewportP* viewport = (ImGuiViewportP*)(void*)ImGui::GetMainViewport();
@@ -121,9 +145,12 @@ namespace MSD {
 		float height = ImGui::GetFrameHeight();
 
 		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.0f, 8.0f));
-		if (ImGui::BeginViewportSideBar("toolbar", viewport, ImGuiDir_Up, height+11.0f, window_flags))
+		if (ImGui::BeginViewportSideBar("toolbar", viewport, ImGuiDir_Up, height + 11.0f, window_flags))
 		{
-			if (ImGui::BeginMenuBar()) {
+
+			if (ImGui::BeginMenuBar())
+			{
+
 				ApplicationCore& app = ApplicationCore::Get();
 				AngMSD& model = app.GetModel();
 				bool& running = app.GetModel().GetStatus();
@@ -137,8 +164,33 @@ namespace MSD {
 					}
 					else
 					{
-						model.Run();
+						if (app.GetModel().m_Magnetrons.size())
+						{ 
+							if (!model.Run())
+							{
+								show_file_path_err = true;
+							};
+						}
+						else
+						{
+							ImGui::OpenPopup("No magnetrons");
+						}
 					}
+				}
+
+				// Always center this window when appearing
+				ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+				ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+
+				if (ImGui::BeginPopupModal("No magnetrons", NULL, ImGuiWindowFlags_AlwaysAutoResize))
+				{
+					ImGui::Text("It appears you didn't add any magnetrons.\n\nFor a proper calculation, add a magnetron in Model Parameters Window.\n");
+					ImGui::Separator();
+
+					if (ImGui::Button("OK", ImVec2(120, 0))) { ImGui::CloseCurrentPopup(); }
+					ImGui::SetItemDefaultFocus();
+					ImGui::SameLine();
+					ImGui::EndPopup();
 				}
 				ImGui::PopStyleVar();
 				ImGui::EndMenuBar();
@@ -146,6 +198,70 @@ namespace MSD {
 			ImGui::End();
 			ImGui::PopStyleVar();
 		};
+	}
+
+
+	// PARAMETERS 
+	void ImGuiLayer::ModelParametersWindow(bool* p_open)
+	{
+
+		if (!ImGui::Begin("Model Parameters", p_open))
+		{
+			ImGui::End();
+			return;
+		}
+
+		ApplicationCore& app = ApplicationCore::Get();
+		AngMSD& model = app.GetModel();
+
+		m_ProgressBar = model.GetCurrentProgress();
+
+		ImGui::PushStyleColor(ImGuiCol_PlotHistogram, ImVec4(0.26f, 0.59f, 0.98f, 0.40f));
+		ImGui::ProgressBar(m_ProgressBar);
+		ImGui::PopStyleColor();
+		ImGui::Text("Ticks: %d", model.m_TimeTicksCounter);
+		ImGui::Text("Magnetrons: %d", model.m_Magnetrons.size());
+		if (ImGui::InputFloat("Rotation Limit", &model.m_RotationLimit)) {
+			if (model.m_RotationLimit < 0) model.m_RotationLimit = 0;
+		};
+		if (ImGui::InputInt("Time Limit", &model.m_TimeLimit))
+		{
+			if (model.m_TimeLimit < 0) model.m_TimeLimit = 0;
+		};
+		if (ImGui::InputInt("Ticks Per Second", &model.m_TicksPerSecond))
+		{
+			if (model.m_TicksPerSecond < 1) model.m_TicksPerSecond = 1;
+		};
+		ImGui::Separator();
+
+		if (ImGui::Button("Add Magnetron"))
+		{
+			model.AddMagnetron();
+		}
+
+		unsigned int count = 0;
+		for (auto i_magnetron : model.m_Magnetrons)
+		{
+			count++;
+			if (!i_magnetron->GetIndex()) { i_magnetron->SetIndex(model.m_MagnetronIndex); }
+			std::string countstr = "Magnetron " + std::to_string(i_magnetron->GetIndex());
+			if (ImGui::CollapsingHeader((const char*)countstr.c_str(), ImGuiTreeNodeFlags_DefaultOpen))
+			{
+				ImGui::PushID(count);
+				MagnetronParameters(i_magnetron);
+				if (ImGui::Button("Delete Magnetron"))
+				{
+					model.DeleteMagnetron(count);
+					if (model.m_Magnetrons.size() != 0) { model.m_MagnetronIndex = model.m_Magnetrons.back()->GetIndex(); }
+					else { model.m_MagnetronIndex = 0; }
+				}
+				ImGui::PopID();
+			}
+		}
+		ImGui::Separator();
+		SubstrateParameters(model.m_Substrate);
+
+		ImGui::End();
 	}
 
 	void ImGuiLayer::MagnetronParameters(Magnetron* magnetron)
@@ -160,6 +276,18 @@ namespace MSD {
 		if (ImGui::Button("Rotate clockwise"))
 		{
 			magnetron->Rotate();
+		}
+		ImGui::Separator();
+		ImGui::Text("Sput rates input");
+		ImGui::InputText("###SputRates",magnetron->m_InputFilePath,sizeof(magnetron->m_InputFilePath),ImGuiInputTextFlags_ReadOnly);
+		ImGui::SameLine();
+		if (ImGui::Button("Browse"))
+		{
+			result = NFD_OpenDialog(NULL, NULL, &outPath);
+			*magnetron->GetInputFilePath() = outPath;
+			if (result == NFD_ERROR) {
+				printf("Error: %s\n", NFD_GetError());
+			}
 		}
 	}
 
@@ -180,66 +308,15 @@ namespace MSD {
 			ImGui::PushItemWidth(110.0f);
 			ImGui::InputFloat("RPM", substrate->GetRPM());
 			ImGui::SameLine();
-			ImGui::Dummy(ImVec2(20.0f,ImGui::GetFrameHeight()));
+			ImGui::Dummy(ImVec2(20.0f, ImGui::GetFrameHeight()));
 			ImGui::SameLine();
 			ImGui::InputFloat("Sub RPM", substrate->GetSubRPM());
 			ImGui::PopItemWidth();
 		}
 	}
 
-	void ImGuiLayer::ModelParametersWindow(bool* p_open)
-	{
 
-		if (!ImGui::Begin("Model Parameters", p_open))
-		{
-			ImGui::End();
-			return;
-		}
-
-		ApplicationCore& app = ApplicationCore::Get();
-		AngMSD& model = app.GetModel();
-
-		m_ProgressBar = model.GetCurrentProgress();
-
-		ImGui::PushStyleColor(ImGuiCol_PlotHistogram, ImVec4(0.26f, 0.59f, 0.98f, 0.40f));
-		ImGui::ProgressBar(m_ProgressBar);
-		ImGui::PopStyleColor();
-		ImGui::Text("Ticks: %d", model.m_TimeTicksCounter);
-		ImGui::Text("Magnetrons: %d", model.m_Magnetrons.size());
-		ImGui::InputFloat("Rotation Limit", &model.m_RotationLimit);
-		ImGui::InputInt("Time Limit", &model.m_TimeLimit);
-		ImGui::Separator();
-
-		if (ImGui::Button("Add Magnetron"))
-		{
-			model.AddMagnetron();
-		}
-
-		unsigned int count = 0;
-		for (auto i_magnetron : model.m_Magnetrons)
-		{
-			count++;
-			if (!i_magnetron->GetIndex()) { i_magnetron->SetIndex(model.m_MagnetronIndex); }
-			std::string countstr = "Magnetron " + std::to_string(i_magnetron->GetIndex());
-			if (ImGui::CollapsingHeader((const char*)countstr.c_str(), ImGuiTreeNodeFlags_DefaultOpen))
-			{
-				ImGui::PushID(count);
-				MagnetronParameters(i_magnetron);
-				if (ImGui::Button("Delete"))
-				{
-					model.DeleteMagnetron(count);
-					if (model.m_Magnetrons.size() != 0) { model.m_MagnetronIndex = model.m_Magnetrons.back()->GetIndex(); }
-					else { model.m_MagnetronIndex = 0; }
-				}
-				ImGui::PopID();
-			}
-		}
-		ImGui::Separator();
-		SubstrateParameters(model.m_Substrate);
-
-		ImGui::End();
-	}
-
+	// RESULTS
 	void ImGuiLayer::ModelResultsWindow(bool* p_open)
 	{
 		if (!ImGui::Begin("Model results", p_open))
@@ -251,49 +328,118 @@ namespace MSD {
 		ApplicationCore& app = ApplicationCore::Get();
 		AngMSD& model = app.GetModel();
 
-		std::vector<float>& vec = model.m_SubstrateBuffer->GetDepEvolution();
+		std::vector<float>& data = model.m_SubstrateBuffer->GetDepEvolution();
+		std::vector<float>* data_array[1] = { &data };
+
 		if (ImGui::CollapsingHeader("Deposition Evolution"))
 		{
-			if (ImPlot::BeginPlot("Deposition Evolution"))
+			DynamicPlot(FindPlotCond());
+			if (ImGui::Button("Export CSV file"))
 			{
-				if (vec.size() != 0) ImPlot::PlotLine("", vec.data(), vec.size());
-				ImPlot::EndPlot();
-			}
-		}
-		
-
-		unsigned int count = 0;
-		for (auto i_magnetron : model.m_Magnetrons)
-		{
-			std::vector<float>& vec2 = i_magnetron->GetDepRates();
-			count++;
-			if (!i_magnetron->GetIndex()) { i_magnetron->SetIndex(model.m_MagnetronIndex); }
-			std::string countstr = "Magnetron " + std::to_string(i_magnetron->GetIndex());
-			if (ImGui::CollapsingHeader((const char*)countstr.c_str(), ImGuiTreeNodeFlags_DefaultOpen))
-			{
-				if (ImPlot::BeginPlot("Deposition Rate"))
+				result = NFD_SaveDialog("csv", NULL, &outPath);
+				if (ExportCSV(outPath, data_array, 1))
 				{
-					if (vec.size() != 0) ImPlot::PlotLine("", vec2.data(), vec2.size());
-					ImPlot::EndPlot();
-				}
+					ImGui::OpenPopup("Success");
+				};
+			}
+			if (ImGui::BeginPopupModal("Success", NULL, ImGuiWindowFlags_AlwaysAutoResize))
+			{
+				ImGui::Text("CSV file successfully created\n\n");
+				ImGui::Separator();
+				if (ImGui::Button("OK", ImVec2(120, 0))) { ImGui::CloseCurrentPopup(); }
+				ImGui::SetItemDefaultFocus();
+				ImGui::SameLine();
+				ImGui::EndPopup();
 			}
 		}
 
 		ImGui::End();
 	}
 
-	void ImGuiLayer::OnUpdate()
+
+	// PLOTS
+	void ImGuiLayer::DynamicPlot(ImPlotCond cond)
 	{
-		Begin();
+		ApplicationCore& app = ApplicationCore::Get();
+		AngMSD& model = app.GetModel();
 
-		MainMenuBar();
-		MainPanel();
-		
-		ImGui::DockSpaceOverViewport();
+		std::vector<float>& data = model.m_SubstrateBuffer->GetDepEvolution();
 
-		if (show_app_model_parameters) ModelParametersWindow(&show_app_model_parameters);
-		if (show_app_model_results) ModelResultsWindow(&show_app_model_results);
+		auto x_min = 0;
+		auto x_max = (int)data.size();
+		auto y_min = std::numeric_limits<float>::max();
+		auto y_max = std::numeric_limits<float>::lowest();
+		for (auto& val : data) {
+			y_min = std::min(y_min, val);
+			y_max = std::max(y_max, val);
+		}
+		ImPlot::SetNextAxesLimits(x_min, x_max, y_min, y_max, cond);
+		if (ImPlot::BeginPlot("Deposition Evolution"))
+		{
+			if (data.size() != 0) ImPlot::PlotLine("", data.data(), data.size());
+			ImPlot::EndPlot();
+		}
+	}
 
-		End();
+	ImPlotCond ImGuiLayer::FindPlotCond()
+	{
+		if (ApplicationCore::Get().GetModel().GetStatus()) return ImPlotCond_Always;
+		return ImPlotCond_None;
+	}
+
+
+	// POPUPS
+	void ImGuiLayer::FilePathErrPopup(bool* p_open)
+	{
+		if (!p_open) return;
+		ImGui::OpenPopup("File Path Error");
+		// Always center this window when appearing
+		ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+		ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+
+		if (ImGui::BeginPopupModal("File Path Error", p_open, ImGuiWindowFlags_AlwaysAutoResize))
+		{
+			ImGui::Text("Couldn't find the file. Please make sure that the path is correct \n\n");
+
+			if (ImGui::Button("OK", ImVec2(120, 0)))
+			{
+				ImGui::CloseCurrentPopup();
+				*p_open = false;
+			}
+			ImGui::SetItemDefaultFocus();
+			ImGui::SameLine();
+			ImGui::EndPopup();
+		}
+
+	}
+
+	bool ImGuiLayer::ExportCSV(const char* outpath, std::vector<float>** data, int number_of_vectors) {
+		// Open the file for writing
+		std::filesystem::path filepath = outpath;
+		if (filepath.extension() == "") filepath.replace_extension(".csv");
+
+		std::ofstream file(filepath);
+
+		if (!file.is_open()) {
+			std::cerr << "Error: Unable to open file " << outpath << std::endl;
+			return false;
+		}
+
+		// Loop through each vector in the data array
+		for (int i = 0; i < number_of_vectors; ++i) {
+			// Get a reference to the current vector
+			std::vector<float>& vec = *data[i];
+
+			// Write the contents of the vector to the file
+			auto size = vec.size();
+			for (int j = 0; j < (int)size; ++j) {
+				file << j << "," << vec[j] << std::endl;
+			}
+			file << std::endl;
+		}
+
+		// Close the file
+		file.close();
+		return true;
 	}
 }
