@@ -12,7 +12,7 @@ namespace MSD {
 		vec3 integrationvectorI;
 		vec3 integrationvectorJ;
 
-		Magnetron(const vec3& pos = { 0.0, 25.0, 0.0 }, const vec3& normal = { 0.0, -1.0, 0.0 }, const double& radius = 5);
+		Magnetron(const vec3& pos = { 0.0, 25.0, 0.0 }, const vec3& normal = { 0.0, -1.0, 0.0 }, const float& radius = 5);
 		~Magnetron();
 
 		void SetIndex(unsigned int val) { m_Index = val; }
@@ -33,8 +33,10 @@ namespace MSD {
 		float* GetNormalZ() { return &(msdnormal.x); }
 		float* GetRotationAngle() { return &(m_RotationAngle); }
 		float& GetCurrentDepRate() { return m_CurrentDepRate; }
-		const char** GetInputFilePath() { return &m_InputFilePath; }
+		char** GetInputFilePath() { return &m_InputFilePath; }
 		std::vector<float>& GetDepRates() { return m_DepRates; }
+
+		bool& GetFilePathErr() { return m_FilePathErr; }
 
 		vec3 GetPos() const { return msdpos; }
 		vec3 GetNormal() const { return msdnormal; }
@@ -49,15 +51,17 @@ namespace MSD {
 		std::map<float, float> m_InputSputRates;
 
 		float m_CurrentDepRate = 0;
-		std::vector<float> m_DepRates; // Deposition rates onto substrate;
 
+		std::vector<float> m_DepRates; // Deposition rates onto substrate;
 		std::vector<float> m_GammaAngles;
 		std::vector<float> m_PhiAngles;
 
-		const char* m_InputFilePath = "C:/Users/eeo5/Documents/input.txt";
+		char* m_InputFilePath = new char();
 
 		unsigned int m_Index = 0;
 		float m_RotationAngle = 0;
+
+		bool m_FilePathErr = false;
 	};
 
 	class MSD_API Substrate
@@ -84,6 +88,7 @@ namespace MSD {
 		float& GetTotalSubAngle() { return m_TotalSubAngle; }
 		float& GetTotalSubAngleDelta() { return m_TotalSubAngleDelta; }
 		float& GetTotalDeposited() { return m_TotalDeposited; }
+
 		std::vector<float>& GetDepEvolution() { return m_DepEvolution; }
 
 		vec3 GetPos() const { return subpos; };

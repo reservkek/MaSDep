@@ -6,6 +6,7 @@
 
 #include "imgui.h"
 
+
 namespace MSD {
 
 	class MSD_API AngMSD {
@@ -19,12 +20,12 @@ namespace MSD {
 		
 		inline int GetTimeTicksCounter() const { return m_TimeTicksCounter; }
 		inline float GetCurrentProgress() const { return m_CurrentProgress; }
-		inline bool& GetStatus() { return m_ModelRunning; }
+		bool& GetStatus() { return m_ModelRunning; }
 
 		inline static AngMSD& GetModelID() { return *s_Instance; }
 
 		void CalculateFlux(Magnetron* magnetron, Substrate* substrate);
-		void Run();
+		bool Run();
 		void Stop();
 		void Clear();
 		void Complete();
@@ -39,8 +40,9 @@ namespace MSD {
 
 		// Время в модели
 		int m_TimeTicksCounter = 0; // Счётчик времени в тиках
-		unsigned int const m_TicksPerSecond = 5; // Количество тиков в секунду
-		float const m_TimePerTick = 1.0f / m_TicksPerSecond; // Количество времени за 1 тик.
+		int m_TicksPerSecond = 5; // Количество тиков в секунду
+		float m_TimePerTick = 1.0f / m_TicksPerSecond; // Количество времени за 1 тик.
+
 		int m_TimeLimit = 60; // Лимит моделирования во времени в секундах
 		float m_CurrentTime = 0;
 

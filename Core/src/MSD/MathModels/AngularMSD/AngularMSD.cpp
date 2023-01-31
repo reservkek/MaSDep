@@ -9,12 +9,15 @@ namespace MSD {
 		s_Instance = this;
 	}
 
-	void AngMSD::Run()
+	bool AngMSD::Run()
 	{
 		m_MagnetronsBuffer = m_Magnetrons;
+		m_SubstrateBuffer = new Substrate();
 		*m_SubstrateBuffer = *m_Substrate;
 
 		float vel = *(m_SubstrateBuffer->GetRPM());
+		m_TimePerTick = 1.0f / m_TicksPerSecond;
+
 		m_SubstrateBuffer->GetTotalAngleDelta() = m_TimePerTick * vel * PI / 30;
 
 		vel = *(m_SubstrateBuffer->GetSubRPM());
@@ -26,55 +29,18 @@ namespace MSD {
 		for (auto m : m_MagnetronsBuffer)
 		{
 			m->InputSputRates(*(m->GetInputFilePath()), m_IntegrationDelta);
+			if (m->GetFilePathErr())
+			{
+				m_ModelRunning = false;
+				return false;
+			}
 		}
 
 		m_CurrentProgressDelta = 1.0f / std::min(expectedRotationTicks, expectedTimeLimitTicks);
 
-		m_ModelRunning = true;
 		m_ToBeCleared = true;
-	}
-
-	void AngMSD::CalculateFlux(Magnetron* magnetron, Substrate* substrate)
-	{
-		auto radius = *(magnetron->GetRadius());
-		float localRadius = 0;
-		float localSputRate = 0;
-		float localDepRate = 0;
-		float fullDepRate = 0;
-		vec3 localPos;
-
-		for (auto i = -radius; i < radius; i += m_IntegrationDelta)
-		{
-			for (auto j = -radius; j < radius; j += m_IntegrationDelta)
-			{
-				if ((localRadius = sqrt(i * i + j * j)) > radius) continue;
-
-				localPos = (magnetron->GetPos() + magnetron->integrationvectorI * i + magnetron->integrationvectorJ * j);
-				m_CurrentFluxVector = FindVector(substrate->GetPos(), localPos);
-				m_CurrentGamma = Angle(m_CurrentFluxVector, substrate->GetNormal());
-				m_CurrentPhi = Angle(-m_CurrentFluxVector, magnetron->GetNormal());
-
-				if (m_CurrentGamma >= PI / 2 or m_CurrentPhi >= PI / 2) continue;
-
-				localSputRate = magnetron->FindSputRate(localRadius);
-				localDepRate = localSputRate * m_IntegrationDelta * m_IntegrationDelta * cos(m_CurrentPhi) * cos(m_CurrentGamma) / (PI * pow(Magnitude(m_CurrentFluxVector), 2));
-				fullDepRate += localDepRate;
-
-			}
-		}
-
-		substrate->GetTotalDeposited() += fullDepRate * m_TimePerTick * 8.33e28;
-		substrate->WriteDepEvolution();
-
-		m_CurrentFluxVector = FindVector(substrate->GetPos(), magnetron->GetPos());
-		m_CurrentGamma = Angle(m_CurrentFluxVector, substrate->GetNormal());
-		m_CurrentPhi = Angle(-m_CurrentFluxVector, magnetron->GetNormal());
-
-		magnetron->GetCurrentDepRate() = fullDepRate;
-		magnetron->WriteDepRate();
-		magnetron->WriteGamma(m_CurrentGamma);
-		magnetron->WritePhi(m_CurrentPhi);
-
+		m_ModelRunning = true;
+		return true;
 	}
 
 	void AngMSD::Stop()
@@ -89,6 +55,7 @@ namespace MSD {
 		m_ToBeCleared = false;
 
 		m_TimeTicksCounter = 0;
+		m_RotationCounter = 0;
 		m_CurrentProgress = 0;
 		m_CurrentTime = 0;
 	}
@@ -141,4 +108,45 @@ namespace MSD {
 		m_Magnetrons.erase(m_Magnetrons.begin()+index-1);
 	}
 
+	void AngMSD::CalculateFlux(Magnetron* magnetron, Substrate* substrate)
+	{
+		auto radius = *(magnetron->GetRadius());
+		float localRadius = 0;
+		float localSputRate = 0;
+		float localDepRate = 0;
+		float fullDepRate = 0;
+		vec3 localPos;
+
+		for (auto i = -radius; i < radius; i += m_IntegrationDelta)
+		{
+			for (auto j = -radius; j < radius; j += m_IntegrationDelta)
+			{
+				if ((localRadius = sqrt(i * i + j * j)) > radius) continue;
+
+				localPos = (magnetron->GetPos() + magnetron->integrationvectorI * i + magnetron->integrationvectorJ * j);
+				m_CurrentFluxVector = FindVector(substrate->GetPos(), localPos);
+				m_CurrentGamma = Angle(m_CurrentFluxVector, substrate->GetNormal());
+				m_CurrentPhi = Angle(-m_CurrentFluxVector, magnetron->GetNormal());
+
+				if (m_CurrentGamma >= PI / 2 or m_CurrentPhi >= PI / 2) continue;
+
+				localSputRate = magnetron->FindSputRate(localRadius);
+				localDepRate = localSputRate * m_IntegrationDelta * m_IntegrationDelta * cos(m_CurrentPhi) * cos(m_CurrentGamma) / (PI * pow(Magnitude(m_CurrentFluxVector), 2));
+				fullDepRate += localDepRate;
+			}
+		}
+
+		substrate->GetTotalDeposited() += fullDepRate * m_TimePerTick * 8.33e28;
+		substrate->WriteDepEvolution();
+
+		m_CurrentFluxVector = FindVector(substrate->GetPos(), magnetron->GetPos());
+		m_CurrentGamma = Angle(m_CurrentFluxVector, substrate->GetNormal());
+		m_CurrentPhi = Angle(-m_CurrentFluxVector, magnetron->GetNormal());
+
+		magnetron->GetCurrentDepRate() = fullDepRate;
+		magnetron->WriteDepRate();
+		magnetron->WriteGamma(m_CurrentGamma);
+		magnetron->WritePhi(m_CurrentPhi);
+
+	}
 }
