@@ -2,7 +2,7 @@
 
 namespace MSD {
 
-	Magnetron::Magnetron(const vec3& pos, const vec3& normal, const double& radius)
+	Magnetron::Magnetron(const vec3& pos, const vec3& normal, const float& radius)
 		: msdpos(pos), msdnormal(normal), m_Radius(radius)
 	{
 		integrationvectorI = FindOrthogonal(msdnormal);
@@ -27,15 +27,18 @@ namespace MSD {
 
 	void Magnetron::InputSputRates(const char* filepath, const float& integrationDelta)
 	{
+		m_FilePathErr = false;
+
 		float localRadius = 0;
 		float localSputRate = 0;
-		double key = NULL;
-		double value = NULL;
+		float key = NULL;
+		float value = NULL;
 
 		std::ifstream stream(filepath);
 		if (!stream.good())
 		{
 			std::cout << "FILEPATH ERROR" << std::endl;
+			m_FilePathErr = true;
 			return;
 		}
 
@@ -55,11 +58,6 @@ namespace MSD {
 			}
 			value = std::stod(line);
 			m_InputSputRates.insert({ key * 100, value });
-		}
-
-		for (const auto& elem : m_InputSputRates)
-		{
-			std::cout << elem.first << " " << elem.second << "\n";
 		}
 
 		for (auto i = -m_Radius; i < m_Radius; i += integrationDelta)
