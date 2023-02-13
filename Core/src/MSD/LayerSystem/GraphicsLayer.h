@@ -1,0 +1,72 @@
+#pragma once
+
+#include "Core.h"
+
+#include "../LayerSystem/Layer.h"
+#include "../Events/MouseEvent.h"
+#include "../Events/KeyEvent.h"
+#include "../Events/ApplicationEvent.h"
+
+#include "Input/Input.h"
+
+#include "Graphics/Renderer.h"
+#include "../glm/gtc/matrix_transform.hpp"
+
+namespace MSD {
+
+	class GraphicsLayer : public Layer
+	{
+	public:
+		GraphicsLayer();
+		~GraphicsLayer();
+
+		inline FrameBuffer& GetFrameBuffer() { return *fb; }
+
+		void OnEvent(Event& event) override;
+		bool OnKeyPressedEvent(KeyPressedEvent& event);
+
+		virtual void OnAttach() override;
+		virtual void OnDetach() override;
+		virtual void OnUpdate(Timestep ts) override;
+	private:
+		std::shared_ptr<VertexArray> va;
+		std::shared_ptr<VertexBuffer> vb;
+		std::shared_ptr<IndexBuffer> ib;
+
+		OrthographicCamera* camera;
+
+		Renderer renderer;
+
+		Shader* shader;
+
+		std::shared_ptr<FrameBuffer> fb;
+
+		glm::mat4 proj = glm::ortho(-400.0f, 400.0f, -400.0f, 400.0f);
+		glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+
+		glm::mat4 mvp = proj;
+
+		float coords[12] =
+		{
+			-200.0f, -200.0f, 0.0f,
+			 200.0f, -200.0f, 0.0f,
+			-200.0f,  200.0f, 0.0f,
+			 200.0f,  200.0f, 0.0f
+		};
+
+		uint32_t indices[6] = { 0, 1, 2, 1, 2, 3 };
+
+		BufferLayout layout =
+		{
+			{ ShaderDataType::Float3, "a_Position"}
+		};
+
+		FrameBufferSpecification spec;
+
+		glm::vec4 color = glm::vec4(0.8f, 0.5f, 0.2f, 1.00f);
+		glm::vec3 m_CameraPosition = glm::vec3(0.0f,0.0f,0.0f);
+
+		float m_CameraSpeed = 1000.0f;
+	};
+
+}

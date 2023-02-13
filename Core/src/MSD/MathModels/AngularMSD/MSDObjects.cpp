@@ -1,8 +1,10 @@
+#include "msdpch.h"
+
 #include "MSDObjects.h"
 
 namespace MSD {
 
-	Magnetron::Magnetron(const vec3& pos, const vec3& normal, const double& radius)
+	Magnetron::Magnetron(const vec3& pos, const vec3& normal, const float& radius)
 		: msdpos(pos), msdnormal(normal), m_Radius(radius)
 	{
 		integrationvectorI = FindOrthogonal(msdnormal);
@@ -27,15 +29,18 @@ namespace MSD {
 
 	void Magnetron::InputSputRates(const char* filepath, const float& integrationDelta)
 	{
+		m_FilePathErr = false;
+
 		float localRadius = 0;
 		float localSputRate = 0;
-		double key = NULL;
-		double value = NULL;
+		float key = NULL;
+		float value = NULL;
 
 		std::ifstream stream(filepath);
 		if (!stream.good())
 		{
-			std::cout << "FILEPATH ERROR" << std::endl;
+			m_FilePathErr = true;
+			m_ErrorMsg = std::string("Couldn't find the file for magnetron #") + std::to_string(m_Index) + std::string("\nPlease make sure that the path is correct \n\n");
 			return;
 		}
 
@@ -45,21 +50,24 @@ namespace MSD {
 
 		while (getline(stream, line))
 		{
+			if (!line.length())
+			{
+				m_ErrorMsg = std::string("An error occured while reading input file for magnetron #");
+				m_ErrorMsg.append(std::to_string(m_Index));
+				m_ErrorMsg.append("\nPlease make sure that the file has correct format.\n\n");
+				m_FilePathErr = true;
+				return;
+			}
 			++linecount;
 			auto keycount = 0;
 			while ((pos = line.find(" ")) != std::string::npos and keycount < 1)
 			{
-				key = std::stod(line.substr(0, pos));
+				key = (float)std::stod(line.substr(0, pos));
 				++keycount;
 				line.erase(0, line.find(" ") + 1);
 			}
-			value = std::stod(line);
+			value = (float)std::stod(line);
 			m_InputSputRates.insert({ key * 100, value });
-		}
-
-		for (const auto& elem : m_InputSputRates)
-		{
-			std::cout << elem.first << " " << elem.second << "\n";
 		}
 
 		for (auto i = -m_Radius; i < m_Radius; i += integrationDelta)

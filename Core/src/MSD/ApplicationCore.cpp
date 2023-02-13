@@ -1,6 +1,9 @@
+#include "msdpch.h"
+
 #include "ApplicationCore.h"
 
 #include "glad/glad.h"
+
 #include <thread>
 
 namespace MSD {
@@ -15,6 +18,10 @@ namespace MSD {
 		m_Window->SetEventCallBack(BIND_EVENT_FN(ApplicationCore::OnEvent));
 
 		m_Model = new AngMSD();
+		m_GraphicsLayer = new GraphicsLayer();
+
+		PushOverlay(new MainLayer());
+		PushOverlay(m_GraphicsLayer);
 	}
 
 	void ApplicationCore::ModelUpdate()
@@ -34,16 +41,18 @@ namespace MSD {
 	{
 		while (m_Running)
 		{
+			float time = (float)glfwGetTime();
+			Timestep timestep = time - m_LastFrameTime;
+			m_LastFrameTime = time;
+
 			for (Layer* layer : m_LayerStack)
 			{
-				layer->OnUpdate();
+				layer->OnUpdate(timestep);
 			}
 
 			m_Window->OnUpdate();
-
-			glClearColor(1, 0, 1, 1);
-			glClear(GL_COLOR_BUFFER_BIT);
 		};
+
 	}
 
 	ApplicationCore::~ApplicationCore()

@@ -1,21 +1,19 @@
 #pragma once
 
-#include <memory>
-#include <string>
-#include <functional>
-#include <sstream>
-#include <iostream>
-#include <fstream>
-#include <vector>
-#include <map>
-#include <algorithm>
+#include "msdpch.h"
+#include "../glm/glm.hpp"
 
+#define MSD_API
 #ifdef MSD_PLATFORM_WINDOWS
+#ifdef MSD_DYNAMIC_LINKING
 	#ifdef MSD_BUILD_DLL
 		#define MSD_API __declspec(dllexport)
 	#else
 		#define MSD_API __declspec(dllimport)
 	#endif
+#else
+	#define MSD_API
+#endif
 #endif
 
 #define BIT(x) (1 << x)
