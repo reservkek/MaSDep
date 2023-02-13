@@ -1,4 +1,6 @@
-#include "Window.h"
+#include "msdpch.h"
+
+#include <Window.h>
 
 #include "Events/ApplicationEvent.h"
 #include "Events/KeyEvent.h"
@@ -42,6 +44,7 @@ namespace MSD {
 		{
 			glfwInit();
 			glfwSetErrorCallback(GLFWErrorCallback);
+			s_GLFWInitialized = true;
 		}
 
 		m_Window = glfwCreateWindow((int)props.Width, (int)props.Height, props.Title.c_str(), nullptr, nullptr);

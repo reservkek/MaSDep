@@ -26,6 +26,7 @@
 #ifndef IMPLOT_DISABLE_OBSOLETE_FUNCTIONS
 #define IMPLOT_DISABLE_OBSOLETE_FUNCTIONS
 #endif
+#include "msdpch.h"
 
 #include "implot.h"
 #include <math.h>

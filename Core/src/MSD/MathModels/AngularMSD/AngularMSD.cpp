@@ -1,3 +1,5 @@
+#include "msdpch.h"
+
 #include "AngularMSD.h"
 
 namespace MSD {
@@ -24,19 +26,20 @@ namespace MSD {
 		m_SubstrateBuffer->GetTotalSubAngleDelta() = m_TimePerTick * vel * PI / 30;
 
 		float expectedRotationTicks = (m_RotationLimit * 2 * PI) / m_SubstrateBuffer->GetTotalAngleDelta();
-		float expectedTimeLimitTicks = m_TimeLimit * m_TicksPerSecond;
+		int expectedTimeLimitTicks = m_TimeLimit * m_TicksPerSecond;
 
 		for (auto m : m_MagnetronsBuffer)
 		{
 			m->InputSputRates(*(m->GetInputFilePath()), m_IntegrationDelta);
 			if (m->GetFilePathErr())
 			{
+				m_ErrorMsg = m->GetErrorMessage();
 				m_ModelRunning = false;
 				return false;
 			}
 		}
 
-		m_CurrentProgressDelta = 1.0f / std::min(expectedRotationTicks, expectedTimeLimitTicks);
+		m_CurrentProgressDelta = 1.0f / std::min(expectedRotationTicks, (float)expectedTimeLimitTicks);
 
 		m_ToBeCleared = true;
 		m_ModelRunning = true;
@@ -101,6 +104,7 @@ namespace MSD {
 	{
 		m_Magnetrons.push_back(new Magnetron());
 		m_MagnetronIndex++;
+		m_Magnetrons.back()->SetIndex(m_MagnetronIndex);
 	}
 
 	void AngMSD::DeleteMagnetron(unsigned int& index)
@@ -131,12 +135,12 @@ namespace MSD {
 				if (m_CurrentGamma >= PI / 2 or m_CurrentPhi >= PI / 2) continue;
 
 				localSputRate = magnetron->FindSputRate(localRadius);
-				localDepRate = localSputRate * m_IntegrationDelta * m_IntegrationDelta * cos(m_CurrentPhi) * cos(m_CurrentGamma) / (PI * pow(Magnitude(m_CurrentFluxVector), 2));
+				localDepRate = localSputRate * m_IntegrationDelta * m_IntegrationDelta * cos(m_CurrentPhi) * cos(m_CurrentGamma) / (PI * (float)pow(Magnitude(m_CurrentFluxVector), 2));
 				fullDepRate += localDepRate;
 			}
 		}
 
-		substrate->GetTotalDeposited() += fullDepRate * m_TimePerTick * 8.33e28;
+		substrate->GetTotalDeposited() += fullDepRate * m_TimePerTick * 8.33e28f;
 		substrate->WriteDepEvolution();
 
 		m_CurrentFluxVector = FindVector(substrate->GetPos(), magnetron->GetPos());

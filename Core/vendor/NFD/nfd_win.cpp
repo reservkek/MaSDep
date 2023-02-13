@@ -3,7 +3,7 @@
 
   http://www.frogtoss.com/labs
  */
-
+#include "msdpch.h"
 
 #ifdef __MINGW32__
 // Explicitly setting NTDDI version, this is necessary for the MinGW compiler

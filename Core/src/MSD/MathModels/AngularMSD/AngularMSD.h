@@ -34,8 +34,9 @@ namespace MSD {
 		void AddMagnetron();
 		void DeleteMagnetron(unsigned int& index);
 
-		extern friend class ImGuiLayer;
+		std::string GetErrorMessage() { return m_ErrorMsg; }
 
+		extern friend class MainLayer;
 	private:
 
 		// Время в модели
@@ -53,7 +54,7 @@ namespace MSD {
 		float m_RotationLimit = 1;
 		float m_RotationCounter = 0;
 
-		float m_IntegrationDelta = 0.1;
+		float m_IntegrationDelta = 0.1f;
 
 		vec3 m_CurrentFluxVector;
 		float m_CurrentGamma = 0;
@@ -75,5 +76,7 @@ namespace MSD {
 		static AngMSD* s_Instance;
 		bool m_ModelRunning = false;
 		bool m_ToBeCleared = false;
+
+		std::string m_ErrorMsg = "";
 	};
 }

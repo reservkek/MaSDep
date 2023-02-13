@@ -21,6 +21,7 @@
 // SOFTWARE.
 
 // ImPlot v0.14
+#include "msdpch.h"
 
 #include "implot.h"
 #include "implot_internal.h"

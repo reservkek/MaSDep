@@ -1,3 +1,5 @@
+#include "msdpch.h"
+
 #include "MSDMath.h"
 
 namespace MSD {
@@ -127,7 +129,7 @@ namespace MSD {
 	{
 		if (map.begin() == map.end())
 		{
-			return 100.0;
+			return 100.0f;
 		}
 
 		std::map<float, float>::iterator iterUpper, iterLower;

@@ -36,24 +36,29 @@ namespace MSD {
 		char** GetInputFilePath() { return &m_InputFilePath; }
 		std::vector<float>& GetDepRates() { return m_DepRates; }
 
+		std::string GetErrorMessage() { return m_ErrorMsg;}
+
 		bool& GetFilePathErr() { return m_FilePathErr; }
 
 		vec3 GetPos() const { return msdpos; }
 		vec3 GetNormal() const { return msdnormal; }
 
-		extern friend class ImGuiLayer;
+		extern friend class MainLayer;
+		extern friend class AngMSD;
 
 	private:
 		vec3 msdpos, msdnormal;
 		float m_Radius;
 
-		std::map<float, float> m_SputRates;
+		// Sput rates used for calculations
 		std::map<float, float> m_InputSputRates;
+		std::map<float, float> m_SputRates;
 
 		float m_CurrentDepRate = 0;
 
+		// Result containers
 		std::vector<float> m_DepRates; // Deposition rates onto substrate;
-		std::vector<float> m_GammaAngles;
+		std::vector<float> m_GammaAngles; 
 		std::vector<float> m_PhiAngles;
 
 		char* m_InputFilePath = new char();
@@ -62,6 +67,7 @@ namespace MSD {
 		float m_RotationAngle = 0;
 
 		bool m_FilePathErr = false;
+		std::string m_ErrorMsg = "";
 	};
 
 	class MSD_API Substrate

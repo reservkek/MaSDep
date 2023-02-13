@@ -1,3 +1,5 @@
+#include "msdpch.h"
+
 #include "LayerStack.h"
 
 namespace MSD {

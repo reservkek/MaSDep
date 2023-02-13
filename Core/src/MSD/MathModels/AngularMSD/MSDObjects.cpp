@@ -1,3 +1,5 @@
+#include "msdpch.h"
+
 #include "MSDObjects.h"
 
 namespace MSD {
@@ -37,8 +39,8 @@ namespace MSD {
 		std::ifstream stream(filepath);
 		if (!stream.good())
 		{
-			std::cout << "FILEPATH ERROR" << std::endl;
 			m_FilePathErr = true;
+			m_ErrorMsg = std::string("Couldn't find the file for magnetron #") + std::to_string(m_Index) + std::string("\nPlease make sure that the path is correct \n\n");
 			return;
 		}
 
@@ -48,15 +50,23 @@ namespace MSD {
 
 		while (getline(stream, line))
 		{
+			if (!line.length())
+			{
+				m_ErrorMsg = std::string("An error occured while reading input file for magnetron #");
+				m_ErrorMsg.append(std::to_string(m_Index));
+				m_ErrorMsg.append("\nPlease make sure that the file has correct format.\n\n");
+				m_FilePathErr = true;
+				return;
+			}
 			++linecount;
 			auto keycount = 0;
 			while ((pos = line.find(" ")) != std::string::npos and keycount < 1)
 			{
-				key = std::stod(line.substr(0, pos));
+				key = (float)std::stod(line.substr(0, pos));
 				++keycount;
 				line.erase(0, line.find(" ") + 1);
 			}
-			value = std::stod(line);
+			value = (float)std::stod(line);
 			m_InputSputRates.insert({ key * 100, value });
 		}
 
