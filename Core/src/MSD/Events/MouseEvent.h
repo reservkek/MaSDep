@@ -93,4 +93,19 @@ namespace MSD {
 		EVENT_CLASS_TYPE(MouseButtonReleased)
 	};
 
+	class MSD_API MouseButtonDoubleClickedEvent : public MouseButtonEvent
+	{
+	public:
+		MouseButtonDoubleClickedEvent(int button)
+			: MouseButtonEvent(button) {}
+
+		std::string ToString() const override
+		{
+			std::stringstream ss;
+			ss << "MouseButtonDoubleClicked: " << m_Button;
+			return ss.str();
+		}
+
+		EVENT_CLASS_TYPE(MouseButtonDoubleClicked)
+	};
 }

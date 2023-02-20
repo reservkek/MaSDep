@@ -28,7 +28,8 @@ namespace MSD {
 	{
 		while (m_Running)
 		{
-			m_Model->OnUpdate();
+			if (m_Model->GetStatus()) m_Model->OnUpdate();
+			else std::this_thread::sleep_for(std::chrono::milliseconds(100));
 		}
 	}
 
@@ -36,6 +37,8 @@ namespace MSD {
 	{
 		ApplicationCore::Get().ModelUpdate();
 	}
+
+	static float lasttime = 0.0f;
 
 	void ApplicationCore::WindowUpdate()
 	{
@@ -51,8 +54,12 @@ namespace MSD {
 			}
 
 			m_Window->OnUpdate();
-		};
 
+			while (glfwGetTime() < lasttime + 1.0 / m_FPSlimit) {
+				std::this_thread::sleep_for(std::chrono::milliseconds(1));
+			}
+			lasttime += 1.0 / m_FPSlimit;
+		};
 	}
 
 	ApplicationCore::~ApplicationCore()
@@ -72,7 +79,8 @@ namespace MSD {
 
 	void ApplicationCore::OnEvent(Event& e)
 	{
-		std::cout << e.ToString() << "\n";
+		//std::cout << e.ToString() << "\n";
+
 		EventDispatcher dispatcher(e);
 		dispatcher.Dispatch<WindowCloseEvent>(BIND_EVENT_FN(ApplicationCore::OnWindowClose));
 

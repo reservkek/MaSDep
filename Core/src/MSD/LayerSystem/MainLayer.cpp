@@ -1,6 +1,7 @@
 #include "msdpch.h"
 
 #include "MainLayer.h"
+#include "Input/Controller.h"
 
 #include "GLFW/glfw3.h"
 
@@ -46,6 +47,10 @@ namespace MSD {
 		io.BackendFlags |= ImGuiBackendFlags_HasSetMousePos;
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 		io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+
+		io.ConfigWindowsMoveFromTitleBarOnly = true;
+
+		io.DeltaTime = 100;
 
 		ImGuiStyle& style = ImGui::GetStyle();
 		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
@@ -218,11 +223,13 @@ namespace MSD {
 
 		ApplicationCore& app = ApplicationCore::Get();
 		AngMSD& model = app.GetModel();
+		ImGuiIO& io = ImGui::GetIO();
 
 		m_ProgressBar = model.GetCurrentProgress();
 		ImGui::ProgressBar(m_ProgressBar);
 		ImGui::Text("Ticks: %d", model.m_TimeTicksCounter);
 		ImGui::Text("Magnetrons: %d", model.m_Magnetrons.size());
+		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
 		if (ImGui::InputFloat("Rotation Limit", &model.m_RotationLimit)) {
 			if (model.m_RotationLimit < 0) model.m_RotationLimit = 0;
 		};
@@ -283,14 +290,17 @@ namespace MSD {
 		ImGui::Text("Sput rates input");
 		ImGui::InputText("###SputRates",magnetron->m_InputFilePath,sizeof(magnetron->m_InputFilePath),ImGuiInputTextFlags_ReadOnly);
 		ImGui::SameLine();
+		if (result == NFD_OPEN)
+			ImGui::BeginDisabled();
 		if (ImGui::Button("Browse"))
 		{
+			//if (!m_AllowInputWindow) return;
+			//m_AllowInputWindow = false;
 			result = NFD_OpenDialog(NULL, NULL, &outPath);
 			*magnetron->GetInputFilePath() = outPath;
-			if (result == NFD_ERROR) {
-				printf("Error: %s\n", NFD_GetError());
-			}
 		}
+		if (result == NFD_OPEN)
+			ImGui::EndDisabled();
 	}
 
 	void MainLayer::SubstrateParameters(Substrate* substrate)
@@ -370,13 +380,22 @@ namespace MSD {
 	{
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2(400, 400));
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-		if (!ImGui::Begin("Model Viewport", p_open, ImGuiWindowFlags_NoScrollbar))
+		if (!ImGui::Begin("Model Viewport", p_open, ImGuiWindowFlags_NoScrollbar
+			| ImGuiWindowFlags_NoScrollWithMouse))
 		{
+			ImGui::PopStyleVar(2);
 			ImGui::End();
 			return;
 		}
 
+		if (ImGui::IsWindowFocused())
+		{
+			GraphicsLayer::m_HandleInputs = true;
+		}
+		else GraphicsLayer::m_HandleInputs = false;
+
 		ApplicationCore& app = ApplicationCore::Get();
+		AngMSD& model = app.GetModel();
 		ImTextureID texID = (ImTextureID)app.GetGraphicsLayer()->GetFrameBuffer().GetColorAttachment();
 
 		//FOR RATIO 1:1
@@ -395,8 +414,16 @@ namespace MSD {
 
 		ImGui::Image(texID, ImVec2(length, length), ImVec2(0, 1), ImVec2(1, 0));
 
-		ImGui::End();
 		ImGui::PopStyleVar(2);
+
+		if (ImGui::BeginPopupContextItem("Viewport Settings"))
+		{
+			if (ImGui::MenuItem("Reset camera position")) { Controller::ResetCameraPosition(); };
+			if (ImGui::MenuItem("Add Magnetron")) { model.AddMagnetron(); };
+			ImGui::EndPopup();
+		}
+
+		ImGui::End();
 		return;
 	}
 

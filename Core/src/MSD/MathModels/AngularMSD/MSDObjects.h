@@ -110,6 +110,7 @@ namespace MSD {
 		float m_TotalSubAngleDelta = 0;
 		float m_TotalDeposited = 0;
 
+		std::vector<float> m_TimeEvolution;
 		std::vector<float> m_DepEvolution;
 	};
 }

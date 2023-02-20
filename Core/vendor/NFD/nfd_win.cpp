@@ -386,10 +386,9 @@ static nfdresult_t SetDefaultPath( IFileDialog *dialog, const char *defaultPath 
 
 nfdresult_t NFD_OpenDialog( const nfdchar_t *filterList,
                             const nfdchar_t *defaultPath,
-                            nfdchar_t **outPath )
+                            nfdchar_t **outPath)
 {
-    nfdresult_t nfdResult = NFD_ERROR;
-
+    nfdresult_t nfdResult = NFD_OPEN;
     
     HRESULT coResult = COMInit();
     if (!COMIsInitialized(coResult))

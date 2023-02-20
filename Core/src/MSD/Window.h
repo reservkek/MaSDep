@@ -4,6 +4,7 @@
 #include "Events/Event.h"
 #include "GLFW/glfw3.h"
 #include <string>
+#include <chrono>
 
 namespace MSD {
 

@@ -64,7 +64,7 @@ namespace MSD {
 		float m_CurrentProgress = 0;
 		float m_CurrentProgressDelta = 0;
 
-		// Объекты (Начальные значение)
+		// Объекты (Начальные значения)
 		Substrate* m_Substrate = new Substrate();
 		std::vector<Magnetron*> m_Magnetrons;
 		unsigned int m_MagnetronIndex = 0;

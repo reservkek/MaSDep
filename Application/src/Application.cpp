@@ -1,4 +1,8 @@
+//#pragma comment( linker, "/subsystem:\"windows\" /entry:\"mainCRTStartup\"" ) 
+
 #include "MSD.h"
+
+#include <iostream>
 
 class ExampleLayer : public MSD::Layer
 {
