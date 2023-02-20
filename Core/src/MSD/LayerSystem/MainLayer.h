@@ -11,6 +11,9 @@
 #include "ImGui/imgui_impl_glfw.h"
 
 #include "ApplicationCore.h"
+#include "GraphicsLayer.h"
+
+#include "GLFW/glfw3.h"
 
 #include "../NFD/include/nfd.h"
 
@@ -52,16 +55,19 @@ namespace MSD {
 		bool show_app_model_parameters = false;
 		bool show_app_model_results = false;
 		bool show_app_property_editor = false;
-		bool show_app_model_viewport = true;
+		bool show_app_model_viewport = false;
 		bool show_file_path_err = false;
 
 		float m_ProgressBar = 0;
 
 		float m_Time = 0.0f;
 
+		bool m_ViewPortHandleInputs = false;
+
 		std::string errorMsg = "";
 		std::string projectDirPath = "C:/users/eeo5/Documents/";
 		nfdchar_t* outPath = (nfdchar_t*)"";
+		bool m_AllowInputWindow = true;
 		nfdresult_t result = NFD_ERROR;
 	};
 

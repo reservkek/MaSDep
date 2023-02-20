@@ -52,6 +52,7 @@ namespace MSD {
 		LayerStack m_LayerStack;
 
 		float m_LastFrameTime = 0.0f;
+		float m_FPSlimit = 150.0f;
 	private:
 		static ApplicationCore* s_Instance;
 	};

@@ -17,7 +17,7 @@ namespace MSD {
 		void Clear() const;
 		void BeginScene();
 		void EndScene();
-		void Submit(const std::shared_ptr<VertexArray> va);
+		void Submit(Shader* shader, const std::shared_ptr<VertexArray> va, glm::mat4 ModelMatrix = glm::mat4(1.0f));
 		void Draw(const std::shared_ptr<VertexArray> va);
 		void Flush();
 

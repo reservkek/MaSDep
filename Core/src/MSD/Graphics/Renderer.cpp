@@ -20,8 +20,10 @@ namespace MSD {
 	{
 	}
 
-	void Renderer::Submit(const std::shared_ptr<VertexArray> va)
+	void Renderer::Submit(Shader* shader, const std::shared_ptr<VertexArray> va, glm::mat4 ModelMatrix)
 	{
+		shader->Bind();
+		shader->SetUniformMat4("u_Model", ModelMatrix);
 		va->Bind();
 		Draw(va);
 	}

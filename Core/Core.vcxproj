@@ -88,7 +88,7 @@
     </Link>
     <Lib>
       <AdditionalDependencies>glfw3_mt.lib;glad.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)Core\vendor\GLFW\lib-vc2022;$(SolutionDir)bin\$(Platform)-$(Configuration)-$(SolutionName)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)Core\vendor\GLFW\lib-vc2022;$(SolutionDir)bin\$(Platform)-$(Configuration)-$(SolutionName)\;%(AdditionalLibraryDirectories);$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -139,6 +139,7 @@
     <ClCompile Include="src\MSD\Graphics\Buffer.cpp" />
     <ClCompile Include="src\MSD\Graphics\Cameras.cpp" />
     <ClCompile Include="src\MSD\Graphics\FrameBuffer.cpp" />
+    <ClCompile Include="src\MSD\Input\Controller.cpp" />
     <ClCompile Include="src\MSD\LayerSystem\GraphicsLayer.cpp" />
     <ClCompile Include="src\MSD\Graphics\Objects.cpp" />
     <ClCompile Include="src\MSD\Graphics\Renderer.cpp" />
@@ -178,6 +179,7 @@
     <ClInclude Include="src\MSD\Graphics\Buffer.h" />
     <ClInclude Include="src\MSD\Graphics\Cameras.h" />
     <ClInclude Include="src\MSD\Graphics\FrameBuffer.h" />
+    <ClInclude Include="src\MSD\Input\Controller.h" />
     <ClInclude Include="src\MSD\LayerSystem\GraphicsLayer.h" />
     <ClInclude Include="src\MSD\Graphics\Internal\Timestep.h" />
     <ClInclude Include="src\MSD\Graphics\Objects.h" />
@@ -201,6 +203,7 @@
     <ClInclude Include="src\MSD\MathModels\AngularMSD\AngularMSD.h" />
     <ClInclude Include="src\MSD\MathModels\AngularMSD\MSDObjects.h" />
     <ClInclude Include="src\MSD\MathModels\AngularMSD\MSDMath.h" />
+    <ClInclude Include="src\MSD\MathModels\Database\PhysicsData.h" />
     <ClInclude Include="src\MSD\Window.h" />
     <ClInclude Include="vendor\color.hpp" />
     <ClInclude Include="vendor\GLFW\include\GLFW\glfw3.h" />

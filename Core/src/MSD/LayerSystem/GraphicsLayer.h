@@ -28,6 +28,8 @@ namespace MSD {
 		virtual void OnAttach() override;
 		virtual void OnDetach() override;
 		virtual void OnUpdate(Timestep ts) override;
+
+		static bool m_HandleInputs;
 	private:
 		std::shared_ptr<VertexArray> va;
 		std::shared_ptr<VertexBuffer> vb;

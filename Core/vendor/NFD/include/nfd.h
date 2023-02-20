@@ -29,7 +29,8 @@ typedef struct {
 typedef enum {
     NFD_ERROR,       /* programmatic error */
     NFD_OKAY,        /* user pressed okay, or successful return */
-    NFD_CANCEL       /* user pressed cancel */
+    NFD_CANCEL,       /* user pressed cancel */
+    NFD_OPEN
 }nfdresult_t;
     
 
@@ -38,7 +39,7 @@ typedef enum {
 /* single file open dialog */    
 nfdresult_t NFD_OpenDialog( const nfdchar_t *filterList,
                             const nfdchar_t *defaultPath,
-                            nfdchar_t **outPath );
+                            nfdchar_t **outPath);
 
 /* multiple file open dialog */    
 nfdresult_t NFD_OpenDialogMultiple( const nfdchar_t *filterList,
