@@ -31,6 +31,7 @@ namespace MSD {
 		static OrthographicCamera* s_Camera;
 		static float s_CameraSpeed;
 		static float s_CameraRotation;
+		static float s_CameraRotationVertical;
 		static float s_CameraRotationSpeed;
 		static float s_ZoomValue;
 		static glm::vec3 s_CameraPosition;

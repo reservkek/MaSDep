@@ -4,6 +4,8 @@
 #include "GLFW/glfw3.h"
 #include "Input/Controller.h"
 
+#include "Graphics/Internal/Objects.h"
+
 namespace MSD {
 
 	bool GraphicsLayer::m_HandleInputs = false;
@@ -24,12 +26,11 @@ namespace MSD {
 		}
 	}
 
-
 	void GraphicsLayer::OnAttach()
 	{
 		va.reset(new VertexArray);
-		vb.reset(new VertexBuffer(coords, 4 * 3 * sizeof(float)));
-		ib.reset(new IndexBuffer(indices, 6));
+		vb.reset(new VertexBuffer(Rect::coords, 4*3*sizeof(float)));
+		ib.reset(new IndexBuffer(Rect::indices, 6));
 		fb.reset(new FrameBuffer(spec));
 
 		vb->SetLayout(layout);
@@ -38,9 +39,13 @@ namespace MSD {
 
 		camera = new OrthographicCamera(-400.0f, 400.0f, -400.0f, 400.0f);
 
-		shader = new Shader("C:/Users/eeo5/Documents/Научная работа/VSProjects/CppGUI/assets/shaders/Basic.glsl");
+		shader = new Shader("F:/dev/CppGui/CppGUI/Core/assets/shaders/Basic.glsl");
 		shader->Bind();
 		shader->SetUniform4f("u_Color", 0.7f, 0.2f, 0.7f, 1.0f);
+
+		gridShader = new Shader("F:/dev/CppGui/CppGUI/Core/assets/shaders/Grid.glsl");
+
+		renderer.CalculateGrid();
 	}
 
 	void GraphicsLayer::OnDetach()
@@ -55,10 +60,18 @@ namespace MSD {
 		}
 		fb->Bind();
 
+		renderer.BeginScene(camera, shader);
+
 		renderer.Clear();
-		
+
 		glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
 		
+		gridShader->Bind();
+		gridShader->SetUniformMat4("u_ViewProjection", camera->GetViewProjectionMatrix());
+		renderer.DrawGrid();
+
+		shader->Bind();
+		shader->SetUniform4fv("u_Color", color);
 		for (int i = 0; i < 10; i++)
 		{
 			for (int j = 0; j < 10; j++)
@@ -69,7 +82,7 @@ namespace MSD {
 			}
 		}
 
-		shader->SetUniform4fv("u_Color", color);
+		renderer.DrawRect({ -100.0f, -100.0f, 0.0f });
 
 		shader->SetUniformMat4("u_ViewProjection", camera->GetViewProjectionMatrix());
 

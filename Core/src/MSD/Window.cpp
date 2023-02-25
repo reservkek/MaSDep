@@ -113,7 +113,6 @@ namespace MSD {
 		glfwSetMouseButtonCallback(m_Window, [](GLFWwindow* window, int button, int action, int mods)
 		{
 			WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
-
 			switch (action)
 			{
 			case GLFW_PRESS:

@@ -82,6 +82,7 @@ namespace MSD {
 	{
 	public:
 		VertexBuffer(float* data, uint32_t size);
+		VertexBuffer(std::vector<glm::vec3>& data);
 		~VertexBuffer();
 
 		void Bind() const;
@@ -103,6 +104,7 @@ namespace MSD {
 		unsigned int m_Count;
 	public:
 		IndexBuffer(const void* data, unsigned int count);
+		IndexBuffer(std::vector<glm::uvec4>& data);
 		~IndexBuffer();
 
 		void Bind() const;
