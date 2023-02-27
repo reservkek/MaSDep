@@ -95,7 +95,7 @@ namespace MSD {
 
 	bool Controller::CameraEventMouseScrolled(MouseScrolledEvent& event)
 	{
-		s_ZoomValue -= event.GetYoffset()*0.1f;
+		s_ZoomValue -= (float)event.GetYoffset()*0.1f;
 		if (s_ZoomValue < 0.1f) s_ZoomValue = 0.1f;
 		s_Camera->SetZoomLevel(s_ZoomValue);
 		return true;
@@ -150,11 +150,11 @@ namespace MSD {
 		s_WindowSizeRatio.x = (s_Camera->m_right - s_Camera->m_left)*1 / maxWinSize;
 		s_WindowSizeRatio.y = (s_Camera->m_top - s_Camera->m_bottom)*1 / maxWinSize;
 
-		s_CurrMousePos.x = event.GetX();
-		s_CurrMousePos.y = event.GetY();
+		s_CurrMousePos.x = (float)event.GetX();
+		s_CurrMousePos.y = (float)event.GetY();
 
-		float deltaX = (event.GetX() - s_LastMousePos.x) * s_WindowSizeRatio.x * s_ZoomValue;
-		float deltaY = (event.GetY() - s_LastMousePos.y) * s_WindowSizeRatio.y * s_ZoomValue;
+		float deltaX = ((float)event.GetX() - s_LastMousePos.x) * s_WindowSizeRatio.x * s_ZoomValue;
+		float deltaY = ((float)event.GetY() - s_LastMousePos.y) * s_WindowSizeRatio.y * s_ZoomValue;
 
 		float angle = s_CameraRotation*PI/180;
 

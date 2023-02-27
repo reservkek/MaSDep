@@ -20,14 +20,15 @@ namespace MSD
 
 	void Object::SetScale(float scale)
 	{
+
 	}
 
 	float Rect::coords[12] =
 	{
-		-200.0f, -200.0f, 0.0f,
-		 200.0f, -200.0f, 0.0f,
-		-200.0f,  200.0f, 0.0f,
-		 200.0f,  200.0f, 0.0f
+		-200.0f, -200.0f, 0.0f, // 0 
+		 200.0f, -200.0f, 0.0f, // 1 
+		-200.0f,  200.0f, 0.0f, // 2 
+		 200.0f,  200.0f, 0.0f  // 3
 	};
 
 	unsigned int Rect::indices[6] = { 0, 1, 2, 1, 2, 3 };
@@ -58,6 +59,7 @@ namespace MSD
 	glm::mat4 Grid::u_ModelMatrix = glm::mat4(1.0f);
 	glm::vec4 Grid::u_Color = glm::vec4(1.0f, 0.0f, 1.0f, 1.0f);
 	
+
 	BufferLayout Grid::u_BasicLayout = {
 		{ ShaderDataType::Float3, "a_Position"}
 	};

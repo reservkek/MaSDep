@@ -35,6 +35,8 @@ namespace MSD {
 		void DeleteMagnetron(unsigned int& index);
 
 		std::string GetErrorMessage() { return m_ErrorMsg; }
+		float& GetCurrentTime() { return m_CurrentTime; }
+		std::vector<float>& GetTimeValues() { return m_TimeValues; }
 
 		extern friend class MainLayer;
 	private:
@@ -72,6 +74,8 @@ namespace MSD {
 		// Буфер для расчёта
 		Substrate* m_SubstrateBuffer = new Substrate();
 		std::vector<Magnetron*> m_MagnetronsBuffer;
+
+		std::vector<float> m_TimeValues = {};
 
 		static AngMSD* s_Instance;
 		bool m_ModelRunning = false;

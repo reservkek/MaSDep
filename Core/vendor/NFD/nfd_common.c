@@ -3,6 +3,7 @@
 
   http://www.frogtoss.com/labs
  */
+
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>

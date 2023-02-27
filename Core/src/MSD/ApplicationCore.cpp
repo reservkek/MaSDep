@@ -19,8 +19,9 @@ namespace MSD {
 
 		m_Model = new AngMSD();
 		m_GraphicsLayer = new GraphicsLayer();
+		m_MainLayer = new MainLayer();
 
-		PushOverlay(new MainLayer());
+		PushOverlay(m_MainLayer);
 		PushOverlay(m_GraphicsLayer);
 	}
 
@@ -48,6 +49,8 @@ namespace MSD {
 			Timestep timestep = time - m_LastFrameTime;
 			m_LastFrameTime = time;
 
+			m_GraphicsLayer->isUpdating() = m_MainLayer->GetViewportStatus();
+
 			for (Layer* layer : m_LayerStack)
 			{
 				layer->OnUpdate(timestep);
@@ -58,7 +61,7 @@ namespace MSD {
 			while (glfwGetTime() < lasttime + 1.0 / m_FPSlimit) {
 				std::this_thread::sleep_for(std::chrono::milliseconds(5));
 			}
-			lasttime += 1.0 / m_FPSlimit;
+			lasttime += 1.0f / m_FPSlimit;
 		};
 	}
 
@@ -102,6 +105,12 @@ namespace MSD {
 	{
 		m_LayerStack.PushOverlay(layer);
 		layer->OnAttach();
+	}
+
+	bool ApplicationCore::IsViewportShown()
+	{
+		if (m_MainLayer == nullptr) return false;
+		return m_MainLayer->GetViewportStatus();
 	}
 
 	bool ApplicationCore::OnWindowClose(WindowCloseEvent& e)

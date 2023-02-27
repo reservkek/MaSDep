@@ -1,6 +1,7 @@
 #include "msdpch.h"
 
 #include "AngularMSD.h"
+#include "../Database/PhysicsData.h"
 
 namespace MSD {
 
@@ -17,6 +18,8 @@ namespace MSD {
 		m_SubstrateBuffer = new Substrate();
 		*m_SubstrateBuffer = *m_Substrate;
 
+		m_TimeValues = {};
+
 		float vel = *(m_SubstrateBuffer->GetRPM());
 		m_TimePerTick = 1.0f / m_TicksPerSecond;
 
@@ -30,6 +33,8 @@ namespace MSD {
 
 		for (auto m : m_MagnetronsBuffer)
 		{
+			m->Clear();
+
 			m->InputSputRates(*(m->GetInputFilePath()), m_IntegrationDelta);
 			if (m->GetFilePathErr())
 			{
@@ -87,9 +92,15 @@ namespace MSD {
 
 		Substrate& s = *m_SubstrateBuffer;
 
+		unsigned short count = 0;
 		for (auto m : m_MagnetronsBuffer)
 		{
+			count++;
 			CalculateFlux(m, &s);
+			if (count != m_MagnetronsBuffer.size())
+			{
+				// TODO
+			}
 		}
 
 		s.Update();
@@ -140,12 +151,14 @@ namespace MSD {
 			}
 		}
 
-		substrate->GetTotalDeposited() += fullDepRate * m_TimePerTick * 8.33e28f;
+		substrate->GetTotalDeposited() += fullDepRate * m_TimePerTick * FindDensity(Elements::Cr);
 		substrate->WriteDepEvolution();
 
 		m_CurrentFluxVector = FindVector(substrate->GetPos(), magnetron->GetPos());
 		m_CurrentGamma = Angle(m_CurrentFluxVector, substrate->GetNormal());
 		m_CurrentPhi = Angle(-m_CurrentFluxVector, magnetron->GetNormal());
+
+		m_TimeValues.push_back(m_CurrentTime);
 
 		magnetron->GetCurrentDepRate() = fullDepRate;
 		magnetron->WriteDepRate();

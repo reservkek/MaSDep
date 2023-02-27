@@ -33,18 +33,29 @@ namespace MSD {
 		void Begin();
 		void End();
 
+		// MAIN MENU BAR
 		void MainMenuBar();
 		void MainPanel();
 
-		void MagnetronParameters(Magnetron* magnetron);
-		void SubstrateParameters(Substrate* substrate);
+		// WINDOWS
 		void ModelParametersWindow(bool* p_open);
 		void ModelResultsWindow(bool* p_open);
 		void ModelViewportWindow(bool* p_open);
-		void FilePathErrPopup(bool* p_open, std::string* error_msg);
-		void DynamicPlot(ImPlotCond cond, std::vector<float>& data);
 
-		bool ExportCSV(const char* path, std::vector<float>** data, int number_of_vectors, nfdresult_t result);
+		// SUBSECTIONS
+		void MagnetronParameters(Magnetron* magnetron);
+		void SubstrateParameters(Substrate* substrate);
+
+		// WIDGETS
+		void DynamicPlot(ImPlotCond cond, std::vector<float>& data, const char* axes[2]);
+		void ExportButton(std::vector<std::vector<float>*> data, const char* id = "");
+
+		// POPUPS
+		void SuccessPopup(bool* p_open);
+		void FilePathErrPopup(bool* p_open, std::string* error_msg);
+
+		// FUNCTIONS
+		bool GetViewportStatus() { return show_app_model_viewport; }
 
 		ImPlotCond FindPlotCond();
 	private:
@@ -56,7 +67,8 @@ namespace MSD {
 		bool show_app_model_results = false;
 		bool show_app_property_editor = false;
 		bool show_app_model_viewport = false;
-		bool show_file_path_err = false;
+		bool show_popup_file_path_err = false;
+		bool show_popup_success = false;
 
 		float m_ProgressBar = 0;
 
@@ -66,6 +78,10 @@ namespace MSD {
 
 		std::string errorMsg = "";
 		std::string projectDirPath = "C:/users/eeo5/Documents/";
+
+		const char* axesDepEvolution[2] = { "Time (s)", "Number of deposited atoms (1/m2)" };
+		const char* axesDepRates[2] = { "Time (s)", "Deposition rate (m/s)" } ;
+
 		nfdchar_t* outPath = (nfdchar_t*)"";
 		bool m_AllowInputWindow = true;
 		nfdresult_t result = NFD_ERROR;

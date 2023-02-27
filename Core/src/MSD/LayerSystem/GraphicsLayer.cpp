@@ -31,7 +31,10 @@ namespace MSD {
 		va.reset(new VertexArray);
 		vb.reset(new VertexBuffer(Rect::coords, 4*3*sizeof(float)));
 		ib.reset(new IndexBuffer(Rect::indices, 6));
-		fb.reset(new FrameBuffer(spec));
+
+		fbSpec.Attachments = { FrameBufferTextureFormat::RGBA8, FrameBufferTextureFormat::Depth };
+
+		fb.reset(new FrameBuffer(fbSpec));
 
 		vb->SetLayout(layout);
 		va->AddVertexBuffer(vb);
@@ -39,11 +42,11 @@ namespace MSD {
 
 		camera = new OrthographicCamera(-400.0f, 400.0f, -400.0f, 400.0f);
 
-		shader = new Shader("F:/dev/CppGui/CppGUI/Core/assets/shaders/Basic.glsl");
+		shader = new Shader("C:/Users/eeo5/Documents/Научная работа/VSProjects/CppGUI/Core/assets/shaders/Basic.glsl");
 		shader->Bind();
 		shader->SetUniform4f("u_Color", 0.7f, 0.2f, 0.7f, 1.0f);
 
-		gridShader = new Shader("F:/dev/CppGui/CppGUI/Core/assets/shaders/Grid.glsl");
+		gridShader = new Shader("C:/Users/eeo5/Documents/Научная работа/VSProjects/CppGUI/Core/assets/shaders/Grid.glsl");
 
 		renderer.CalculateGrid();
 	}
@@ -54,10 +57,13 @@ namespace MSD {
 
 	void GraphicsLayer::OnUpdate(Timestep ts)
 	{
+		if (!m_Updating) return;
+
 		if (m_HandleInputs)
 		{
 			Controller::HandleCameraInputs(camera, &ts);
 		}
+
 		fb->Bind();
 
 		renderer.BeginScene(camera, shader);

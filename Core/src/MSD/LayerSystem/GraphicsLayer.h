@@ -23,14 +23,17 @@ namespace MSD {
 		inline FrameBuffer& GetFrameBuffer() { return *fb; }
 
 		void OnEvent(Event& event) override;
-		bool OnKeyPressedEvent(KeyPressedEvent& event);
 
 		virtual void OnAttach() override;
 		virtual void OnDetach() override;
 		virtual void OnUpdate(Timestep ts) override;
 
+		bool& isUpdating() { return m_Updating; }
+
 		static bool m_HandleInputs;
 	private:
+		bool m_Updating = false;
+
 		std::shared_ptr<VertexArray> va;
 		std::shared_ptr<VertexBuffer> vb;
 		std::shared_ptr<IndexBuffer> ib;
@@ -64,7 +67,7 @@ namespace MSD {
 			{ ShaderDataType::Float3, "a_Position"}
 		};
 
-		FrameBufferSpecification spec;
+		FrameBufferSpecification fbSpec;
 
 		glm::vec4 color = glm::vec4(0.8f, 0.5f, 0.2f, 1.00f);
 		glm::vec3 m_CameraPosition = glm::vec3(0.0f,0.0f,0.0f);
