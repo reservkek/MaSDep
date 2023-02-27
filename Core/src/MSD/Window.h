@@ -13,7 +13,7 @@ namespace MSD {
 		std::string Title;
 		unsigned int Height, Width;
 
-		WindowProps(const std::string& title = "MSD",
+		WindowProps(const std::string& title = "MaSDep - DEV Version",
 					const unsigned int& width = 1000,
 					const unsigned int& height = 700)
 			: Title(title), Width(width), Height(height)

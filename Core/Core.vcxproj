@@ -130,6 +130,7 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\MSD\Graphics\Internal\Objects.cpp" />
     <ClCompile Include="src\msdpch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">msdpch.h</PrecompiledHeaderFile>
@@ -141,7 +142,6 @@
     <ClCompile Include="src\MSD\Graphics\FrameBuffer.cpp" />
     <ClCompile Include="src\MSD\Input\Controller.cpp" />
     <ClCompile Include="src\MSD\LayerSystem\GraphicsLayer.cpp" />
-    <ClCompile Include="src\MSD\Graphics\Objects.cpp" />
     <ClCompile Include="src\MSD\Graphics\Renderer.cpp" />
     <ClCompile Include="src\MSD\Graphics\Shader.cpp" />
     <ClCompile Include="src\MSD\Graphics\VertexArray.cpp" />
@@ -175,6 +175,7 @@
     <ClCompile Include="vendor\NFD\nfd_win.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\MSD\Graphics\Internal\Objects.h" />
     <ClInclude Include="src\msdpch.h" />
     <ClInclude Include="src\MSD\Graphics\Buffer.h" />
     <ClInclude Include="src\MSD\Graphics\Cameras.h" />
@@ -182,7 +183,6 @@
     <ClInclude Include="src\MSD\Input\Controller.h" />
     <ClInclude Include="src\MSD\LayerSystem\GraphicsLayer.h" />
     <ClInclude Include="src\MSD\Graphics\Internal\Timestep.h" />
-    <ClInclude Include="src\MSD\Graphics\Objects.h" />
     <ClInclude Include="src\MSD\Graphics\Renderer.h" />
     <ClInclude Include="src\MSD\Graphics\Shader.h" />
     <ClInclude Include="src\MSD\Graphics\VertexArray.h" />
@@ -507,7 +507,8 @@
     <Library Include="vendor\GLFW\lib-vc2022\glfw3_mt.lib" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="imgui.ini" />
+    <None Include="assets\shaders\Basic.glsl" />
+    <None Include="assets\shaders\Grid.glsl" />
     <None Include="res\shaders\Basic.shader" />
     <None Include="vendor\glm\detail\func_common.inl" />
     <None Include="vendor\glm\detail\func_common_simd.inl" />

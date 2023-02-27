@@ -13,6 +13,7 @@ namespace MSD {
 		OrthographicCamera(float left, float right, float bottom, float top);
 		void SetPositon(const glm::vec3& position);
 		void SetRotationAroundZ(float rotation) { m_RotationAroundZ = rotation; CalcViewMatrix(); }
+		void SetRotationAroundX(float rotation) { m_RotationAroundX = rotation; CalcViewMatrix(); }
 		void SetZoomLevel(float zoom) { m_Zoom = zoom; CalcProjectionMatrix(); }
 
 		const glm::mat4& GetProjectionMatrix() const { return m_ProjectionMatrix; }
@@ -30,6 +31,7 @@ namespace MSD {
 
 		glm::vec3 m_Position = glm::vec3(0, 0, 0);
 		float m_RotationAroundZ = 0.0f;
+		float m_RotationAroundX = 0.0f;
 		float m_Zoom = 1.0f;
 	};
 

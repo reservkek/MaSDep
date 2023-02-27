@@ -40,6 +40,7 @@ namespace MSD {
 		Renderer renderer;
 
 		Shader* shader;
+		Shader* gridShader;
 
 		std::shared_ptr<FrameBuffer> fb;
 

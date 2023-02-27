@@ -8,6 +8,7 @@ namespace MSD {
 
 	float Controller::s_CameraSpeed = 1000.0f;
 	float Controller::s_CameraRotation = 0.0f;
+	float Controller::s_CameraRotationVertical = 0.0f;
 	float Controller::s_CameraRotationSpeed = 180.0f;
 	float Controller::s_ZoomValue = 1.0f;
 
@@ -54,8 +55,17 @@ namespace MSD {
 		{
 			s_CameraRotation += s_CameraRotationSpeed * (*timestep);
 		}
+		if (Input::IsKeyPressed(GLFW_KEY_W))
+		{
+			s_CameraRotationVertical -= s_CameraRotationSpeed * (*timestep);
+		}
+		if (Input::IsKeyPressed(GLFW_KEY_S))
+		{
+			s_CameraRotationVertical += s_CameraRotationSpeed * (*timestep);
+		}
 
 		s_Camera->SetPositon(s_CameraPosition);
+		s_Camera->SetRotationAroundX(s_CameraRotationVertical);
 		s_Camera->SetRotationAroundZ(s_CameraRotation);
 	}
 
@@ -74,10 +84,12 @@ namespace MSD {
 	{
 		s_ZoomValue = 1.0f;
 		s_CameraRotation = 0.0f;
+		s_CameraRotationVertical = 0.0f;
 		s_CameraPosition = glm::vec3(0.0f, 0.0f, 0.0f);
 
 		s_Camera->SetPositon(s_CameraPosition);
 		s_Camera->SetRotationAroundZ(s_CameraRotation);
+		s_Camera->SetRotationAroundX(s_CameraRotationVertical);
 		s_Camera->SetZoomLevel(s_ZoomValue);
 	}
 
@@ -148,8 +160,8 @@ namespace MSD {
 
 		if (s_Draggable)
 		{
-			s_CameraPosition.x += -deltaX*cos(angle)-deltaY*sin(angle);
-			s_CameraPosition.y += -deltaX*sin(angle)+deltaY*cos(angle);
+			s_CameraPosition.x += -deltaX*cos(angle)+deltaY*sin(angle);
+			s_CameraPosition.y += deltaX*sin(angle)+deltaY*cos(angle);
 		}
 		s_LastMousePos.x = s_CurrMousePos.x;
 		s_LastMousePos.y = s_CurrMousePos.y;

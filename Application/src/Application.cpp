@@ -2,8 +2,6 @@
 
 #include "MSD.h"
 
-#include <iostream>
-
 class ExampleLayer : public MSD::Layer
 {
 
