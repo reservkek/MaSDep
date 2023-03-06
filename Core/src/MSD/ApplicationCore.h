@@ -39,11 +39,14 @@ namespace MSD {
 		void WindowUpdate();
 
 		inline static ApplicationCore& Get() { return *s_Instance; }
+
+		bool IsViewportShown();
 	private:
 		bool OnWindowClose(WindowCloseEvent& e);
 
 		std::unique_ptr<Window> m_Window;
 		
+		MainLayer* m_MainLayer;
 		GraphicsLayer* m_GraphicsLayer;
 		AngMSD* m_Model;
 

@@ -87,10 +87,13 @@ namespace MSD {
 
 		ImGui::DockSpaceOverViewport();
 
-		if (show_file_path_err) FilePathErrPopup(&show_file_path_err, &errorMsg);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 10.0f);
+		if (show_popup_file_path_err) FilePathErrPopup(&show_popup_file_path_err, &errorMsg);
+		if (show_popup_success) SuccessPopup(&show_popup_success);
 		if (show_app_model_parameters) ModelParametersWindow(&show_app_model_parameters);
 		if (show_app_model_results) ModelResultsWindow(&show_app_model_results);
 		if (show_app_model_viewport) ModelViewportWindow(&show_app_model_viewport);
+		ImGui::PopStyleVar();
 
 		End();
 	}
@@ -112,6 +115,79 @@ namespace MSD {
 			ImGui::RenderPlatformWindowsDefault();
 			glfwMakeContextCurrent(backup_current_context);
 		}
+	}
+
+	// STATIC FUNCTIONS
+	static bool ExportCSV(const char* outpath, std::vector<std::vector<float>*> data, int number_of_vectors, nfdresult_t result)
+	{
+		if (result != NFD_OKAY) return false;
+
+		// Open the file for writing
+		std::filesystem::path filepath = outpath;
+		if (filepath.extension() == "") filepath.replace_extension(".csv");
+
+		std::ofstream file(filepath);
+
+		if (!file.is_open()) {
+			return false;
+		}
+
+		// Loop through each vector in the data array
+		for (int i = 0; i < number_of_vectors; ++i) {
+			// Get a reference to the current vector
+			std::vector<float>& vec = *data[i];
+
+			// Write the contents of the vector to the file
+			auto size = vec.size();
+			for (int j = 0; j < (int)size; ++j) {
+				file << j << "," << vec[j] << std::endl;
+			}
+			file << std::endl;
+		}
+
+		// Close the file
+		file.close();
+		return true;
+	}
+
+	static void DrawVec3Control(const std::string& label, float* data, float columnwidth = 120.0f)
+	{
+		ImGui::PushID(label.c_str());
+
+		ImGui::Columns(2, (const char*)0, false);
+
+		ImGui::PushMultiItemsWidths(3, ImGui::CalcItemWidth());
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0,5.0f));
+
+		float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
+		ImVec2 buttonSize = { lineHeight + 3.0f, lineHeight };
+
+		if (ImGui::Button("X", buttonSize)) {};
+		ImGui::SameLine();
+		ImGui::InputFloat("##X", &data[0], 0, 0, "%.1f");
+		ImGui::PopItemWidth();
+		ImGui::SameLine();
+
+		if (ImGui::Button("Y", buttonSize)) {};
+		ImGui::SameLine();
+		ImGui::InputFloat("##Y", &data[1], 0, 0, "%.1f");
+		ImGui::PopItemWidth();
+		ImGui::SameLine();
+
+		if (ImGui::Button("Z", buttonSize)) {};
+		ImGui::SameLine();
+		ImGui::InputFloat("##Z", &data[2], 0, 0, "%.1f");
+		ImGui::PopItemWidth();
+		ImGui::PopStyleVar();
+
+		ImGui::NextColumn();
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(5.0f, 5.0f));
+		ImGui::Text(label.c_str());
+		ImGui::PopStyleVar();
+
+		ImGui::PopID();
+
+		ImGui::Columns(1);
 	}
 
 	///////////////////
@@ -178,7 +254,7 @@ namespace MSD {
 						{ 
 							if (!model.Run())
 							{
-								show_file_path_err = true;
+								show_popup_file_path_err = true;
 							};
 						}
 						else
@@ -214,12 +290,14 @@ namespace MSD {
 	// PARAMETERS 
 	void MainLayer::ModelParametersWindow(bool* p_open)
 	{
-
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2(400, 400));
 		if (!ImGui::Begin("Model Parameters", p_open))
 		{
+			ImGui::PopStyleVar();
 			ImGui::End();
 			return;
 		}
+		ImGui::PopStyleVar();
 
 		ApplicationCore& app = ApplicationCore::Get();
 		AngMSD& model = app.GetModel();
@@ -227,9 +305,11 @@ namespace MSD {
 
 		m_ProgressBar = model.GetCurrentProgress();
 		ImGui::ProgressBar(m_ProgressBar);
+
 		ImGui::Text("Ticks: %d", model.m_TimeTicksCounter);
 		ImGui::Text("Magnetrons: %d", model.m_Magnetrons.size());
 		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+
 		if (ImGui::InputFloat("Rotation Limit", &model.m_RotationLimit)) {
 			if (model.m_RotationLimit < 0) model.m_RotationLimit = 0;
 		};
@@ -252,13 +332,18 @@ namespace MSD {
 		for (auto i_magnetron : model.m_Magnetrons)
 		{
 			count++;
+			bool keepMagnetron = true;
 			if (!i_magnetron->GetIndex()) { i_magnetron->SetIndex(model.m_MagnetronIndex); }
 			std::string countstr = "Magnetron " + std::to_string(i_magnetron->GetIndex());
-			if (ImGui::CollapsingHeader((const char*)countstr.c_str(), ImGuiTreeNodeFlags_DefaultOpen))
+			if (ImGui::CollapsingHeader((const char*)countstr.c_str(), &keepMagnetron, ImGuiTreeNodeFlags_DefaultOpen))
 			{
 				ImGui::PushID(count);
+				ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 5.0f);
+				ImGui::BeginChild("DA", ImVec2(0, 200), true);
 				MagnetronParameters(i_magnetron);
-				if (ImGui::Button("Delete Magnetron"))
+				ImGui::PopStyleVar();
+				ImGui::EndChild();
+				if (keepMagnetron == false)
 				{
 					model.DeleteMagnetron(count);
 					if (model.m_Magnetrons.size() != 0) { model.m_MagnetronIndex = model.m_Magnetrons.back()->GetIndex(); }
@@ -277,9 +362,9 @@ namespace MSD {
 	{
 		ImGui::InputFloat("Radius", magnetron->GetRadius());
 		float* pos[3] = { magnetron->GetPosX(), magnetron->GetPosY(), magnetron->GetPosZ() };
-		ImGui::InputFloat3("Magnetron position", *pos);
+		DrawVec3Control("Magentron position", *pos);
 		float* normal[3] = { magnetron->GetNormalX(), magnetron->GetNormalY(), magnetron->GetNormalZ() };
-		ImGui::InputFloat3("Magnetron normal vector", *normal);
+		DrawVec3Control("Magnetron normal vector", *normal);
 		ImGui::InputFloat("###rotate", magnetron->GetRotationAngle());
 		ImGui::SameLine();
 		if (ImGui::Button("Rotate clockwise"))
@@ -308,9 +393,9 @@ namespace MSD {
 		if (ImGui::CollapsingHeader("Substrate", ImGuiTreeNodeFlags_DefaultOpen))
 		{
 			float* pos[3] = { substrate->GetPosX(), substrate->GetPosY(), substrate->GetPosZ() };
-			ImGui::InputFloat3("Magnetron position", *pos);
+			DrawVec3Control("Magnetron position", *pos);
 			float* normal[3] = { substrate->GetNormalX(), substrate->GetNormalY(), substrate->GetNormalZ() };
-			ImGui::InputFloat3("Magnetron normal vector", *normal);
+			DrawVec3Control("Magnetron normal vector", *normal);
 			ImGui::InputFloat("###rotate", substrate->GetRotationAngle());
 			ImGui::SameLine();
 			if (ImGui::Button("Rotate clockwise"))
@@ -325,53 +410,6 @@ namespace MSD {
 			ImGui::InputFloat("Sub RPM", substrate->GetSubRPM());
 			ImGui::PopItemWidth();
 		}
-	}
-
-
-	// RESULTS
-	void MainLayer::ModelResultsWindow(bool* p_open)
-	{
-		if (!ImGui::Begin("Model results", p_open))
-		{
-			ImGui::End();
-			return;
-		}
-
-		ApplicationCore& app = ApplicationCore::Get();
-		AngMSD& model = app.GetModel();
-
-		std::vector<float>& data = model.m_SubstrateBuffer->GetDepEvolution();
-		std::vector<float>* data_array[1] = { &data };
-
-		if (ImGui::CollapsingHeader("Deposition Evolution"))
-		{
-			ApplicationCore& app = ApplicationCore::Get();
-			AngMSD& model = app.GetModel();
-
-			std::vector<float>& data = model.m_SubstrateBuffer->GetDepEvolution();
-
-			DynamicPlot(FindPlotCond(), data);
-			if (ImGui::Button("Export CSV file"))
-			{
-				outPath = (nfdchar_t*)(projectDirPath.c_str());
-				result = NFD_SaveDialog("csv", NULL, &outPath);
-				if (ExportCSV(outPath, data_array, 1, result))
-				{
-					ImGui::OpenPopup("Success");
-				};
-			}
-			if (ImGui::BeginPopupModal("Success", NULL, ImGuiWindowFlags_AlwaysAutoResize))
-			{
-				ImGui::Text("CSV file successfully saved\n\n");
-				ImGui::Separator();
-				if (ImGui::Button("OK", ImVec2(120, 0))) { ImGui::CloseCurrentPopup(); }
-				ImGui::SetItemDefaultFocus();
-				ImGui::SameLine();
-				ImGui::EndPopup();
-			}
-		}
-
-		ImGui::End();
 	}
 
 
@@ -427,22 +465,106 @@ namespace MSD {
 		return;
 	}
 
+	// RESULTS
+	void MainLayer::ModelResultsWindow(bool* p_open)
+	{
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2(400, 400));
+
+		if (!ImGui::Begin("Model results", p_open))
+		{
+			ImGui::PopStyleVar();
+			ImGui::End();
+			return;
+		}
+		ImGui::PopStyleVar();
+
+		ApplicationCore& app = ApplicationCore::Get();
+		AngMSD& model = app.GetModel();
+
+		std::vector<float>& data = model.m_SubstrateBuffer->GetDepEvolution();
+		std::vector<std::vector<float>*> depEvolutionData;
+		depEvolutionData.push_back(&data);
+
+
+		std::vector<std::vector<float>*> depRatesData;
+
+		if (ImGui::CollapsingHeader("Deposition Evolution"))
+		{
+			ApplicationCore& app = ApplicationCore::Get();
+			AngMSD& model = app.GetModel();
+
+			std::vector<float>& data = model.m_SubstrateBuffer->GetDepEvolution();
+
+			DynamicPlot(FindPlotCond(), data, axesDepEvolution);
+			ExportButton(depEvolutionData);
+			ImGui::Separator();
+		}
+		depEvolutionData.pop_back();
+
+
+		unsigned int count = 0;
+		for (auto magnetron : model.m_Magnetrons)
+		{
+			std::vector<float>& depRates = magnetron->GetDepRates();
+			depRatesData.push_back(&depRates);
+
+			ImGui::PushID(count);
+			std::string countstr = "Deposition rate of magnetron " + std::to_string(magnetron->GetIndex());;
+			if (ImGui::CollapsingHeader((const char*)countstr.c_str()))
+			{
+				DynamicPlot(FindPlotCond(), depRates, axesDepRates);
+			}
+			count++;
+			ImGui::PopID();
+		}
+		ImGui::End();
+		depRatesData.clear();
+	}
+
+	void MainLayer::ExportButton(std::vector<std::vector<float>*> data, const char* id)
+	{
+		ImGuiStyle& style = ImGui::GetStyle();
+
+		float alignment = 0.5f;
+		float size = ImGui::CalcTextSize("Export CSV File").x + style.FramePadding.x * 2.0f;
+		float avail = ImGui::GetContentRegionAvail().x;
+
+		float off = (avail - size) * alignment;
+		if (off > 0.0f)
+			ImGui::SetCursorPosX(ImGui::GetCursorPosX() + off);
+
+		if (ImGui::Button("Export CSV file"))
+		{
+			outPath = (nfdchar_t*)(projectDirPath.c_str());
+			result = NFD_SaveDialog("csv", NULL, &outPath);
+			if (ExportCSV(outPath, data, 1, result))
+			{
+				show_popup_success = true;
+			};
+		}
+	}
+
 
 	// PLOTS
-	void MainLayer::DynamicPlot(ImPlotCond cond, std::vector<float>& data)
+	void MainLayer::DynamicPlot(ImPlotCond cond, std::vector<float>& data, const char* axes[2])
 	{
+		auto x_values = ApplicationCore::Get().GetModel().GetTimeValues();
+
 		auto x_min = 0;
-		auto x_max = (int)data.size();
+		auto x_max = ApplicationCore::Get().GetModel().GetCurrentTime()+1.0f;
 		auto y_min = std::numeric_limits<float>::max();
 		auto y_max = std::numeric_limits<float>::lowest();
 		for (auto& val : data) {
 			y_min = std::min(y_min, val);
 			y_max = std::max(y_max, val);
 		}
+		
 		ImPlot::SetNextAxesLimits(x_min, x_max, y_min, y_max, cond);
-		if (ImPlot::BeginPlot("Deposition Evolution"))
+
+		if (ImPlot::BeginPlot("###plt"))
 		{
-			if (data.size() != 0) ImPlot::PlotLine("", data.data(), (int)data.size());
+			ImPlot::SetupAxes(*axes, *(axes+1));
+			if (data.size() != 0) ImPlot::PlotLine("", x_values.data(), data.data(), (int)data.size());
 			ImPlot::EndPlot();
 		}
 	}
@@ -455,6 +577,30 @@ namespace MSD {
 
 
 	// POPUPS
+	void MainLayer::SuccessPopup(bool* p_open)
+	{
+		if (!p_open) return;
+
+		ImGui::OpenPopup("Success");
+
+		ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+		ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+
+		if (ImGui::BeginPopupModal("Success", p_open, ImGuiWindowFlags_AlwaysAutoResize))
+		{
+			ImGui::Text("CSV file successfully saved\n\n");
+			ImGui::Separator();
+			if (ImGui::Button("OK", ImVec2(120, 0)))
+			{
+				ImGui::CloseCurrentPopup();
+				*p_open = false;
+			}
+			ImGui::SetItemDefaultFocus();
+			ImGui::SameLine();
+			ImGui::EndPopup();
+		}
+	}
+
 	void MainLayer::FilePathErrPopup(bool* p_open, std::string* error_msg)
 	{
 		if (!p_open) return;
@@ -482,37 +628,5 @@ namespace MSD {
 			ImGui::EndPopup();
 		}
 
-	}
-
-	bool MainLayer::ExportCSV(const char* outpath, std::vector<float>** data, int number_of_vectors, nfdresult_t result)
-	{	
-		if (result != NFD_OKAY) return false;
-		
-		// Open the file for writing
-		std::filesystem::path filepath = outpath;
-		if (filepath.extension() == "") filepath.replace_extension(".csv");
-
-		std::ofstream file(filepath);
-
-		if (!file.is_open()) {
-			return false;
-		}
-
-		// Loop through each vector in the data array
-		for (int i = 0; i < number_of_vectors; ++i) {
-			// Get a reference to the current vector
-			std::vector<float>& vec = *data[i];
-
-			// Write the contents of the vector to the file
-			auto size = vec.size();
-			for (int j = 0; j < (int)size; ++j) {
-				file << j << "," << vec[j] << std::endl;
-			}
-			file << std::endl;
-		}
-
-		// Close the file
-		file.close();
-		return true;
 	}
 }

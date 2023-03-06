@@ -21,6 +21,7 @@ namespace MSD {
 		void WriteGamma(const float& gamma);
 		void WritePhi(const float& phi);
 		void InputSputRates(const char* filepath, const float& integrationDelta);
+		void Clear();
 		float FindSputRate(const float& radius);
 
 		int GetIndex() const { return m_Index; }
@@ -40,7 +41,7 @@ namespace MSD {
 
 		bool& GetFilePathErr() { return m_FilePathErr; }
 
-		vec3 GetPos() const { return msdpos; }
+		vec3 GetPos() { return msdpos; }
 		vec3 GetNormal() const { return msdnormal; }
 
 		extern friend class MainLayer;

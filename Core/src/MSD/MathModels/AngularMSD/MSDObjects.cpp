@@ -82,6 +82,13 @@ namespace MSD {
 		}
 	}
 
+	void Magnetron::Clear()
+	{
+		m_DepRates.clear();
+		m_GammaAngles.clear();
+		m_PhiAngles.clear();
+	}
+
 	float Magnetron::FindSputRate(const float& radius)
 	{
 		if (auto it = m_SputRates.find(radius); it != m_SputRates.end())

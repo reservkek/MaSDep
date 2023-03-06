@@ -2,7 +2,7 @@
 
 namespace MSD {
 
-	enum class Elements
+	enum Elements
 	{
 		None = 0,
 		Cr = 1 << 0
