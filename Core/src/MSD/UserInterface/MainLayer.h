@@ -41,6 +41,7 @@ namespace MSD {
 		void ModelParametersWindow(bool* p_open);
 		void ModelResultsWindow(bool* p_open);
 		void ModelViewportWindow(bool* p_open);
+		void PeriodicTableWindow(bool* p_open);
 
 		// SUBSECTIONS
 		void MagnetronParameters(Magnetron* magnetron);

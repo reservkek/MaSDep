@@ -4,6 +4,7 @@
 #include "../Database/PhysicsData.h"
 
 namespace MSD {
+	using namespace Database;
 
 	AngMSD* AngMSD::s_Instance = nullptr;
 
@@ -92,15 +93,14 @@ namespace MSD {
 
 		Substrate& s = *m_SubstrateBuffer;
 
+		static bool write = false;
 		unsigned short count = 0;
 		for (auto m : m_MagnetronsBuffer)
 		{
 			count++;
-			CalculateFlux(m, &s);
-			if (count != m_MagnetronsBuffer.size())
-			{
-				// TODO
-			}
+			if (count == m_MagnetronsBuffer.size()) write = true;
+			else write = false;
+			CalculateFlux(m, &s, write);
 		}
 
 		s.Update();
@@ -123,7 +123,7 @@ namespace MSD {
 		m_Magnetrons.erase(m_Magnetrons.begin()+index-1);
 	}
 
-	void AngMSD::CalculateFlux(Magnetron* magnetron, Substrate* substrate)
+	void AngMSD::CalculateFlux(Magnetron* magnetron, Substrate* substrate, bool write)
 	{
 		auto radius = *(magnetron->GetRadius());
 		float localRadius = 0;
@@ -151,14 +151,16 @@ namespace MSD {
 			}
 		}
 
-		substrate->GetTotalDeposited() += fullDepRate * m_TimePerTick * FindDensity(Elements::Cr);
-		substrate->WriteDepEvolution();
+		const static float CrDensity = FindAtomicDensity(magnetron->GetElement());
+		substrate->GetTotalDeposited() += fullDepRate * m_TimePerTick * CrDensity;
+
+		if (write) substrate->WriteDepEvolution();
 
 		m_CurrentFluxVector = FindVector(substrate->GetPos(), magnetron->GetPos());
 		m_CurrentGamma = Angle(m_CurrentFluxVector, substrate->GetNormal());
 		m_CurrentPhi = Angle(-m_CurrentFluxVector, magnetron->GetNormal());
 
-		m_TimeValues.push_back(m_CurrentTime);
+		if (write) m_TimeValues.push_back(m_CurrentTime);
 
 		magnetron->GetCurrentDepRate() = fullDepRate;
 		magnetron->WriteDepRate();

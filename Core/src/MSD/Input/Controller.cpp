@@ -153,6 +153,7 @@ namespace MSD {
 		s_CurrMousePos.x = (float)event.GetX();
 		s_CurrMousePos.y = (float)event.GetY();
 
+
 		float deltaX = ((float)event.GetX() - s_LastMousePos.x) * s_WindowSizeRatio.x * s_ZoomValue;
 		float deltaY = ((float)event.GetY() - s_LastMousePos.y) * s_WindowSizeRatio.y * s_ZoomValue;
 

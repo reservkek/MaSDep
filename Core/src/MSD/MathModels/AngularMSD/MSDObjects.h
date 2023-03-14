@@ -4,8 +4,12 @@
 #include "Core.h"
 
 #include "MSDMath.h"
+#include "../Database/PhysicsData.h"
 
 namespace MSD {
+
+	using namespace Database;
+
 	class MSD_API Magnetron
 	{
 	public:
@@ -30,11 +34,12 @@ namespace MSD {
 		float* GetPosY() { return &(msdpos.y); }
 		float* GetPosZ() { return &(msdpos.z); }
 		float* GetNormalX() { return &(msdnormal.x); }
-		float* GetNormalY() { return &(msdnormal.x); }
-		float* GetNormalZ() { return &(msdnormal.x); }
+		float* GetNormalY() { return &(msdnormal.y); }
+		float* GetNormalZ() { return &(msdnormal.z); }
 		float* GetRotationAngle() { return &(m_RotationAngle); }
 		float& GetCurrentDepRate() { return m_CurrentDepRate; }
 		char** GetInputFilePath() { return &m_InputFilePath; }
+
 		std::vector<float>& GetDepRates() { return m_DepRates; }
 
 		std::string GetErrorMessage() { return m_ErrorMsg;}
@@ -44,12 +49,18 @@ namespace MSD {
 		vec3 GetPos() { return msdpos; }
 		vec3 GetNormal() const { return msdnormal; }
 
+		Element& GetElement() { return m_Element; }
+
 		extern friend class MainLayer;
 		extern friend class AngMSD;
 
 	private:
+		// Geometry
 		vec3 msdpos, msdnormal;
 		float m_Radius;
+
+		// Element
+		Element m_Element = Cr;
 
 		// Sput rates used for calculations
 		std::map<float, float> m_InputSputRates;
@@ -82,11 +93,11 @@ namespace MSD {
 		void WriteDepEvolution();
 
 		float* GetPosX() { return &(subpos.x); }
-		float* GetPosZ() { return &(subpos.z); }
 		float* GetPosY() { return &(subpos.y); }
+		float* GetPosZ() { return &(subpos.z); }
 		float* GetNormalX() { return &(subnormal.x); }
-		float* GetNormalY() { return &(subnormal.x); }
-		float* GetNormalZ() { return &(subnormal.x); }
+		float* GetNormalY() { return &(subnormal.y); }
+		float* GetNormalZ() { return &(subnormal.z); }
 		float* GetRPM() { return &RPM; }
 		float* GetSubRPM() { return &subRPM; }
 		float* GetRotationAngle() { return &m_RotationAngle; }

@@ -24,7 +24,7 @@ namespace MSD {
 
 		inline static AngMSD& GetModelID() { return *s_Instance; }
 
-		void CalculateFlux(Magnetron* magnetron, Substrate* substrate);
+		void CalculateFlux(Magnetron* magnetron, Substrate* substrate, bool write = true);
 		bool Run();
 		void Stop();
 		void Clear();

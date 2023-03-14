@@ -2,20 +2,19 @@
 
 namespace MSD {
 
-	enum Elements
-	{
-		None = 0,
-		Cr = 1 << 0
-	};
+	namespace Database {
 
-	float FindDensity(Elements element)
-	{
-		switch (element)
+		enum Element
 		{
-		case Elements::None:     return 0;
-		case Elements::Cr:       return 8.33e28f;
-		}
-		return 0;
+			None = 0,
+				Cr = 1 << 0,
+				Al = 1 << 1,
+				Cu = 1 << 2,
+				Ti = 1 << 3,
+		};
+
+		float FindAtomicDensity(Element element);
+
 	}
 
 }

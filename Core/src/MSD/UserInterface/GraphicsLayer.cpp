@@ -32,7 +32,7 @@ namespace MSD {
 		vb.reset(new VertexBuffer(Rect::coords, 4*3*sizeof(float)));
 		ib.reset(new IndexBuffer(Rect::indices, 6));
 
-		fbSpec.Attachments = { FrameBufferTextureFormat::RGBA8, FrameBufferTextureFormat::Depth };
+		fbSpec.Attachments = { FrameBufferTextureFormat::RGBA8, FrameBufferTextureFormat::RED_INTEGER, FrameBufferTextureFormat::Depth };
 
 		fb.reset(new FrameBuffer(fbSpec));
 
@@ -42,11 +42,11 @@ namespace MSD {
 
 		camera = new OrthographicCamera(-400.0f, 400.0f, -400.0f, 400.0f);
 
-		shader = new Shader("C:/Users/eeo5/Documents/Научная работа/VSProjects/CppGUI/Core/assets/shaders/Basic.glsl");
+		shader = new Shader("../assets/shaders/Basic.glsl");
 		shader->Bind();
 		shader->SetUniform4f("u_Color", 0.7f, 0.2f, 0.7f, 1.0f);
 
-		gridShader = new Shader("C:/Users/eeo5/Documents/Научная работа/VSProjects/CppGUI/Core/assets/shaders/Grid.glsl");
+		gridShader = new Shader("../assets/shaders/Grid.glsl");
 
 		renderer.CalculateGrid();
 	}
@@ -74,7 +74,6 @@ namespace MSD {
 		
 		gridShader->Bind();
 		gridShader->SetUniformMat4("u_ViewProjection", camera->GetViewProjectionMatrix());
-		renderer.DrawGrid();
 
 		shader->Bind();
 		shader->SetUniform4fv("u_Color", color);

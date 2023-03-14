@@ -15,10 +15,13 @@ void main()
 #version 330 core
 
 layout(location = 0) out vec4 color;
+layout(location = 1) out int color2;
 
 uniform vec4 u_Color;
 
 void main()
 {
     color = u_Color;
+
+    color2 = 50;
 };

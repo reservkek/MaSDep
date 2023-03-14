@@ -5,7 +5,6 @@
 
 #include "GLFW/glfw3.h"
 
-namespace fs = std::filesystem;
 namespace MSD {
 
 	MainLayer::MainLayer()
@@ -41,7 +40,7 @@ namespace MSD {
 		};
 
 		io.Fonts->Clear();
-		io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\Segoeui.ttf", 16.0f, &font_config, ranges);
+		io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\Segoeui.ttf", 17.0f, &font_config, ranges);
 
 		io.BackendFlags |= ImGuiBackendFlags_HasMouseCursors;
 		io.BackendFlags |= ImGuiBackendFlags_HasSetMousePos;
@@ -86,6 +85,7 @@ namespace MSD {
 		MainPanel();
 
 		ImGui::DockSpaceOverViewport();
+
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 10.0f);
 		if (show_popup_file_path_err) FilePathErrPopup(&show_popup_file_path_err, &errorMsg);
@@ -190,6 +190,26 @@ namespace MSD {
 		ImGui::Columns(1);
 	}
 
+	static void SetHandCursor()
+	{
+		if (ImGui::IsItemHovered())
+			ImGui::SetMouseCursor(7);
+	}
+
+	static void HelpMarker(const char* desc)
+	{
+		ImGui::SameLine();
+		ImGui::TextDisabled("(?)");
+		if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort))
+		{
+			ImGui::BeginTooltip();
+			ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+			ImGui::TextUnformatted(desc);
+			ImGui::PopTextWrapPos();
+			ImGui::EndTooltip();
+		}
+	}
+
 	///////////////////
 	// IMGUI WINDOWS //
 	///////////////////
@@ -218,6 +238,7 @@ namespace MSD {
 				ImGui::MenuItem("null", NULL, &show_app_property_editor);
 				ImGui::EndMenu();
 			}
+			SetHandCursor();
 			ImGui::EndMainMenuBar();
 		}
 		ImGui::PopStyleVar();
@@ -305,6 +326,7 @@ namespace MSD {
 
 		m_ProgressBar = model.GetCurrentProgress();
 		ImGui::ProgressBar(m_ProgressBar);
+		ImGui::Separator();
 
 		ImGui::Text("Ticks: %d", model.m_TimeTicksCounter);
 		ImGui::Text("Magnetrons: %d", model.m_Magnetrons.size());
@@ -332,7 +354,7 @@ namespace MSD {
 		for (auto i_magnetron : model.m_Magnetrons)
 		{
 			count++;
-			bool keepMagnetron = true;
+			bool keepMagnetron = true; // Deletes magnetron if false
 			if (!i_magnetron->GetIndex()) { i_magnetron->SetIndex(model.m_MagnetronIndex); }
 			std::string countstr = "Magnetron " + std::to_string(i_magnetron->GetIndex());
 			if (ImGui::CollapsingHeader((const char*)countstr.c_str(), &keepMagnetron, ImGuiTreeNodeFlags_DefaultOpen))
@@ -375,8 +397,6 @@ namespace MSD {
 		ImGui::Text("Sput rates input");
 		ImGui::InputText("###SputRates",magnetron->m_InputFilePath,sizeof(magnetron->m_InputFilePath),ImGuiInputTextFlags_ReadOnly);
 		ImGui::SameLine();
-		if (result == NFD_OPEN)
-			ImGui::BeginDisabled();
 		if (ImGui::Button("Browse"))
 		{
 			//if (!m_AllowInputWindow) return;
@@ -384,8 +404,6 @@ namespace MSD {
 			result = NFD_OpenDialog(NULL, NULL, &outPath);
 			*magnetron->GetInputFilePath() = outPath;
 		}
-		if (result == NFD_OPEN)
-			ImGui::EndDisabled();
 	}
 
 	void MainLayer::SubstrateParameters(Substrate* substrate)
@@ -627,6 +645,15 @@ namespace MSD {
 			ImGui::SameLine();
 			ImGui::EndPopup();
 		}
-
 	}
+
+	void MainLayer::PeriodicTableWindow(bool* p_open)
+	{
+		ImGui::Begin("Periodic Table", p_open, ImGuiWindowFlags_MenuBar);
+
+		// TODO Periodic table
+
+		ImGui::End();
+	}
+
 }
