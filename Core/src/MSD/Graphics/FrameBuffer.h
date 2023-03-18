@@ -39,7 +39,7 @@ namespace MSD {
 
 	struct FrameBufferSpecification
 	{
-		int Width = 800, Height = 800;
+		unsigned int Width = 800, Height = 800;
 		unsigned int Samples = 1;
 
 		FrameBufferAttachmentSpecification Attachments;
@@ -58,8 +58,13 @@ namespace MSD {
 		const unsigned long long GetColorAttachment(unsigned int index = 0) const { return m_ColorAttachments[index]; };
 
 		void Recreate();
+		void ChangeFrameBufferSize(int width, int height);
+
+		void ClearObjectIndices(unsigned int attachmentIndex, int clearValue);
 
 		void UpdateSpec(const FrameBufferSpecification& spec);
+
+		int ReadPixel(unsigned int attachmentIndex, int x, int y);
 
 		void Bind();
 		void Unbind();
@@ -72,6 +77,8 @@ namespace MSD {
 
 		std::vector<unsigned int> m_ColorAttachments;
 		unsigned int m_DepthAttachment = 0;
+
+		int m_PixelData;
 	};
 
 }

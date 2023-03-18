@@ -12,6 +12,7 @@ namespace MSD {
 	float Controller::s_CameraRotationSpeed = 180.0f;
 	float Controller::s_ZoomValue = 1.0f;
 
+
 	glm::vec3 Controller::s_CameraPosition = glm::vec3(0.0f, 0.0f, 0.0f);
 	glm::vec2 Controller::s_CurrMousePos = glm::vec2(0.0f, 0.0f);
 	glm::vec2 Controller::s_LastMousePos = glm::vec2(0.0f, 0.0f);
@@ -19,6 +20,7 @@ namespace MSD {
 
 
 	bool Controller::s_Draggable = false;
+	bool Controller::s_EnableInputs = true;
 
 	OrthographicCamera* Controller::s_Camera = nullptr;
 	Controller* s_Instance = new Controller();
@@ -72,12 +74,19 @@ namespace MSD {
 	void Controller::CameraOnEvent(Event& event)
 	{
 		if (s_Camera == nullptr) return;
+		if (!s_EnableInputs) return;
+
 		EventDispatcher dispatcher(event);
 		dispatcher.Dispatch<MouseScrolledEvent>(BIND_EVENT_FN_STATIC(Controller::CameraEventMouseScrolled));
 		dispatcher.Dispatch<MouseButtonDoubleClickedEvent>(BIND_EVENT_FN_STATIC(Controller::CameraEventMouseDoubleClicked));
 		dispatcher.Dispatch<MouseButtonPressedEvent>(BIND_EVENT_FN_STATIC(Controller::CameraEventMouseButtonPressed));
 		dispatcher.Dispatch<MouseButtonReleasedEvent>(BIND_EVENT_FN_STATIC(Controller::CameraEventMouseButtonReleased));
 		dispatcher.Dispatch<MouseMovedEvent>(BIND_EVENT_FN_STATIC(Controller::CameraEventMouseMoved));
+	}
+
+	void Controller::EnableInputs(bool enable)
+	{
+		s_EnableInputs = enable;
 	}
 
 	void Controller::ResetCameraPosition()
@@ -133,6 +142,8 @@ namespace MSD {
 	bool Controller::CameraEventMouseMoved(MouseMovedEvent& event)
 	{
 		ImGuiIO& io = ImGui::GetIO();
+
+		// TODO: FIX INTITIAL MOUSE POSITION WHEN DRAGGING
 
 		auto imguiWindow = ImGui::FindWindowByName("Model Viewport");
 		if (imguiWindow != nullptr)

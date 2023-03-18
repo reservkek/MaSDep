@@ -121,6 +121,11 @@ namespace MSD {
 		glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, &matrix[0][0]);
 	}
 
+	void Shader::SetUniform1i(const std::string& name, int i)
+	{
+		glUniform1i(GetUniformLocation(name), i);
+	}
+
 	int Shader::GetUniformLocation(const std::string& name)
 	{
 		if (m_UniformLocationCache.find(name) != m_UniformLocationCache.end())

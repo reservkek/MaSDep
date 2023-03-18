@@ -5,6 +5,8 @@
 
 namespace MSD {
 
+	int Renderer::s_SelectedID = -1;
+
 	void Renderer::Clear() const
 	{
 		//glClearColor(0.94f, 0.94f, 0.94f, 1.0f);
@@ -37,7 +39,7 @@ namespace MSD {
 
 	void Renderer::DrawLines(const std::shared_ptr<VertexArray> va)
 	{
-		std::cout << va->GetIndexBuffer()->GetCount() << "\n";
+		glLineWidth(2);
 		glDrawElements(GL_LINES, va->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
 	}
 
@@ -58,32 +60,49 @@ namespace MSD {
 		//m_va->Bind();
 		//DrawLines(m_va);
 
-		//glEnable(GL_BLEND);
-		//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 6);
 	}
 
-	void Renderer::DrawRect(glm::vec3 position)
+	Rect* Renderer::CreateRect()
 	{
 		Rect* obj = new Rect();
 		m_Objects.push_back(obj);
-		obj->SetPosition(position);
+		return obj;
+	}
+
+	void Renderer::DrawRect(Object* rect, glm::vec3 position)
+	{
+		if (rect == nullptr)
+			rect = m_Objects.back();
+
+		rect->SetPosition(position);
 
 		m_va.reset(new VertexArray());
 		m_vb.reset(new VertexBuffer(Rect::coords, 3 * 4 * sizeof(float)));
 		m_ib.reset(new IndexBuffer(Rect::indices, 6));
 
 
-		m_vb->SetLayout(obj->GetLayout());
+		m_vb->SetLayout(rect->GetLayout());
 		m_va->AddVertexBuffer(m_vb);
 		m_va->SetIndexBuffer(m_ib);
 
 		m_shader->Bind();
-		m_shader->SetUniform4fv("u_Color", obj->GetColor());
-		m_shader->SetUniformMat4("u_Model", obj->GetModelMatrix());
+		m_shader->SetUniform4fv("u_Color", rect->GetColor());
+		m_shader->SetUniformMat4("u_Model", rect->GetModelMatrix());
+		m_shader->SetUniform1i("u_ID", rect->GetID());
 
 		m_va->Bind();
 		Draw(m_va);
+
+		if (s_SelectedID == rect->GetID())
+		{
+			m_ib.reset(new IndexBuffer(Rect::outlineIndices, 8));
+			m_va->SetIndexBuffer(m_ib);
+			m_shader->SetUniform4fv("u_Color", rect->GetOutlineColor());
+			DrawLines(m_va);
+		}
 	}
 
 	void Renderer::DrawCube(glm::vec3 position)
@@ -134,6 +153,17 @@ namespace MSD {
 
 	void Renderer::Flush()
 	{
+		m_Objects.clear();
+	}
+
+	void Renderer::GetOpenGLVersion()
+	{
+		std::cout << "" << std::endl;
+		std::cout << "" << "OpenGL Vendor: " << glGetString(GL_VENDOR) << std::endl;
+		std::cout << "" << "OpenGL Renderer: " << glGetString(GL_RENDERER) << std::endl;
+		std::cout << "" << "OpenGL Version: " << glGetString(GL_VERSION) << std::endl;
+		std::cout << "" << "OpenGL Shading Language Version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
+		std::cout << "" << std::endl;
 	}
 
 }

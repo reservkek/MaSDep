@@ -61,7 +61,7 @@ namespace MSD {
 		ApplicationCore& app = ApplicationCore::Get();
 		GLFWwindow* window = static_cast<GLFWwindow*>(app.GetWindow().GetID());
 
-		ImGui_ImplOpenGL3_Init("#version 130");
+		ImGui_ImplOpenGL3_Init("#version 430");
 		ImGui_ImplGlfw_InitForOpenGL(window, true);
 	}
 
@@ -86,6 +86,7 @@ namespace MSD {
 
 		ImGui::DockSpaceOverViewport();
 
+		ReadViewPortObjects();
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 10.0f);
 		if (show_popup_file_path_err) FilePathErrPopup(&show_popup_file_path_err, &errorMsg);
@@ -114,6 +115,39 @@ namespace MSD {
 			ImGui::UpdatePlatformWindows();
 			ImGui::RenderPlatformWindowsDefault();
 			glfwMakeContextCurrent(backup_current_context);
+		}
+	}
+
+	void MainLayer::ReadViewPortObjects()
+	{
+		if (!show_app_model_viewport) return;
+
+		ApplicationCore& app = ApplicationCore::Get();
+		auto framebuffer = app.GetGraphicsLayer()->GetFrameBuffer();
+		auto fbSize = framebuffer->GetSpecification().Width;
+
+		auto [mx, my] = ImGui::GetMousePos();
+		mx -= m_ViewportBounds[0].x;
+		my -= m_ViewportBounds[0].y;
+		glm::vec2 viewportSize = m_ViewportBounds[1] - m_ViewportBounds[0];
+		//my = viewportSize.y - m_ViewportHeaderSize - my;
+
+		int mouseX = (int)(mx * m_ViewportWindowRelation);
+		int mouseY = (int)(fbSize - (my * m_ViewportWindowRelation));
+
+		if (mouseX > 0 && mouseY > 0 && mouseX < fbSize && mouseY < fbSize)
+		{
+			framebuffer->Bind();
+			auto hoveredID = framebuffer->ReadPixel(1, mouseX, mouseY);
+			framebuffer->Unbind();
+
+			if (ImGui::IsMouseClicked(ImGuiMouseButton_Left))
+			{
+				app.GetGraphicsLayer()->SetSelectedItem(hoveredID);
+				Controller::EnableInputs(hoveredID == -1);
+			}
+			std::cout << "ID: " << hoveredID << "\n";
+			std::cout << "MouseX: " << mouseX << "; MouseY: " << mouseY << "; \n";
 		}
 	}
 
@@ -209,6 +243,7 @@ namespace MSD {
 			ImGui::EndTooltip();
 		}
 	}
+
 
 	///////////////////
 	// IMGUI WINDOWS //
@@ -393,6 +428,13 @@ namespace MSD {
 		{
 			magnetron->Rotate();
 		}
+		ImGui::Text("Target element: %s", GetSymbol(magnetron->GetElement()));
+		ImGui::SameLine();
+		if (ImGui::Button("..."))
+		{
+			show_app_periodic_table = true;
+		}
+		PeriodicTableWindow(&show_app_periodic_table, &magnetron->GetElement());
 		ImGui::Separator();
 		ImGui::Text("Sput rates input");
 		ImGui::InputText("###SputRates",magnetron->m_InputFilePath,sizeof(magnetron->m_InputFilePath),ImGuiInputTextFlags_ReadOnly);
@@ -434,8 +476,10 @@ namespace MSD {
 	// MODEL VIEWPORT
 	void MainLayer::ModelViewportWindow(bool* p_open)
 	{
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2(400, 400));
+		m_ViewportHeaderSize = ImGui::GetFrameHeightWithSpacing();
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2(400, 400 + m_ViewportHeaderSize));
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+
 		if (!ImGui::Begin("Model Viewport", p_open, ImGuiWindowFlags_NoScrollbar
 			| ImGuiWindowFlags_NoScrollWithMouse))
 		{
@@ -443,6 +487,8 @@ namespace MSD {
 			ImGui::End();
 			return;
 		}
+
+		ImVec2 viewportOffset = ImGui::GetCursorPos();
 
 		if (ImGui::IsWindowFocused())
 		{
@@ -452,11 +498,14 @@ namespace MSD {
 
 		ApplicationCore& app = ApplicationCore::Get();
 		AngMSD& model = app.GetModel();
-		ImTextureID texID = (ImTextureID)app.GetGraphicsLayer()->GetFrameBuffer().GetColorAttachment();
+		ImTextureID texID = (ImTextureID)app.GetGraphicsLayer()->GetFrameBuffer()->GetColorAttachment();
+		auto fbSize = app.GetGraphicsLayer()->GetFrameBuffer()->GetSpecification().Width;
 
 		//FOR RATIO 1:1
-		ImVec2 wsize = ImGui::GetWindowSize();
-		float length = std::max(wsize.x, wsize.y);
+		ImVec2 windowSize = ImGui::GetWindowSize();
+		windowSize.y -= m_ViewportHeaderSize;
+		float length = std::max(windowSize.x, windowSize.y);
+		m_ViewportWindowRelation = fbSize / length;
 
 		ImGuiStyle& style = ImGui::GetStyle();
 
@@ -468,10 +517,17 @@ namespace MSD {
 		ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offsetX);
 		ImGui::SetCursorPosY(ImGui::GetCursorPosY() + offsetY);
 
+		ImVec2 minBound = ImGui::GetWindowPos();
+		ImVec2 offsetToKeepRatio = { 0.5f * (length - windowSize.x), 0.5f * (length - windowSize.y) };
+		minBound.x += viewportOffset.x - offsetToKeepRatio.x;
+		minBound.y += viewportOffset.y - offsetToKeepRatio.y;
+
+		ImVec2 maxBound = { minBound.x + windowSize.x + offsetToKeepRatio.x, minBound.y + windowSize.y + offsetToKeepRatio.y};
+		m_ViewportBounds[0] = { minBound.x, minBound.y };
+		m_ViewportBounds[1] = { maxBound.x, maxBound.y };
+
 		ImGui::Image(texID, ImVec2(length, length), ImVec2(0, 1), ImVec2(1, 0));
-
 		ImGui::PopStyleVar(2);
-
 		if (ImGui::BeginPopupContextItem("Viewport Settings"))
 		{
 			if (ImGui::MenuItem("Reset camera position")) { Controller::ResetCameraPosition(); };
@@ -647,11 +703,47 @@ namespace MSD {
 		}
 	}
 
-	void MainLayer::PeriodicTableWindow(bool* p_open)
+	static const Element elements[] = { Al, Ti, Cr, Cu };
+
+	static const int num_elements = sizeof(elements) / sizeof(Element);
+
+	void MainLayer::PeriodicTableWindow(bool* p_open, Element* element)
 	{
-		ImGui::Begin("Periodic Table", p_open, ImGuiWindowFlags_MenuBar);
+		if (!*p_open) return;
+
+		ImGui::Begin("Choose element: ", p_open, ImGuiWindowFlags_MenuBar);
 
 		// TODO Periodic table
+		for (int i = 0; i < num_elements; i++) {
+			// Set up a button for each element
+			ImGui::PushID(i);
+			ImGui::Button(GetSymbol(elements[i]), ImVec2(40, 40));
+
+			// Show element name as tooltip
+			if (ImGui::IsItemHovered()) {
+				ImGui::BeginTooltip();
+				ImGui::Text("%s", GetName(elements[i]));
+				ImGui::Text("Atomic number: %d", GetAtomicNumber(elements[i]));
+				ImGui::EndTooltip();
+			}
+
+			// Handle element click
+			if (ImGui::IsItemClicked()) {
+				// Do something with the clicked element, such as print its atomic number
+				*element = elements[i];
+				*p_open = false;
+			}
+
+			ImGui::PopID();
+
+			// Add spacing to create periodic table layout
+			if ((i + 1) % 18 != 0) {
+				ImGui::SameLine();
+			}
+			else {
+				ImGui::Spacing();
+			}
+		}
 
 		ImGui::End();
 	}

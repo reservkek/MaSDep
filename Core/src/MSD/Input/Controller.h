@@ -17,6 +17,7 @@ namespace MSD {
 		static void HandleCameraInputs(OrthographicCamera* camera, Timestep* timestep);
 		static void CameraOnUpdate(Timestep* timestep);
 		static void CameraOnEvent(Event& event);
+		static void EnableInputs(bool enable);
 		static void ResetCameraPosition();
 
 		inline static void SetCameraSpeed(float speed) { s_CameraSpeed = speed; }
@@ -41,6 +42,7 @@ namespace MSD {
 		static glm::vec2 s_WindowSizeRatio;
 
 		static bool s_Draggable;
+		static bool s_EnableInputs;
 	};
 
 }

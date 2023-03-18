@@ -48,7 +48,8 @@ namespace MSD {
 
 		gridShader = new Shader("../assets/shaders/Grid.glsl");
 
-		renderer.CalculateGrid();
+		auto rect = renderer.CreateRect();
+		rect->SetID(42);
 	}
 
 	void GraphicsLayer::OnDetach()
@@ -67,8 +68,9 @@ namespace MSD {
 		fb->Bind();
 
 		renderer.BeginScene(camera, shader);
-
 		renderer.Clear();
+
+		fb->ClearObjectIndices(1, -1);
 
 		glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
 		
@@ -77,20 +79,25 @@ namespace MSD {
 
 		shader->Bind();
 		shader->SetUniform4fv("u_Color", color);
-		for (int i = 0; i < 10; i++)
-		{
-			for (int j = 0; j < 10; j++)
-			{
-				glm::vec3 pos(i * 50.0f, j * 50.0f, 0.0f);
-				glm::mat4 transform = glm::translate(glm::mat4(1.0f), pos)*scale;
-				renderer.Submit(shader, va, transform);
-			}
-		}
 
-		renderer.DrawRect({ -100.0f, -100.0f, 0.0f });
+		//for (int i = 0; i < 10; i++)
+		//{
+		//	for (int j = 0; j < 10; j++)
+		//	{
+		//		glm::vec3 pos(i * 50.0f, j * 50.0f, 0.0f);
+		//		glm::mat4 transform = glm::translate(glm::mat4(1.0f), pos)*scale;
+		//		renderer.Submit(shader, va, transform);
+		//	}
+		//}
+
+		renderer.DrawRect(nullptr, { 0.0f, 0.0f, 0.0f });
 
 		shader->SetUniformMat4("u_ViewProjection", camera->GetViewProjectionMatrix());
 
 		fb->Unbind();
+	}
+	void GraphicsLayer::SetSelectedItem(unsigned int id)
+	{
+		Renderer::GetSelectedItem() = id;
 	}
 }

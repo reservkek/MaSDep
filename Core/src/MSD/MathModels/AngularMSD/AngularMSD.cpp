@@ -151,7 +151,7 @@ namespace MSD {
 			}
 		}
 
-		const static float CrDensity = FindAtomicDensity(magnetron->GetElement());
+		const static float CrDensity = GetAtomicDensity(magnetron->GetElement());
 		substrate->GetTotalDeposited() += fullDepRate * m_TimePerTick * CrDensity;
 
 		if (write) substrate->WriteDepEvolution();

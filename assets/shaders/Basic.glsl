@@ -1,5 +1,5 @@
 #shader vertex
-#version 330 core
+#version 450 core
 
 layout(location = 0) in vec4 position;
 
@@ -12,16 +12,16 @@ void main()
 };
 
 #shader fragment
-#version 330 core
+#version 450 core
 
 layout(location = 0) out vec4 color;
-layout(location = 1) out int color2;
+layout(location = 1) out int ID;
 
 uniform vec4 u_Color;
+uniform int u_ID;
 
 void main()
 {
     color = u_Color;
-
-    color2 = 50;
+    ID = u_ID;
 };

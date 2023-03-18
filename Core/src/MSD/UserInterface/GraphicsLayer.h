@@ -20,7 +20,7 @@ namespace MSD {
 		GraphicsLayer();
 		~GraphicsLayer();
 
-		inline FrameBuffer& GetFrameBuffer() { return *fb; }
+		std::shared_ptr<FrameBuffer> GetFrameBuffer() { return fb; }
 
 		void OnEvent(Event& event) override;
 
@@ -29,6 +29,7 @@ namespace MSD {
 		virtual void OnUpdate(Timestep ts) override;
 
 		bool& isUpdating() { return m_Updating; }
+		void SetSelectedItem(unsigned int id);
 
 		static bool m_HandleInputs;
 	private:

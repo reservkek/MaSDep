@@ -6,6 +6,8 @@
 
 namespace MSD {
 
+	static const unsigned int s_MaxBufferSize = 8192;
+
 	static bool isDepthFormat(FrameBufferTextureFormat format)
 	{
 		switch (format)
@@ -32,7 +34,7 @@ namespace MSD {
 	}
 
 	static void AttachColorTexture(unsigned int id, int samples, GLenum internalFormat,
-		GLenum format, unsigned int width, unsigned int height, int index)
+		GLenum format, GLenum type, unsigned int width, unsigned int height, int index)
 	{
 		bool multisampled = samples > 1;
 		if (multisampled)
@@ -41,7 +43,7 @@ namespace MSD {
 		}
 		else
 		{
-			glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, GL_UNSIGNED_BYTE, nullptr);
+			glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, type, nullptr);
 
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -89,12 +91,13 @@ namespace MSD {
 		}
 
 		Recreate();
+
 	}
 
 	FrameBuffer::~FrameBuffer()
 	{
 		glDeleteFramebuffers(1, &m_FrameBufferID);
-		glDeleteBuffers(m_ColorAttachments.size(), m_ColorAttachments.data());
+		glDeleteBuffers((GLsizei)m_ColorAttachments.size(), m_ColorAttachments.data());
 		glDeleteBuffers(1, &m_DepthAttachment);
 	}
 
@@ -103,7 +106,7 @@ namespace MSD {
 		if (m_FrameBufferID)
 		{
 			glDeleteFramebuffers(1, &m_FrameBufferID);
-			glDeleteBuffers(m_ColorAttachments.size(), m_ColorAttachments.data());
+			glDeleteBuffers((GLsizei)m_ColorAttachments.size(), m_ColorAttachments.data());
 			glDeleteBuffers(1, &m_DepthAttachment);
 
 			m_ColorAttachments.clear();
@@ -113,15 +116,13 @@ namespace MSD {
 		glCreateFramebuffers(1, &m_FrameBufferID);
 		glBindFramebuffer(GL_FRAMEBUFFER, m_FrameBufferID);
 
-		glViewport(0, 0, m_Specification.Width, m_Specification.Height);
-
 		// Attachments
 		static bool multisample = m_Specification.Samples > 1;
 
 		if (m_ColorAttachmentSpecifications.size())
 		{
 			m_ColorAttachments.resize(m_ColorAttachmentSpecifications.size());
-			CreateTextures(m_ColorAttachments.data(), m_ColorAttachments.size(), multisample);
+			CreateTextures(m_ColorAttachments.data(), (unsigned int)m_ColorAttachments.size(), multisample);
 
 			for (size_t i = 0; i < m_ColorAttachments.size(); i++)
 			{
@@ -130,11 +131,11 @@ namespace MSD {
 				{
 				case FrameBufferTextureFormat::RGBA8:
 					AttachColorTexture(m_ColorAttachments[i], m_Specification.Samples,
-						GL_RGBA8, GL_RGBA, m_Specification.Width, m_Specification.Height, i);
+						GL_RGBA8, GL_RGBA, GL_FLOAT, m_Specification.Width, m_Specification.Height, (int)i);
 					break;
 				case FrameBufferTextureFormat::RED_INTEGER:
 					AttachColorTexture(m_ColorAttachments[i], m_Specification.Samples,
-						GL_R32I, GL_RED_INTEGER, m_Specification.Width, m_Specification.Height, i);
+						GL_R32I, GL_RED_INTEGER, GL_INT, m_Specification.Width, m_Specification.Height, (int)i);
 					break;
 				}
 			}
@@ -156,7 +157,7 @@ namespace MSD {
 		if (m_ColorAttachments.size() > 1)
 		{
 			GLenum buffers[4] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3 };
-			glDrawBuffers(m_ColorAttachments.size(), buffers);
+			glDrawBuffers((GLsizei)m_ColorAttachments.size(), buffers);
 		}
 		else if (m_ColorAttachments.empty())
 		{
@@ -172,13 +173,35 @@ namespace MSD {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
+	void FrameBuffer::ChangeFrameBufferSize(int width, int height)
+	{
+		m_Specification.Width = width;
+		m_Specification.Height = height;
+	}
+
+	void FrameBuffer::ClearObjectIndices(unsigned int attachmentIndex, int clearValue)
+	{
+		glClearBufferiv(GL_COLOR, 1, &clearValue);
+	}
+
 	void FrameBuffer::UpdateSpec(const FrameBufferSpecification& spec)
 	{
+		m_Specification = spec;
+	}
+
+	int FrameBuffer::ReadPixel(unsigned int attachmentIndex, int x, int y)
+	{
+		GLenum buffers[4] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3 };
+		glReadBuffer(buffers[attachmentIndex]);
+		glReadPixels(x, y, 1, 1, GL_RED_INTEGER, GL_INT, &m_PixelData);
+		return m_PixelData;
 	}
 
 	void FrameBuffer::Bind()
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, m_FrameBufferID);
+		glViewport(0, 0, m_Specification.Width, m_Specification.Height);
+
 	}
 
 	void FrameBuffer::Unbind()

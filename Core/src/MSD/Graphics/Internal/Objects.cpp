@@ -33,6 +33,8 @@ namespace MSD
 
 	unsigned int Rect::indices[6] = { 0, 1, 2, 1, 2, 3 };
 
+	unsigned int Rect::outlineIndices[8] = { 0, 1, 1, 3, 3, 2, 2, 0 };
+
 	float Cube::coords[24] =
 	{
 		-200.0f, -200.0f, -200.0f, //0
@@ -63,4 +65,14 @@ namespace MSD
 	BufferLayout Grid::u_BasicLayout = {
 		{ ShaderDataType::Float3, "a_Position"}
 	};
+
+
+	Rect::Rect(unsigned int id)
+	{
+		m_ObjectID = id;
+		if (id == 0)
+		{
+			m_ObjectID = (unsigned int)&id;
+		}
+	}
 }

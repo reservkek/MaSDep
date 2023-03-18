@@ -4,16 +4,20 @@ namespace MSD {
 
 	namespace Database {
 
-		enum Element
+		enum Element : int
 		{
 			None = 0,
-				Cr = 1 << 0,
-				Al = 1 << 1,
-				Cu = 1 << 2,
-				Ti = 1 << 3,
+			H, He, // 1 period 
+			Li, Be, B, C, N, O, F, Ne, // 2 period
+			Na, Mg, Al, Si, P, S, Cl, Ar, // 3 period
+			K, Ca, Sc, Ti, V, Cr, Mn, Fe, Co, Ni, Cu, Zn, Ga, Ge, As, Se, Br, Kr // 4 period
 		};
 
-		float FindAtomicDensity(Element element);
+		float GetAtomicDensity(Element element);
+		float GetDensity(Element element);
+		int GetAtomicNumber(Element element);
+		const char* GetName(Element element);
+		const char* GetSymbol(Element element);
 
 	}
 

@@ -29,6 +29,7 @@ namespace MSD {
 		void SetUniform4f(const std::string& name, float v0, float v1, float v2, float v3);
 		void SetUniform4fv(const std::string& name, const glm::vec4& vec);
 		void SetUniformMat4(const std::string& name, const glm::mat4& matrix);
+		void SetUniform1i(const std::string& name, int i);
 	private:
 		ShaderProgramSource ParseShader(const std::string& filepath);
 		unsigned int CompileShader(unsigned int type, const std::string& source);
