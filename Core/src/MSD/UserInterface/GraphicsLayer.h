@@ -12,6 +12,8 @@
 #include "Graphics/Renderer.h"
 #include "../glm/gtc/matrix_transform.hpp"
 
+#include "MathModels/AngularMSD/AngularMSD.h"
+
 namespace MSD {
 
 	class GraphicsLayer : public Layer
@@ -28,8 +30,13 @@ namespace MSD {
 		virtual void OnDetach() override;
 		virtual void OnUpdate(Timestep ts) override;
 
+		void SetModel(AngMSD* model) { m_Model = model; };
+
 		bool& isUpdating() { return m_Updating; }
 		void SetSelectedItem(unsigned int id);
+
+		void UpdateObjects();
+		void UpdateObjectStates();
 
 		static bool m_HandleInputs;
 	private:
@@ -38,6 +45,8 @@ namespace MSD {
 		std::shared_ptr<VertexArray> va;
 		std::shared_ptr<VertexBuffer> vb;
 		std::shared_ptr<IndexBuffer> ib;
+
+		AngMSD* m_Model;
 
 		OrthographicCamera* camera;
 

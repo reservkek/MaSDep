@@ -39,6 +39,7 @@ namespace MSD {
 		std::vector<float>& GetTimeValues() { return m_TimeValues; }
 
 		extern friend class MainLayer;
+		extern friend class GraphicsLayer;
 	private:
 
 		// Время в модели

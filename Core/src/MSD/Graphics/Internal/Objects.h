@@ -12,9 +12,11 @@ namespace MSD {
 	public:
 		void SetPosition(const glm::vec3& pos);
 		void SetColor(const glm::vec4& color);
-		void SetScale(float x, float y, float z = 1.0f);
-		void SetScale(float scale);
+		void SetScale(const glm::vec3& scale);
+		void SetAngle(float angle);
 		void SetID(unsigned int id) { m_ObjectID = id; }
+
+		void CalcModelMatrix();
 
 		unsigned int GetID() { return m_ObjectID; }
 
@@ -24,9 +26,14 @@ namespace MSD {
 		const glm::mat4& GetModelMatrix() const { return m_ModelMatrix; };
 		const BufferLayout& GetLayout() const { return m_BasicLayout; };
 	private:
-		glm::mat4 m_ModelMatrix = glm::mat4(1.0f);
-		glm::vec4 m_Color = glm::vec4(1.0f, 0.0f, 1.0f, 1.0f);
+		glm::vec3 m_Scale = glm::vec3(1.0f,1.0f,1.0f);
+		glm::vec3 m_Pos = glm::vec3(0.0f);
+		glm::vec4 m_Color = glm::vec4(0.1f, 0.5f, 0.0f, 1.0f);
 		glm::vec4 m_OutlineColor = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
+		glm::mat4 m_ModelMatrix = glm::mat4(1.0f);
+
+		float m_Angle = 0.0f;
+
 		unsigned int m_ObjectID;
 
 		BufferLayout m_BasicLayout =

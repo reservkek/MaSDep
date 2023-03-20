@@ -7,7 +7,7 @@
 namespace MSD {
 
 	float Controller::s_CameraSpeed = 1000.0f;
-	float Controller::s_CameraRotation = 0.0f;
+	float Controller::s_CameraRotation = 180.0f;
 	float Controller::s_CameraRotationVertical = 0.0f;
 	float Controller::s_CameraRotationSpeed = 180.0f;
 	float Controller::s_ZoomValue = 1.0f;
@@ -23,7 +23,6 @@ namespace MSD {
 	bool Controller::s_EnableInputs = true;
 
 	OrthographicCamera* Controller::s_Camera = nullptr;
-	Controller* s_Instance = new Controller();
 
 	void Controller::HandleCameraInputs(OrthographicCamera* camera, Timestep* timestep)
 	{
@@ -92,7 +91,7 @@ namespace MSD {
 	void Controller::ResetCameraPosition()
 	{
 		s_ZoomValue = 1.0f;
-		s_CameraRotation = 0.0f;
+		s_CameraRotation = 180.0f;
 		s_CameraRotationVertical = 0.0f;
 		s_CameraPosition = glm::vec3(0.0f, 0.0f, 0.0f);
 
@@ -146,6 +145,7 @@ namespace MSD {
 		// TODO: FIX INTITIAL MOUSE POSITION WHEN DRAGGING
 
 		auto imguiWindow = ImGui::FindWindowByName("Model Viewport");
+
 		if (imguiWindow != nullptr)
 		{
 			if (imguiWindow->Pos.x != lastWinPos.x or imguiWindow->Pos.y != lastWinPos.y)
@@ -177,6 +177,7 @@ namespace MSD {
 		}
 		s_LastMousePos.x = s_CurrMousePos.x;
 		s_LastMousePos.y = s_CurrMousePos.y;
+
 		return true;
 	}
 }

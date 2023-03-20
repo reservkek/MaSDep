@@ -61,6 +61,8 @@ namespace MSD {
 
 		ImPlotCond FindPlotCond();
 	private:
+		bool toBeSelected = false;
+
 		int val = 0;
 
 		bool show_app_main_menu_bar = false;

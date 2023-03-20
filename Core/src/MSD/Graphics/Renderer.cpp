@@ -101,6 +101,7 @@ namespace MSD {
 			m_ib.reset(new IndexBuffer(Rect::outlineIndices, 8));
 			m_va->SetIndexBuffer(m_ib);
 			m_shader->SetUniform4fv("u_Color", rect->GetOutlineColor());
+			m_shader->SetUniform1i("u_Border", 1);
 			DrawLines(m_va);
 		}
 	}
@@ -126,6 +127,19 @@ namespace MSD {
 
 		m_va->Bind();
 		Draw(m_va);
+	}
+
+	void Renderer::DrawScene()
+	{
+		for (auto obj : m_Objects)
+		{
+			DrawRect(obj);
+		}
+	}
+
+	void Renderer::SetObjectID(int index)
+	{
+		m_Objects.back()->SetID(index);
 	}
 
 	static int slices = 14;

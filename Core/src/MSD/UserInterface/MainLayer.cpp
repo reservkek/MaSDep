@@ -61,6 +61,11 @@ namespace MSD {
 		ApplicationCore& app = ApplicationCore::Get();
 		GLFWwindow* window = static_cast<GLFWwindow*>(app.GetWindow().GetID());
 
+		AngMSD& model = app.GetModel();
+		GraphicsLayer* graphicsLayer = app.GetGraphicsLayer();
+		graphicsLayer->SetModel(&model);
+		graphicsLayer->UpdateObjects();
+
 		ImGui_ImplOpenGL3_Init("#version 430");
 		ImGui_ImplGlfw_InitForOpenGL(window, true);
 	}
@@ -122,9 +127,13 @@ namespace MSD {
 	{
 		if (!show_app_model_viewport) return;
 
+
 		ApplicationCore& app = ApplicationCore::Get();
+		auto graphicsLayer = app.GetGraphicsLayer();
 		auto framebuffer = app.GetGraphicsLayer()->GetFrameBuffer();
 		auto fbSize = framebuffer->GetSpecification().Width;
+
+		graphicsLayer->UpdateObjectStates();
 
 		auto [mx, my] = ImGui::GetMousePos();
 		mx -= m_ViewportBounds[0].x;
@@ -135,19 +144,29 @@ namespace MSD {
 		int mouseX = (int)(mx * m_ViewportWindowRelation);
 		int mouseY = (int)(fbSize - (my * m_ViewportWindowRelation));
 
-		if (mouseX > 0 && mouseY > 0 && mouseX < fbSize && mouseY < fbSize)
+		if (mouseX > 0 && mouseY > 0 && mouseX < (int)fbSize && mouseY < (int)fbSize)
 		{
 			framebuffer->Bind();
 			auto hoveredID = framebuffer->ReadPixel(1, mouseX, mouseY);
+
 			framebuffer->Unbind();
 
 			if (ImGui::IsMouseClicked(ImGuiMouseButton_Left))
 			{
-				app.GetGraphicsLayer()->SetSelectedItem(hoveredID);
-				Controller::EnableInputs(hoveredID == -1);
+				toBeSelected = true;
 			}
+
+			if (ImGui::IsMouseDragging(ImGuiMouseButton_Left))
+			{
+				toBeSelected = false;
+			}
+
+			if (ImGui::IsMouseReleased(ImGuiMouseButton_Left) && toBeSelected)
+			{
+				app.GetGraphicsLayer()->SetSelectedItem(hoveredID);
+			}
+
 			std::cout << "ID: " << hoveredID << "\n";
-			std::cout << "MouseX: " << mouseX << "; MouseY: " << mouseY << "; \n";
 		}
 	}
 
@@ -357,6 +376,7 @@ namespace MSD {
 
 		ApplicationCore& app = ApplicationCore::Get();
 		AngMSD& model = app.GetModel();
+		GraphicsLayer* graphicsLayer = app.GetGraphicsLayer();
 		ImGuiIO& io = ImGui::GetIO();
 
 		m_ProgressBar = model.GetCurrentProgress();
@@ -383,6 +403,7 @@ namespace MSD {
 		if (ImGui::Button("Add Magnetron"))
 		{
 			model.AddMagnetron();
+			graphicsLayer->UpdateObjects();
 		}
 
 		unsigned int count = 0;
@@ -403,6 +424,7 @@ namespace MSD {
 				if (keepMagnetron == false)
 				{
 					model.DeleteMagnetron(count);
+					graphicsLayer->UpdateObjects();
 					if (model.m_Magnetrons.size() != 0) { model.m_MagnetronIndex = model.m_Magnetrons.back()->GetIndex(); }
 					else { model.m_MagnetronIndex = 0; }
 				}
@@ -419,7 +441,7 @@ namespace MSD {
 	{
 		ImGui::InputFloat("Radius", magnetron->GetRadius());
 		float* pos[3] = { magnetron->GetPosX(), magnetron->GetPosY(), magnetron->GetPosZ() };
-		DrawVec3Control("Magentron position", *pos);
+		DrawVec3Control("Magnetron position", *pos);
 		float* normal[3] = { magnetron->GetNormalX(), magnetron->GetNormalY(), magnetron->GetNormalZ() };
 		DrawVec3Control("Magnetron normal vector", *normal);
 		ImGui::InputFloat("###rotate", magnetron->GetRotationAngle());
@@ -498,6 +520,7 @@ namespace MSD {
 
 		ApplicationCore& app = ApplicationCore::Get();
 		AngMSD& model = app.GetModel();
+		GraphicsLayer* graphicsLayer = app.GetGraphicsLayer();
 		ImTextureID texID = (ImTextureID)app.GetGraphicsLayer()->GetFrameBuffer()->GetColorAttachment();
 		auto fbSize = app.GetGraphicsLayer()->GetFrameBuffer()->GetSpecification().Width;
 
@@ -528,10 +551,15 @@ namespace MSD {
 
 		ImGui::Image(texID, ImVec2(length, length), ImVec2(0, 1), ImVec2(1, 0));
 		ImGui::PopStyleVar(2);
+
 		if (ImGui::BeginPopupContextItem("Viewport Settings"))
 		{
 			if (ImGui::MenuItem("Reset camera position")) { Controller::ResetCameraPosition(); };
-			if (ImGui::MenuItem("Add Magnetron")) { model.AddMagnetron(); };
+			if (ImGui::MenuItem("Add Magnetron"))
+			{
+				model.AddMagnetron();
+				graphicsLayer->UpdateObjects();
+			};
 			ImGui::EndPopup();
 		}
 

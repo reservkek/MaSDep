@@ -60,7 +60,7 @@ namespace MSD {
 		void Recreate();
 		void ChangeFrameBufferSize(int width, int height);
 
-		void ClearObjectIndices(unsigned int attachmentIndex, int clearValue);
+		void ClearAttachment(unsigned int attachmentIndex, int clearValue);
 
 		void UpdateSpec(const FrameBufferSpecification& spec);
 

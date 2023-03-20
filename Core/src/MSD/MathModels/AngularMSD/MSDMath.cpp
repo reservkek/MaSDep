@@ -71,7 +71,7 @@ namespace MSD {
 		return c;
 	}
 
-	float Angle(const MSD::vec3& a, const MSD::vec3& b)
+	float Angle(MSD::vec3 a, MSD::vec3 b)
 	{
 		float cosTheta = MSD::DotProduct(a, b) / (MSD::Magnitude(a) * MSD::Magnitude(b));
 		if (acos(cosTheta) != acos(cosTheta)) return 0;

@@ -25,7 +25,9 @@ namespace MSD {
 		void DrawGrid();
 		void DrawRect(Object* rect = nullptr, glm::vec3 position = glm::vec3(0, 0, 0));
 		void DrawCube(glm::vec3 position = glm::vec3(0, 0, 0));
+		void DrawScene();
 
+		void SetObjectID(int index);
 
 		void CalculateGrid();
 		void Flush();

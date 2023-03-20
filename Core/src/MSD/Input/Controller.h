@@ -28,7 +28,6 @@ namespace MSD {
 		static bool CameraEventMouseButtonReleased(MouseButtonReleasedEvent& event);
 		static bool CameraEventMouseMoved(MouseMovedEvent& event);
 	private:
-		static Controller* s_Instance;
 		static OrthographicCamera* s_Camera;
 		static float s_CameraSpeed;
 		static float s_CameraRotation;

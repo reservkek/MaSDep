@@ -179,9 +179,9 @@ namespace MSD {
 		m_Specification.Height = height;
 	}
 
-	void FrameBuffer::ClearObjectIndices(unsigned int attachmentIndex, int clearValue)
+	void FrameBuffer::ClearAttachment(unsigned int attachmentIndex, int clearValue)
 	{
-		glClearBufferiv(GL_COLOR, 1, &clearValue);
+		glClearBufferiv(GL_COLOR, attachmentIndex, &clearValue);
 	}
 
 	void FrameBuffer::UpdateSpec(const FrameBufferSpecification& spec)

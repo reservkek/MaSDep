@@ -3,6 +3,8 @@
 
 #include "Core.h"
 
+#include "Graphics/Internal/Objects.h"
+
 #include "MSDMath.h"
 #include "../Database/PhysicsData.h"
 
@@ -16,19 +18,23 @@ namespace MSD {
 		vec3 integrationvectorI;
 		vec3 integrationvectorJ;
 
-		Magnetron(const vec3& pos = { 0.0, 25.0, 0.0 }, const vec3& normal = { 0.0, -1.0, 0.0 }, const float& radius = 5);
+		Magnetron(const vec3& pos = { 0.0, 25.0, 0.0 }, const vec3& normal = { 0.0, -1.0, 0.0 }, const float& radius = 4.5);
 		~Magnetron();
 
 		void SetIndex(unsigned int val) { m_Index = val; }
+		void SetGraphicsObject(Object* obj) { m_Object = obj;  }
 		void Rotate();
 		void WriteDepRate();
 		void WriteGamma(const float& gamma);
 		void WritePhi(const float& phi);
 		void InputSputRates(const char* filepath, const float& integrationDelta);
 		void Clear();
+
+		float CalcAngle();
+
 		float FindSputRate(const float& radius);
 
-		int GetIndex() const { return m_Index; }
+		int GetIndex() { return m_Index; }
 		float* GetRadius() { return &m_Radius; }
 		float* GetPosX() { return &(msdpos.x); }
 		float* GetPosY() { return &(msdpos.y); }
@@ -39,6 +45,8 @@ namespace MSD {
 		float* GetRotationAngle() { return &(m_RotationAngle); }
 		float& GetCurrentDepRate() { return m_CurrentDepRate; }
 		char** GetInputFilePath() { return &m_InputFilePath; }
+
+		Object* GetGraphicsObject() const { return m_Object; }
 
 		std::vector<float>& GetDepRates() { return m_DepRates; }
 
@@ -80,6 +88,9 @@ namespace MSD {
 
 		bool m_FilePathErr = false;
 		std::string m_ErrorMsg = "";
+
+		// Graphics container
+		Object* m_Object;
 	};
 
 	class MSD_API Substrate
@@ -91,6 +102,10 @@ namespace MSD {
 		void Rotate();
 		void Update();
 		void WriteDepEvolution();
+
+		void SetGraphicsObject(Object* obj) { m_Object = obj; }
+
+		float CalcAngle();
 
 		float* GetPosX() { return &(subpos.x); }
 		float* GetPosY() { return &(subpos.y); }
@@ -109,10 +124,15 @@ namespace MSD {
 
 		std::vector<float>& GetDepEvolution() { return m_DepEvolution; }
 
+		Object* GetGraphicsObject() { return m_Object; }
+
 		vec3 GetPos() const { return subpos; };
 		vec3 GetNormal() const { return subnormal; };
 
 	private:
+		// Graphics container
+		Object* m_Object;
+
 		vec3 subpos, subnormal;
 		float RPM, subRPM; // Rotations per minute
 		float m_RotationAngle = 0;
