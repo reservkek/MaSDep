@@ -40,7 +40,7 @@ namespace MSD {
 		};
 
 		io.Fonts->Clear();
-		io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\Segoeui.ttf", 17.0f, &font_config, ranges);
+		io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\Segoeui.ttf", 15.0f, &font_config, ranges);
 
 		io.BackendFlags |= ImGuiBackendFlags_HasMouseCursors;
 		io.BackendFlags |= ImGuiBackendFlags_HasSetMousePos;
@@ -99,6 +99,7 @@ namespace MSD {
 		if (show_app_model_parameters) ModelParametersWindow(&show_app_model_parameters);
 		if (show_app_model_results) ModelResultsWindow(&show_app_model_results);
 		if (show_app_model_viewport) ModelViewportWindow(&show_app_model_viewport);
+		if (show_app_periodic_table) PeriodicTableWindow(&show_app_periodic_table, m_SelectedElement);
 		ImGui::PopStyleVar();
 
 		End();
@@ -129,6 +130,7 @@ namespace MSD {
 
 
 		ApplicationCore& app = ApplicationCore::Get();
+		AngMSD& model = app.GetModel();
 		auto graphicsLayer = app.GetGraphicsLayer();
 		auto framebuffer = app.GetGraphicsLayer()->GetFrameBuffer();
 		auto fbSize = framebuffer->GetSpecification().Width;
@@ -164,6 +166,15 @@ namespace MSD {
 			if (ImGui::IsMouseReleased(ImGuiMouseButton_Left) && toBeSelected)
 			{
 				app.GetGraphicsLayer()->SetSelectedItem(hoveredID);
+			}
+
+			if (hoveredID == 99999)
+			{
+				ImGui::BeginTooltip();
+				ImGui::PushTextWrapPos(ImGui::GetFontSize() * 100.0f);
+				ImGui::TextUnformatted("Substrate");
+				ImGui::PopTextWrapPos();
+				ImGui::EndTooltip();
 			}
 
 			std::cout << "ID: " << hoveredID << "\n";
@@ -413,23 +424,23 @@ namespace MSD {
 			bool keepMagnetron = true; // Deletes magnetron if false
 			if (!i_magnetron->GetIndex()) { i_magnetron->SetIndex(model.m_MagnetronIndex); }
 			std::string countstr = "Magnetron " + std::to_string(i_magnetron->GetIndex());
+			ImGui::PushID(count);
 			if (ImGui::CollapsingHeader((const char*)countstr.c_str(), &keepMagnetron, ImGuiTreeNodeFlags_DefaultOpen))
 			{
-				ImGui::PushID(count);
 				ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 5.0f);
 				ImGui::BeginChild("DA", ImVec2(0, 200), true);
 				MagnetronParameters(i_magnetron);
 				ImGui::PopStyleVar();
 				ImGui::EndChild();
-				if (keepMagnetron == false)
-				{
-					model.DeleteMagnetron(count);
-					graphicsLayer->UpdateObjects();
-					if (model.m_Magnetrons.size() != 0) { model.m_MagnetronIndex = model.m_Magnetrons.back()->GetIndex(); }
-					else { model.m_MagnetronIndex = 0; }
-				}
-				ImGui::PopID();
 			}
+			if (keepMagnetron == false)
+			{
+				model.DeleteMagnetron(count);
+				graphicsLayer->UpdateObjects();
+				if (model.m_Magnetrons.size() != 0) { model.m_MagnetronIndex = model.m_Magnetrons.back()->GetIndex(); }
+				else { model.m_MagnetronIndex = 0; }
+			}
+			ImGui::PopID();
 		}
 		ImGui::Separator();
 		SubstrateParameters(model.m_Substrate);
@@ -455,8 +466,8 @@ namespace MSD {
 		if (ImGui::Button("..."))
 		{
 			show_app_periodic_table = true;
+			m_SelectedElement = &magnetron->GetElement();
 		}
-		PeriodicTableWindow(&show_app_periodic_table, &magnetron->GetElement());
 		ImGui::Separator();
 		ImGui::Text("Sput rates input");
 		ImGui::InputText("###SputRates",magnetron->m_InputFilePath,sizeof(magnetron->m_InputFilePath),ImGuiInputTextFlags_ReadOnly);
@@ -739,7 +750,7 @@ namespace MSD {
 	{
 		if (!*p_open) return;
 
-		ImGui::Begin("Choose element: ", p_open, ImGuiWindowFlags_MenuBar);
+		ImGui::Begin("Choose element: ", p_open, ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking);
 
 		// TODO Periodic table
 		for (int i = 0; i < num_elements; i++) {

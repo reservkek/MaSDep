@@ -90,7 +90,7 @@ namespace MSD {
 		std::string m_ErrorMsg = "";
 
 		// Graphics container
-		Object* m_Object;
+		Object* m_Object = nullptr;
 	};
 
 	class MSD_API Substrate
@@ -131,7 +131,7 @@ namespace MSD {
 
 	private:
 		// Graphics container
-		Object* m_Object;
+		Object* m_Object = nullptr;
 
 		vec3 subpos, subnormal;
 		float RPM, subRPM; // Rotations per minute

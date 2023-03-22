@@ -95,6 +95,8 @@ namespace MSD {
 		nfdchar_t* outPath = (nfdchar_t*)"";
 		bool m_AllowInputWindow = true;
 		nfdresult_t result = NFD_ERROR;
+
+		Element* m_SelectedElement = nullptr;
 	};
 
 }
