@@ -9,8 +9,8 @@
 #include "Graphics/Renderer.h"
 #include "Graphics/Internal/Timestep.h"
 
-#include "LayerSystem/MainLayer.h"
-#include "LayerSystem/GraphicsLayer.h"
+#include "UserInterface/MainLayer.h"
+#include "UserInterface/GraphicsLayer.h"
 
 #include "../glm/gtc/matrix_transform.hpp"
 

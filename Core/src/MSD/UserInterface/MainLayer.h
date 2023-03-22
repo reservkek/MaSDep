@@ -41,6 +41,7 @@ namespace MSD {
 		void ModelParametersWindow(bool* p_open);
 		void ModelResultsWindow(bool* p_open);
 		void ModelViewportWindow(bool* p_open);
+		void PeriodicTableWindow(bool* p_open, Element* element);
 
 		// SUBSECTIONS
 		void MagnetronParameters(Magnetron* magnetron);
@@ -56,9 +57,12 @@ namespace MSD {
 
 		// FUNCTIONS
 		bool GetViewportStatus() { return show_app_model_viewport; }
+		void ReadViewPortObjects();
 
 		ImPlotCond FindPlotCond();
 	private:
+		bool toBeSelected = false;
+
 		int val = 0;
 
 		bool show_app_main_menu_bar = false;
@@ -67,6 +71,8 @@ namespace MSD {
 		bool show_app_model_results = false;
 		bool show_app_property_editor = false;
 		bool show_app_model_viewport = false;
+		bool show_app_periodic_table = false;
+
 		bool show_popup_file_path_err = false;
 		bool show_popup_success = false;
 
@@ -75,6 +81,10 @@ namespace MSD {
 		float m_Time = 0.0f;
 
 		bool m_ViewPortHandleInputs = false;
+
+		glm::vec2 m_ViewportBounds[2];
+		float m_ViewportHeaderSize = 0.0f;
+		float m_ViewportWindowRelation = 1.0f;
 
 		std::string errorMsg = "";
 		std::string projectDirPath = "C:/users/eeo5/Documents/";
@@ -85,6 +95,8 @@ namespace MSD {
 		nfdchar_t* outPath = (nfdchar_t*)"";
 		bool m_AllowInputWindow = true;
 		nfdresult_t result = NFD_ERROR;
+
+		Element* m_SelectedElement = nullptr;
 	};
 
 }

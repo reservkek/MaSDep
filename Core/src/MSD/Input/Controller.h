@@ -5,7 +5,7 @@
 #include "Graphics/Internal/Timestep.h"
 #include "GLFW/glfw3.h"
 #include "Events/MouseEvent.h"
-#include "LayerSystem/MainLayer.h"
+#include "UserInterface/MainLayer.h"
 
 namespace MSD {
 
@@ -17,6 +17,7 @@ namespace MSD {
 		static void HandleCameraInputs(OrthographicCamera* camera, Timestep* timestep);
 		static void CameraOnUpdate(Timestep* timestep);
 		static void CameraOnEvent(Event& event);
+		static void EnableInputs(bool enable);
 		static void ResetCameraPosition();
 
 		inline static void SetCameraSpeed(float speed) { s_CameraSpeed = speed; }
@@ -27,7 +28,6 @@ namespace MSD {
 		static bool CameraEventMouseButtonReleased(MouseButtonReleasedEvent& event);
 		static bool CameraEventMouseMoved(MouseMovedEvent& event);
 	private:
-		static Controller* s_Instance;
 		static OrthographicCamera* s_Camera;
 		static float s_CameraSpeed;
 		static float s_CameraRotation;
@@ -41,6 +41,7 @@ namespace MSD {
 		static glm::vec2 s_WindowSizeRatio;
 
 		static bool s_Draggable;
+		static bool s_EnableInputs;
 	};
 
 }

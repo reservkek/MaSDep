@@ -4,6 +4,8 @@
 #include "../glm/glm.hpp"
 
 #define MSD_API
+#define MSD_LANGUAGE_ENGLISH
+
 #ifdef MSD_PLATFORM_WINDOWS
 #ifdef MSD_DYNAMIC_LINKING
 	#ifdef MSD_BUILD_DLL

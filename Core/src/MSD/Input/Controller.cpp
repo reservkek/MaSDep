@@ -7,10 +7,11 @@
 namespace MSD {
 
 	float Controller::s_CameraSpeed = 1000.0f;
-	float Controller::s_CameraRotation = 0.0f;
+	float Controller::s_CameraRotation = 180.0f;
 	float Controller::s_CameraRotationVertical = 0.0f;
 	float Controller::s_CameraRotationSpeed = 180.0f;
 	float Controller::s_ZoomValue = 1.0f;
+
 
 	glm::vec3 Controller::s_CameraPosition = glm::vec3(0.0f, 0.0f, 0.0f);
 	glm::vec2 Controller::s_CurrMousePos = glm::vec2(0.0f, 0.0f);
@@ -19,9 +20,9 @@ namespace MSD {
 
 
 	bool Controller::s_Draggable = false;
+	bool Controller::s_EnableInputs = true;
 
 	OrthographicCamera* Controller::s_Camera = nullptr;
-	Controller* s_Instance = new Controller();
 
 	void Controller::HandleCameraInputs(OrthographicCamera* camera, Timestep* timestep)
 	{
@@ -72,6 +73,8 @@ namespace MSD {
 	void Controller::CameraOnEvent(Event& event)
 	{
 		if (s_Camera == nullptr) return;
+		if (!s_EnableInputs) return;
+
 		EventDispatcher dispatcher(event);
 		dispatcher.Dispatch<MouseScrolledEvent>(BIND_EVENT_FN_STATIC(Controller::CameraEventMouseScrolled));
 		dispatcher.Dispatch<MouseButtonDoubleClickedEvent>(BIND_EVENT_FN_STATIC(Controller::CameraEventMouseDoubleClicked));
@@ -80,10 +83,15 @@ namespace MSD {
 		dispatcher.Dispatch<MouseMovedEvent>(BIND_EVENT_FN_STATIC(Controller::CameraEventMouseMoved));
 	}
 
+	void Controller::EnableInputs(bool enable)
+	{
+		s_EnableInputs = enable;
+	}
+
 	void Controller::ResetCameraPosition()
 	{
 		s_ZoomValue = 1.0f;
-		s_CameraRotation = 0.0f;
+		s_CameraRotation = 180.0f;
 		s_CameraRotationVertical = 0.0f;
 		s_CameraPosition = glm::vec3(0.0f, 0.0f, 0.0f);
 
@@ -134,7 +142,10 @@ namespace MSD {
 	{
 		ImGuiIO& io = ImGui::GetIO();
 
+		// TODO: FIX INTITIAL MOUSE POSITION WHEN DRAGGING
+
 		auto imguiWindow = ImGui::FindWindowByName("Model Viewport");
+
 		if (imguiWindow != nullptr)
 		{
 			if (imguiWindow->Pos.x != lastWinPos.x or imguiWindow->Pos.y != lastWinPos.y)
@@ -153,6 +164,7 @@ namespace MSD {
 		s_CurrMousePos.x = (float)event.GetX();
 		s_CurrMousePos.y = (float)event.GetY();
 
+
 		float deltaX = ((float)event.GetX() - s_LastMousePos.x) * s_WindowSizeRatio.x * s_ZoomValue;
 		float deltaY = ((float)event.GetY() - s_LastMousePos.y) * s_WindowSizeRatio.y * s_ZoomValue;
 
@@ -165,6 +177,7 @@ namespace MSD {
 		}
 		s_LastMousePos.x = s_CurrMousePos.x;
 		s_LastMousePos.y = s_CurrMousePos.y;
+
 		return true;
 	}
 }

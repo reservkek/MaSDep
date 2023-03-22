@@ -12,6 +12,16 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Core", "Core\Core.vcxproj",
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Glad", "Glad\Glad.vcxproj", "{780628D7-FFF3-4CED-BF22-4741595D9D83}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "assets", "assets", "{23C96AFD-6663-43F9-AC55-741CF0C6DF2C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "shaders", "shaders", "{C744DC20-B1F2-4FC8-8660-185F9E7BD59F}"
+	ProjectSection(SolutionItems) = preProject
+		assets\shaders\Basic.glsl = assets\shaders\Basic.glsl
+		assets\shaders\Grid.glsl = assets\shaders\Grid.glsl
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "textures", "textures", "{B605C3C3-B57E-41B1-81E9-9F9A53E6B3B5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -33,6 +43,10 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{C744DC20-B1F2-4FC8-8660-185F9E7BD59F} = {23C96AFD-6663-43F9-AC55-741CF0C6DF2C}
+		{B605C3C3-B57E-41B1-81E9-9F9A53E6B3B5} = {23C96AFD-6663-43F9-AC55-741CF0C6DF2C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B20029A4-9958-4CDD-B780-065F198A9AE7}

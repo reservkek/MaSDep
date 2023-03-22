@@ -2,20 +2,23 @@
 
 namespace MSD {
 
-	enum Elements
-	{
-		None = 0,
-		Cr = 1 << 0
-	};
+	namespace Database {
 
-	float FindDensity(Elements element)
-	{
-		switch (element)
+		enum Element : int
 		{
-		case Elements::None:     return 0;
-		case Elements::Cr:       return 8.33e28f;
-		}
-		return 0;
+			None = 0,
+			H, He, // 1 period 
+			Li, Be, B, C, N, O, F, Ne, // 2 period
+			Na, Mg, Al, Si, P, S, Cl, Ar, // 3 period
+			K, Ca, Sc, Ti, V, Cr, Mn, Fe, Co, Ni, Cu, Zn, Ga, Ge, As, Se, Br, Kr // 4 period
+		};
+
+		float GetAtomicDensity(Element element);
+		float GetDensity(Element element);
+		int GetAtomicNumber(Element element);
+		const char* GetName(Element element);
+		const char* GetSymbol(Element element);
+
 	}
 
 }

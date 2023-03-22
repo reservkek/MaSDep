@@ -4,6 +4,8 @@
 
 #include "imgui.h"
 
+#include "../glm/glm.hpp"
+
 namespace MSD {
 	constexpr float PI = 3.14159265358979f;
 
@@ -20,12 +22,14 @@ namespace MSD {
 		vec3 operator+(const vec3& a) const;
 		vec3 operator-(const vec3& a) const;
 		vec3 operator-() const;
+
+		operator glm::vec3() const { return { x,y,z }; }
 	};
 
 	// MATH FUNCTIONS //////////////////// 
 	float Magnitude(const vec3& a);
 	float DotProduct(const vec3& a, const vec3& b);
-	float Angle(const vec3& a, const vec3& b);
+	float Angle(vec3 a, vec3 b);
 	float Approx(const float& radius, std::map<float, float> map);
 	vec3 Normalize(const vec3& a);
 	vec3 CrossProduct(const vec3& a, const vec3& b);

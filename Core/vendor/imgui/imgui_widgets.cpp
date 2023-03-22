@@ -7200,6 +7200,9 @@ bool ImGui::MenuItemEx(const char* label, const char* icon, const char* shortcut
     if (window->SkipItems)
         return false;
 
+    if (IsAnyItemHovered())
+        SetMouseCursor(7);
+
     ImGuiContext& g = *GImGui;
     ImGuiStyle& style = g.Style;
     ImVec2 pos = window->DC.CursorPos;
@@ -7214,6 +7217,7 @@ bool ImGui::MenuItemEx(const char* label, const char* icon, const char* shortcut
     // but I am unsure whether this should be kept at all. For now moved it to be an opt-in feature used by menus only.
     bool pressed;
     PushID(label);
+
     if (!enabled)
         BeginDisabled();
 
