@@ -39,7 +39,7 @@ namespace MSD {
 
 	struct FrameBufferSpecification
 	{
-		unsigned int Width = 800, Height = 800;
+		unsigned int Width = 1600, Height = 1600;
 		unsigned int Samples = 1;
 
 		FrameBufferAttachmentSpecification Attachments;

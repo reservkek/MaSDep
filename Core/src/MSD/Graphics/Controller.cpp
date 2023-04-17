@@ -23,6 +23,7 @@ namespace MSD {
 	bool Controller::s_EnableInputs = true;
 
 	OrthographicCamera* Controller::s_Camera = nullptr;
+	AngMSDObject* Controller::s_SelectedObject = nullptr;
 
 	void Controller::HandleCameraInputs(OrthographicCamera* camera, Timestep* timestep)
 	{
@@ -32,21 +33,23 @@ namespace MSD {
 
 	void Controller::CameraOnUpdate(Timestep* timestep)
 	{
+		if (s_Camera == nullptr) return;
+
 		if (Input::IsKeyPressed(GLFW_KEY_LEFT))
-		{
-			s_CameraPosition.x -= s_CameraSpeed * (*timestep);
-		}
-		if (Input::IsKeyPressed(GLFW_KEY_RIGHT))
 		{
 			s_CameraPosition.x += s_CameraSpeed * (*timestep);
 		}
+		if (Input::IsKeyPressed(GLFW_KEY_RIGHT))
+		{
+			s_CameraPosition.x -= s_CameraSpeed * (*timestep);
+		}
 		if (Input::IsKeyPressed(GLFW_KEY_UP))
 		{
-			s_CameraPosition.y += s_CameraSpeed * (*timestep);
+			s_CameraPosition.y -= s_CameraSpeed * (*timestep);
 		}
 		if (Input::IsKeyPressed(GLFW_KEY_DOWN))
 		{
-			s_CameraPosition.y -= s_CameraSpeed * (*timestep);
+			s_CameraPosition.y += s_CameraSpeed * (*timestep);
 		}
 		if (Input::IsKeyPressed(GLFW_KEY_Q))
 		{
@@ -164,14 +167,13 @@ namespace MSD {
 		s_CurrMousePos.x = (float)event.GetX();
 		s_CurrMousePos.y = (float)event.GetY();
 
-
-		float deltaX = ((float)event.GetX() - s_LastMousePos.x) * s_WindowSizeRatio.x * s_ZoomValue;
-		float deltaY = ((float)event.GetY() - s_LastMousePos.y) * s_WindowSizeRatio.y * s_ZoomValue;
-
-		float angle = s_CameraRotation*PI/180;
-
 		if (s_Draggable)
 		{
+			float deltaX = ((float)event.GetX() - s_LastMousePos.x) * s_WindowSizeRatio.x * s_ZoomValue;
+			float deltaY = ((float)event.GetY() - s_LastMousePos.y) * s_WindowSizeRatio.y * s_ZoomValue;
+
+			float angle = s_CameraRotation * PI / 180;
+
 			s_CameraPosition.x += -deltaX*cos(angle)+deltaY*sin(angle);
 			s_CameraPosition.y += deltaX*sin(angle)+deltaY*cos(angle);
 		}
@@ -179,5 +181,66 @@ namespace MSD {
 		s_LastMousePos.y = s_CurrMousePos.y;
 
 		return true;
+	}
+
+
+	/////////////////////////
+	///// OBJECT INPUTS /////
+	/////////////////////////
+
+	void Controller::HandleObjectInputs(Substrate* object, Timestep* timestep)
+	{
+		s_SelectedObject = object;
+		ObjectOnUpdate(timestep);
+	}
+
+	void Controller::HandleObjectInputs(Magnetron* object, Timestep* timestep)
+	{
+		s_SelectedObject = object;
+		ObjectOnUpdate(timestep);
+	}
+
+	void Controller::ObjectOnUpdate(Timestep* timestep)
+	{
+		if (s_SelectedObject == nullptr) return;
+
+		//auto objectPosition = glm::vec3(s_SelectedObject->GetPosX(), s_SelectedObject->GetPosY(), s_SelectedObject->GetPosZ()); ;
+
+		//if (Input::IsKeyPressed(GLFW_KEY_LEFT))
+		//{
+		//	objectPosition.x = s_CameraSpeed * (*timestep);
+		//}
+		//if (Input::IsKeyPressed(GLFW_KEY_RIGHT))
+		//{
+		//	s_CameraPosition.x -= s_CameraSpeed * (*timestep);
+		//}
+		//if (Input::IsKeyPressed(GLFW_KEY_UP))
+		//{
+		//	s_CameraPosition.y -= s_CameraSpeed * (*timestep);
+		//}
+		//if (Input::IsKeyPressed(GLFW_KEY_DOWN))
+		//{
+		//	s_CameraPosition.y += s_CameraSpeed * (*timestep);
+		//}
+		//if (Input::IsKeyPressed(GLFW_KEY_Q))
+		//{
+		//	s_CameraRotation -= s_CameraRotationSpeed * (*timestep);
+		//}
+		//if (Input::IsKeyPressed(GLFW_KEY_E))
+		//{
+		//	s_CameraRotation += s_CameraRotationSpeed * (*timestep);
+		//}
+		//if (Input::IsKeyPressed(GLFW_KEY_W))
+		//{
+		//	s_CameraRotationVertical -= s_CameraRotationSpeed * (*timestep);
+		//}
+		//if (Input::IsKeyPressed(GLFW_KEY_S))
+		//{
+		//	s_CameraRotationVertical += s_CameraRotationSpeed * (*timestep);
+		//}
+
+		//s_Camera->SetPositon(s_CameraPosition);
+		//s_Camera->SetRotationAroundX(s_CameraRotationVertical);
+		//s_Camera->SetRotationAroundZ(s_CameraRotation);
 	}
 }

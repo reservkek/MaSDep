@@ -215,7 +215,7 @@
     <ClCompile Include="src\MSD\Graphics\Buffer.cpp" />
     <ClCompile Include="src\MSD\Graphics\Cameras.cpp" />
     <ClCompile Include="src\MSD\Graphics\FrameBuffer.cpp" />
-    <ClCompile Include="src\MSD\Input\Controller.cpp" />
+    <ClCompile Include="src\MSD\Graphics\Controller.cpp" />
     <ClCompile Include="src\MSD\MathModels\Database\PhysicsData.cpp" />
     <ClCompile Include="src\MSD\UserInterface\GraphicsLayer.cpp" />
     <ClCompile Include="src\MSD\Graphics\Renderer.cpp" />
@@ -258,7 +258,7 @@
     <ClInclude Include="src\MSD\Graphics\Buffer.h" />
     <ClInclude Include="src\MSD\Graphics\Cameras.h" />
     <ClInclude Include="src\MSD\Graphics\FrameBuffer.h" />
-    <ClInclude Include="src\MSD\Input\Controller.h" />
+    <ClInclude Include="src\MSD\Graphics\Controller.h" />
     <ClInclude Include="src\MSD\UserInterface\GraphicsLayer.h" />
     <ClInclude Include="src\MSD\Graphics\Internal\Timestep.h" />
     <ClInclude Include="src\MSD\Graphics\Renderer.h" />

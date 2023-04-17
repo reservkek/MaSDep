@@ -67,6 +67,9 @@ namespace MSD {
 		m_RotationCounter = 0;
 		m_CurrentProgress = 0;
 		m_CurrentTime = 0;
+
+		m_ExportData.clear();
+		m_ExportDataColumnNames.clear();
 	}
 
 	void AngMSD::Complete()
@@ -74,6 +77,21 @@ namespace MSD {
 		m_ToBeCleared = false;
 		m_ModelRunning = false;
 		m_CurrentProgress = 1.0f;
+
+		m_ExportDataColumnNames.push_back("Tick");
+		m_ExportDataColumnNames.push_back("Time (s)");
+		m_ExportDataColumnNames.push_back("Substrate deposition (1/m2)");
+
+		m_ExportData.push_back(&m_TimeValues);
+		m_ExportData.push_back(&m_SubstrateBuffer->GetDepEvolution());
+
+		for (auto magnetron : m_MagnetronsBuffer)
+		{
+			m_ExportData.push_back(&magnetron->GetDepRates());
+			std::string name = std::string("Dep rate from magnetron No.") + std::to_string(magnetron->GetIndex()) + std::string(" (m/s)");
+
+			m_ExportDataColumnNames.push_back(name);
+		}
 	}
 
 	void AngMSD::OnUpdate()

@@ -45,8 +45,8 @@ namespace MSD {
 			{
 			case None:     return "None";
 			case Cr:       return "Chromium";
-			case Al:	   return "Aluminum";
-			case Cu:	   return "Cuprum";
+			case Al:	   return "Aluminium";
+			case Cu:	   return "Copper";
 			case Ti:	   return "Titanium";
 			}
 			return "Null";

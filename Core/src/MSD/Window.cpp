@@ -12,6 +12,8 @@ namespace MSD {
 
 	static std::chrono::time_point lastTime = std::chrono::high_resolution_clock::now();
 
+	static int lastButton = 0;
+
 	static bool s_GLFWInitialized = false;
 
 	static void GLFWErrorCallback(int error_code, const char* description)
@@ -29,8 +31,6 @@ namespace MSD {
 	{
 		glfwDestroyWindow(m_Window);
 	}
-
-	static float lasttime = 0;
 
 	void Window::OnUpdate()
 	{
@@ -118,7 +118,7 @@ namespace MSD {
 			case GLFW_PRESS:
 			{
 				std::chrono::time_point curTime = std::chrono::high_resolution_clock::now();
-				if ((curTime - lastTime) < std::chrono::milliseconds(200))
+				if (((curTime - lastTime) < std::chrono::milliseconds(200)) && button == lastButton)
 				{
 					MouseButtonDoubleClickedEvent event(button);
 					data.EventCallback(event);
@@ -129,6 +129,7 @@ namespace MSD {
 					data.EventCallback(event);
 				}
 				lastTime = curTime;
+				lastButton = button;
 				break;
 			}
 			case GLFW_RELEASE:

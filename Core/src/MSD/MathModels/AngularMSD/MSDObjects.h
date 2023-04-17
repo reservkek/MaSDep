@@ -12,7 +12,18 @@ namespace MSD {
 
 	using namespace Database;
 
-	class MSD_API Magnetron
+	class AngMSDObject
+	{
+	public:
+		virtual float* GetPosY() = 0;
+		virtual float* GetPosZ() = 0;
+		virtual float* GetPosX() = 0;
+		virtual float* GetNormalX() = 0;
+		virtual float* GetNormalY() = 0;
+		virtual float* GetNormalZ() = 0;
+	};
+
+	class MSD_API Magnetron : public AngMSDObject
 	{
 	public:
 		vec3 integrationvectorI;
@@ -93,7 +104,7 @@ namespace MSD {
 		Object* m_Object = nullptr;
 	};
 
-	class MSD_API Substrate
+	class MSD_API Substrate : public AngMSDObject
 	{
 	public:
 		Substrate(const vec3& pos = { 0.0, 15.0, 0.0 }, const vec3& normal = { 0.0, 1.0, 0.0 },

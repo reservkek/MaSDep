@@ -28,7 +28,7 @@ namespace MSD {
 	private:
 		glm::vec3 m_Scale = glm::vec3(1.0f,1.0f,1.0f);
 		glm::vec3 m_Pos = glm::vec3(0.0f);
-		glm::vec4 m_Color = glm::vec4(0.1f, 0.5f, 0.0f, 1.0f);
+		glm::vec4 m_Color = glm::vec4(0.2f, 0.2f, 1.0f, 1.0f);
 		glm::vec4 m_OutlineColor = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
 		glm::mat4 m_ModelMatrix = glm::mat4(1.0f);
 
@@ -56,6 +56,16 @@ namespace MSD {
 	public:
 		static float coords[3*4*2];
 		static unsigned int indices[6*6];
+	};
+
+	class Arrow : public Object
+	{
+	public:
+		unsigned int GetID() { return -1; }
+
+		static float coords[3*5];
+		static unsigned int indicesLine[2];
+		static unsigned int indicesHead[3];
 	};
 
 	class Grid

@@ -9,10 +9,11 @@ namespace MSD {
 	public:
 		const glm::vec3& GetPosition() const { return m_Position; }
 		float GetRotation() const { return m_RotationAroundZ; }
+		float GetZoomLevel() const { return m_Zoom; }
 
 		OrthographicCamera(float left, float right, float bottom, float top);
 		void SetPositon(const glm::vec3& position);
-		void SetRotationAroundZ(float rotation) { m_RotationAroundZ = rotation; CalcViewMatrix(); }
+		void SetRotationAroundZ(float rotation);
 		void SetRotationAroundX(float rotation) { m_RotationAroundX = rotation; CalcViewMatrix(); }
 		void SetZoomLevel(float zoom) { m_Zoom = zoom; CalcProjectionMatrix(); }
 

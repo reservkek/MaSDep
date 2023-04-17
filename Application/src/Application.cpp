@@ -2,11 +2,6 @@
 
 #include "MSD.h"
 
-class ExampleLayer : public MSD::Layer
-{
-
-};
-
 class Application : public MSD::ApplicationCore
 {
 public:

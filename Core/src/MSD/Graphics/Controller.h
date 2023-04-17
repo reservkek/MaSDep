@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Graphics/Cameras.h"
-#include "Input.h"
 #include "Graphics/Internal/Timestep.h"
 #include "GLFW/glfw3.h"
 #include "Events/MouseEvent.h"
@@ -20,6 +19,11 @@ namespace MSD {
 		static void EnableInputs(bool enable);
 		static void ResetCameraPosition();
 
+
+		static void HandleObjectInputs(Substrate* substrate, Timestep* timestep);
+		static void HandleObjectInputs(Magnetron* magnetron, Timestep* timestep);
+		static void ObjectOnUpdate(Timestep* timestep);
+
 		inline static void SetCameraSpeed(float speed) { s_CameraSpeed = speed; }
 	private:
 		static bool CameraEventMouseScrolled(MouseScrolledEvent& event);
@@ -29,6 +33,8 @@ namespace MSD {
 		static bool CameraEventMouseMoved(MouseMovedEvent& event);
 	private:
 		static OrthographicCamera* s_Camera;
+		static AngMSDObject* s_SelectedObject;
+
 		static float s_CameraSpeed;
 		static float s_CameraRotation;
 		static float s_CameraRotationVertical;
@@ -42,6 +48,7 @@ namespace MSD {
 
 		static bool s_Draggable;
 		static bool s_EnableInputs;
+		static bool s_isDragging;
 	};
 
 }

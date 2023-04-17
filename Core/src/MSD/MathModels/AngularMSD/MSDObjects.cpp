@@ -132,6 +132,7 @@ namespace MSD {
 		subnormal = RotateAroundZ(subnormal, -m_RotationAngle);
 		m_RotationAngle = 0;
 	}
+
 	void Substrate::Update()
 	{
 		m_TotalAngle += m_TotalAngleDelta;

@@ -57,13 +57,28 @@ namespace MSD
 	};
 
 	unsigned int Cube::indices[36] =
-	{ 0, 1, 2, 1, 2, 3,
+	{
+	  0, 1, 2, 1, 2, 3,
 	  4, 5, 6, 5, 6, 7,
 	  0, 2, 4, 2, 4, 6,
 	  1, 3, 5, 3, 5, 6,
 	  0, 1, 4, 1, 4, 5,
 	  2, 3, 7, 3, 7, 6
 	};
+
+	float Arrow::coords[3 * 5] =
+	{
+		 0.0f, -50.0f, 0.0f, // Arrow line start
+		 0.0f,  25.0f, 0.0f, // Arrow line end
+		 0.0f,  50.0f, 0.0f, // Arrow head vertex 1
+		-10.0f, 25.0f, 0.0f, // Arrow head vertex 2
+		 10.0f, 25.0f, 0.0f  // Arrow head vertex 3
+	};
+
+	unsigned int Arrow::indicesLine[2] = { 0, 1 };
+
+	unsigned int Arrow::indicesHead[3] = { 2, 3, 4 };
+
 
 	std::vector<glm::vec3> Grid::u_Vertices = std::vector<glm::vec3>();
 	std::vector<glm::uvec4> Grid::u_Indices = std::vector<glm::uvec4>();

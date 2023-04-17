@@ -2,8 +2,8 @@
 
 #include "GraphicsLayer.h"
 #include "GLFW/glfw3.h"
-#include "Input/Controller.h"
 
+#include "Graphics/Controller.h"
 #include "Graphics/Internal/Objects.h"
 
 namespace MSD {
@@ -49,8 +49,7 @@ namespace MSD {
 
 		gridShader = new Shader("../assets/shaders/Grid.glsl");
 
-		/*auto rect = renderer.CreateRect();
-		rect->SetID(42);*/
+
 	}
 
 	void GraphicsLayer::OnDetach()
@@ -60,6 +59,7 @@ namespace MSD {
 	void GraphicsLayer::OnUpdate(Timestep ts)
 	{
 		if (!m_Updating) return;
+
 
 		if (m_HandleInputs)
 		{
@@ -74,14 +74,19 @@ namespace MSD {
 		fb->ClearAttachment(1, -1);
 		fb->ClearAttachment(2, 0);
 
+		Arrow myFirstArrow;
+
+ 
 		glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
 		
 		gridShader->Bind();
 		gridShader->SetUniformMat4("u_ViewProjection", camera->GetViewProjectionMatrix());
+		renderer.DrawGrid(gridShader);
 
 		shader->Bind();
 		shader->SetUniform4fv("u_Color", color);
 
+		renderer.DrawArrow(&myFirstArrow);
 		renderer.DrawScene();
 
 		/*renderer.DrawRect(nullptr, { 0.0f, 0.0f, 0.0f });*/
@@ -90,7 +95,7 @@ namespace MSD {
 
 		fb->Unbind();
 	}
-	void GraphicsLayer::SetSelectedItem(unsigned int id)
+	void GraphicsLayer::SetSelectedItem(int id)
 	{
 		Renderer::GetSelectedItem() = id;
 	}

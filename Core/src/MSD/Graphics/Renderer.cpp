@@ -37,28 +37,19 @@ namespace MSD {
 		glDrawElements(GL_TRIANGLES, va->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
 	}
 
-	void Renderer::DrawLines(const std::shared_ptr<VertexArray> va)
+	void Renderer::DrawLines(const std::shared_ptr<VertexArray> va, float thickness)
 	{
-		glLineWidth(2);
+		glLineWidth(thickness);
 		glDrawElements(GL_LINES, va->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
 	}
 
-	void Renderer::DrawGrid()
+	void Renderer::DrawGrid(Shader* shader)
 	{
-		//m_va.reset(new VertexArray());
-		//m_vb.reset(new VertexBuffer(Grid::u_Vertices));
-		//m_ib.reset(new IndexBuffer(Grid::u_Indices));
+		glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+		glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
 
-		//m_vb->SetLayout(Grid::u_BasicLayout);
-		//m_va->AddVertexBuffer(m_vb);
-		//m_va->SetIndexBuffer(m_ib);
-
-		//m_shader->Bind();
-		//m_shader->SetUniform4fv("u_Color", Grid::u_Color);
-		//m_shader->SetUniformMat4("u_Model", Grid::u_ModelMatrix);
-
-		//m_va->Bind();
-		//DrawLines(m_va);
+		glEnable(GL_LINE_SMOOTH);
+		glEnable(GL_POLYGON_SMOOTH);
 
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -101,10 +92,14 @@ namespace MSD {
 			m_ib.reset(new IndexBuffer(Rect::outlineIndices, 8));
 			m_va->SetIndexBuffer(m_ib);
 			m_shader->SetUniform4fv("u_Color", rect->GetOutlineColor());
-			m_shader->SetUniform1i("u_Border", 1);
 			DrawLines(m_va);
 		}
 	}
+
+	void Renderer::DrawRectOutline(Object* rect, glm::vec3 position)
+	{
+	}
+
 
 	void Renderer::DrawCube(glm::vec3 position)
 	{
@@ -127,6 +122,35 @@ namespace MSD {
 
 		m_va->Bind();
 		Draw(m_va);
+	}
+
+	void Renderer::DrawArrow(Arrow* arrow, glm::vec3 position)
+	{
+		if (arrow == nullptr)
+			return;
+
+		m_va.reset(new VertexArray());
+		m_vb.reset(new VertexBuffer(Arrow::coords, 3 * 5 * sizeof(float)));
+		m_ib.reset(new IndexBuffer(Arrow::indicesLine, 2));
+
+		m_vb->SetLayout(arrow->GetLayout());
+		m_va->AddVertexBuffer(m_vb);
+		m_va->SetIndexBuffer(m_ib);
+
+		m_shader->Bind();
+		m_shader->SetUniform4fv("u_Color", arrow->GetColor());
+		m_shader->SetUniformMat4("u_Model", arrow->GetModelMatrix());
+		m_shader->SetUniform1i("u_ID", arrow->GetID());
+
+		m_va->Bind();
+		DrawLines(m_va, 4);
+
+		m_ib.reset(new IndexBuffer(Arrow::indicesHead, 3));
+		m_va->SetIndexBuffer(m_ib);
+
+		Draw(m_va);
+
+		arrow->SetPosition(position);
 	}
 
 	void Renderer::DrawScene()

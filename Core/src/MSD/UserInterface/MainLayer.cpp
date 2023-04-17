@@ -1,7 +1,7 @@
 #include "msdpch.h"
 
 #include "MainLayer.h"
-#include "Input/Controller.h"
+#include "Graphics/Controller.h"
 
 #include "GLFW/glfw3.h"
 
@@ -141,7 +141,6 @@ namespace MSD {
 		mx -= m_ViewportBounds[0].x;
 		my -= m_ViewportBounds[0].y;
 		glm::vec2 viewportSize = m_ViewportBounds[1] - m_ViewportBounds[0];
-		//my = viewportSize.y - m_ViewportHeaderSize - my;
 
 		int mouseX = (int)(mx * m_ViewportWindowRelation);
 		int mouseY = (int)(fbSize - (my * m_ViewportWindowRelation));
@@ -182,11 +181,8 @@ namespace MSD {
 	}
 
 	// STATIC FUNCTIONS
-	static bool ExportCSV(const char* outpath, std::vector<std::vector<float>*> data, int number_of_vectors, nfdresult_t result)
+	static bool ExportCSV(const char* outpath, std::vector<std::vector<float>*> data, std::vector<std::string> column_names)
 	{
-		if (result != NFD_OKAY) return false;
-
-		// Open the file for writing
 		std::filesystem::path filepath = outpath;
 		if (filepath.extension() == "") filepath.replace_extension(".csv");
 
@@ -196,15 +192,32 @@ namespace MSD {
 			return false;
 		}
 
-		// Loop through each vector in the data array
-		for (int i = 0; i < number_of_vectors; ++i) {
-			// Get a reference to the current vector
-			std::vector<float>& vec = *data[i];
+		size_t number_of_vectors = data.size();
+		size_t elements_per_vector = 0;
+		for (auto& vec : data) {
+			elements_per_vector = std::max(elements_per_vector, vec->size());
+		}
+		
+		for (size_t i = 0; i < column_names.size(); ++i)
+		{
+			file << column_names[i];
+			if (i < column_names.size() - 1) file << ",";
+		}
+		file << std::endl;
 
-			// Write the contents of the vector to the file
-			auto size = vec.size();
-			for (int j = 0; j < (int)size; ++j) {
-				file << j << "," << vec[j] << std::endl;
+		// Write each row of the CSV file
+		for (size_t row = 0; row < elements_per_vector; ++row) {
+			for (size_t col = 0; col < number_of_vectors; ++col) {
+				if (col == 0)
+				{
+					file << row+1 << ",";
+				}
+				if (row < data[col]->size()) {
+					file <<  (*(data[col]))[row];
+				}
+				if (col != number_of_vectors - 1) {
+					file << ",";
+				}
 			}
 			file << std::endl;
 		}
@@ -476,8 +489,8 @@ namespace MSD {
 		{
 			//if (!m_AllowInputWindow) return;
 			//m_AllowInputWindow = false;
-			result = NFD_OpenDialog(NULL, NULL, &outPath);
-			*magnetron->GetInputFilePath() = outPath;
+			m_FileResult = NFD_OpenDialog(NULL, NULL, &m_OutPath);
+			*magnetron->GetInputFilePath() = m_OutPath;
 		}
 	}
 
@@ -594,11 +607,6 @@ namespace MSD {
 		ApplicationCore& app = ApplicationCore::Get();
 		AngMSD& model = app.GetModel();
 
-		std::vector<float>& data = model.m_SubstrateBuffer->GetDepEvolution();
-		std::vector<std::vector<float>*> depEvolutionData;
-		depEvolutionData.push_back(&data);
-
-
 		std::vector<std::vector<float>*> depRatesData;
 
 		if (ImGui::CollapsingHeader("Deposition Evolution"))
@@ -609,10 +617,9 @@ namespace MSD {
 			std::vector<float>& data = model.m_SubstrateBuffer->GetDepEvolution();
 
 			DynamicPlot(FindPlotCond(), data, axesDepEvolution);
-			ExportButton(depEvolutionData);
+			ExportButton(model.m_ExportData, model.m_ExportDataColumnNames);
 			ImGui::Separator();
 		}
-		depEvolutionData.pop_back();
 
 
 		unsigned int count = 0;
@@ -634,7 +641,7 @@ namespace MSD {
 		depRatesData.clear();
 	}
 
-	void MainLayer::ExportButton(std::vector<std::vector<float>*> data, const char* id)
+	void MainLayer::ExportButton(std::vector<std::vector<float>*> data, std::vector<std::string> column_names)
 	{
 		ImGuiStyle& style = ImGui::GetStyle();
 
@@ -648,12 +655,15 @@ namespace MSD {
 
 		if (ImGui::Button("Export CSV file"))
 		{
-			outPath = (nfdchar_t*)(projectDirPath.c_str());
-			result = NFD_SaveDialog("csv", NULL, &outPath);
-			if (ExportCSV(outPath, data, 1, result))
+			m_OutPath = (nfdchar_t*)(projectDirPath.c_str());
+			m_FileResult = NFD_SaveDialog("csv", NULL, &m_OutPath);
+			if (m_FileResult == NFD_OKAY)
 			{
-				show_popup_success = true;
-			};
+				if (ExportCSV(m_OutPath, data, column_names))
+				{
+					show_popup_success = true;
+				};
+			}
 		}
 	}
 
@@ -754,11 +764,11 @@ namespace MSD {
 
 		// TODO Periodic table
 		for (int i = 0; i < num_elements; i++) {
-			// Set up a button for each element
+
 			ImGui::PushID(i);
 			ImGui::Button(GetSymbol(elements[i]), ImVec2(40, 40));
 
-			// Show element name as tooltip
+			// Element name and atomic number as tooltip
 			if (ImGui::IsItemHovered()) {
 				ImGui::BeginTooltip();
 				ImGui::Text("%s", GetName(elements[i]));
@@ -766,16 +776,14 @@ namespace MSD {
 				ImGui::EndTooltip();
 			}
 
-			// Handle element click
 			if (ImGui::IsItemClicked()) {
-				// Do something with the clicked element, such as print its atomic number
 				*element = elements[i];
 				*p_open = false;
 			}
 
 			ImGui::PopID();
 
-			// Add spacing to create periodic table layout
+			// Periodic table layout
 			if ((i + 1) % 18 != 0) {
 				ImGui::SameLine();
 			}

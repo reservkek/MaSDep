@@ -15,6 +15,7 @@ namespace MSD {
 		~AngMSD()
 		{
 			delete m_Substrate;
+			delete m_SubstrateBuffer;
 			for (auto i_magnetron : m_Magnetrons) delete i_magnetron;
 		};
 		
@@ -47,11 +48,11 @@ namespace MSD {
 		int m_TicksPerSecond = 5; // Количество тиков в секунду
 		float m_TimePerTick = 1.0f / m_TicksPerSecond; // Количество времени за 1 тик.
 
-		int m_TimeLimit = 60; // Лимит моделирования во времени в секундах
+		int m_TimeLimit = 60; // Ограничения моделирования по времени в секундах
 		float m_CurrentTime = 0;
 
 		// Пространство в модели
-		unsigned int spaceRatio = 100; // Разделение 1 метра пространства на виртуальные отрезки
+		unsigned int m_spaceRatio = 100; // Разделение 1 метра пространства на виртуальные отрезки
 
 		// Другие параметры
 		float m_RotationLimit = 1;
@@ -63,7 +64,7 @@ namespace MSD {
 		float m_CurrentGamma = 0;
 		float m_CurrentPhi = 0;
 
-		// Прогресс-бар
+		// Прогресс-шкала
 		float m_CurrentProgress = 0;
 		float m_CurrentProgressDelta = 0;
 
@@ -76,7 +77,12 @@ namespace MSD {
 		Substrate* m_SubstrateBuffer = new Substrate();
 		std::vector<Magnetron*> m_MagnetronsBuffer;
 
+		// Контейнер для значений по времени
 		std::vector<float> m_TimeValues = {};
+
+		// Данные для вывода в текстовый файл.
+		std::vector<std::vector<float>*> m_ExportData = {};
+		std::vector<std::string> m_ExportDataColumnNames = {};
 
 		static AngMSD* s_Instance;
 		bool m_ModelRunning = false;
