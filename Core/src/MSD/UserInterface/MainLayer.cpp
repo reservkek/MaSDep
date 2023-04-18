@@ -539,8 +539,13 @@ namespace MSD {
 		if (ImGui::IsWindowFocused())
 		{
 			GraphicsLayer::m_HandleInputs = true;
+			Controller::EnableEvents();
 		}
-		else GraphicsLayer::m_HandleInputs = false;
+		else
+		{
+			GraphicsLayer::m_HandleInputs = false;
+			Controller::DisableEvents();
+		}
 
 		ApplicationCore& app = ApplicationCore::Get();
 		AngMSD& model = app.GetModel();

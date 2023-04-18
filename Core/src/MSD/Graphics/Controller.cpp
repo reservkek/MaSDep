@@ -20,7 +20,7 @@ namespace MSD {
 
 
 	bool Controller::s_Draggable = false;
-	bool Controller::s_EnableInputs = true;
+	bool Controller::s_EnableEvents = true;
 
 	OrthographicCamera* Controller::s_Camera = nullptr;
 	AngMSDObject* Controller::s_SelectedObject = nullptr;
@@ -76,19 +76,26 @@ namespace MSD {
 	void Controller::CameraOnEvent(Event& event)
 	{
 		if (s_Camera == nullptr) return;
-		if (!s_EnableInputs) return;
 
 		EventDispatcher dispatcher(event);
-		dispatcher.Dispatch<MouseScrolledEvent>(BIND_EVENT_FN_STATIC(Controller::CameraEventMouseScrolled));
-		dispatcher.Dispatch<MouseButtonDoubleClickedEvent>(BIND_EVENT_FN_STATIC(Controller::CameraEventMouseDoubleClicked));
 		dispatcher.Dispatch<MouseButtonPressedEvent>(BIND_EVENT_FN_STATIC(Controller::CameraEventMouseButtonPressed));
 		dispatcher.Dispatch<MouseButtonReleasedEvent>(BIND_EVENT_FN_STATIC(Controller::CameraEventMouseButtonReleased));
 		dispatcher.Dispatch<MouseMovedEvent>(BIND_EVENT_FN_STATIC(Controller::CameraEventMouseMoved));
+		
+		if (!s_EnableEvents) return;
+		
+		dispatcher.Dispatch<MouseScrolledEvent>(BIND_EVENT_FN_STATIC(Controller::CameraEventMouseScrolled));
+		dispatcher.Dispatch<MouseButtonDoubleClickedEvent>(BIND_EVENT_FN_STATIC(Controller::CameraEventMouseDoubleClicked));
 	}
 
-	void Controller::EnableInputs(bool enable)
+	void Controller::EnableEvents()
 	{
-		s_EnableInputs = enable;
+		s_EnableEvents = true;
+	}
+
+	void Controller::DisableEvents()
+	{
+		s_EnableEvents = false;
 	}
 
 	void Controller::ResetCameraPosition()

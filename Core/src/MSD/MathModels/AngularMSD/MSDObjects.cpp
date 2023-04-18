@@ -4,8 +4,21 @@
 
 namespace MSD {
 
+	////////////////////////////////
+	// GENERAL ANGULAR MSD OBJECT //
+	////////////////////////////////
+
+	AngMSDObject::AngMSDObject(const vec3& pos, const vec3& normal)
+		: msdpos(pos), msdnormal(normal)
+	{
+	}
+
+	////////////////////////////////
+	// MAGNETRON OBJECT FUNCTIONS //
+	////////////////////////////////
+
 	Magnetron::Magnetron(const vec3& pos, const vec3& normal, const float& radius)
-		: msdpos(pos), msdnormal(normal), m_Radius(radius)
+		: AngMSDObject(pos, normal), m_Radius(radius)
 	{
 		integrationvectorI = FindOrthogonal(msdnormal);
 		integrationvectorJ = CrossProduct(msdnormal, integrationvectorI);
@@ -120,25 +133,33 @@ namespace MSD {
 		m_PhiAngles.push_back(phi);
 	}
 
+	////////////////////////////////
+	// SUBSTRATE OBJECT FUNCTIONS //
+	////////////////////////////////
+
 	Substrate::Substrate(const vec3& pos, const vec3& normal, const float& rpm, const float& subrpm)
-		: subpos(pos), subnormal(normal), RPM(rpm), subRPM(subrpm)
+		: AngMSDObject(pos, normal), RPM(rpm), subRPM(subrpm)
 	{
 	}
 
 	void Substrate::Rotate()
 	{
 		m_RotationAngle = m_RotationAngle * PI / 180;
-		subpos = RotateAroundZ(subpos, -m_RotationAngle);
-		subnormal = RotateAroundZ(subnormal, -m_RotationAngle);
+		msdpos = RotateAroundZ(msdpos, -m_RotationAngle);
+		msdnormal = RotateAroundZ(msdnormal, -m_RotationAngle);
 		m_RotationAngle = 0;
 	}
 
 	void Substrate::Update()
 	{
+		// Updating substrate position and angle during simulation
+
 		m_TotalAngle += m_TotalAngleDelta;
 		m_TotalSubAngle += m_TotalSubAngleDelta;
-		subpos = RotateAroundZ(subpos, m_TotalAngleDelta);
-		subnormal = RotateAroundZ(subnormal, m_TotalAngleDelta+m_TotalSubAngleDelta);
+		msdpos = RotateAroundZ(msdpos, m_TotalAngleDelta);
+		msdnormal = RotateAroundZ(msdnormal, m_TotalAngleDelta+m_TotalSubAngleDelta);
+
+		// Setting angle range from 0 to 360 degrees
 
 		if (m_TotalAngle >= 2 * PI) m_TotalAngle -= 2 * PI;
 		if (m_TotalAngle < 0) m_TotalAngle += 2 * PI;
@@ -153,8 +174,8 @@ namespace MSD {
 
 	float Substrate::CalcAngle()
 	{
-		auto res = Angle(subnormal, { 0,1,0 });
-		if (subnormal.x < 0) return res;
+		auto res = Angle(msdnormal, { 0,1,0 });
+		if (msdnormal.x < 0) return res;
 		else return -res;
 	}
 

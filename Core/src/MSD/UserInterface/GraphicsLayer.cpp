@@ -20,10 +20,7 @@ namespace MSD {
 
 	void GraphicsLayer::OnEvent(Event& event)
 	{
-		if (m_HandleInputs)
-		{
-			Controller::CameraOnEvent(event);
-		}
+		Controller::CameraOnEvent(event);
 	}
 
 	void GraphicsLayer::OnAttach()

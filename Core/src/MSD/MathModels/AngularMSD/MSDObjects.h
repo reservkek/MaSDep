@@ -15,12 +15,21 @@ namespace MSD {
 	class AngMSDObject
 	{
 	public:
-		virtual float* GetPosY() = 0;
-		virtual float* GetPosZ() = 0;
-		virtual float* GetPosX() = 0;
-		virtual float* GetNormalX() = 0;
-		virtual float* GetNormalY() = 0;
-		virtual float* GetNormalZ() = 0;
+		AngMSDObject(const vec3& pos, const vec3& normal);
+
+		float* GetPosX() { return &(msdpos.x); }
+		float* GetPosY() { return &(msdpos.y); }
+		float* GetPosZ() { return &(msdpos.z); }
+		float* GetNormalX() { return &(msdnormal.x); }
+		float* GetNormalY() { return &(msdnormal.y); }
+		float* GetNormalZ() { return &(msdnormal.z); }
+
+		vec3& GetPos() { return msdpos; }
+		vec3& GetNormal() { return msdnormal; }
+
+	private:
+		// Geometry
+		vec3 msdpos, msdnormal;
 	};
 
 	class MSD_API Magnetron : public AngMSDObject
@@ -47,12 +56,6 @@ namespace MSD {
 
 		int GetIndex() { return m_Index; }
 		float* GetRadius() { return &m_Radius; }
-		float* GetPosX() { return &(msdpos.x); }
-		float* GetPosY() { return &(msdpos.y); }
-		float* GetPosZ() { return &(msdpos.z); }
-		float* GetNormalX() { return &(msdnormal.x); }
-		float* GetNormalY() { return &(msdnormal.y); }
-		float* GetNormalZ() { return &(msdnormal.z); }
 		float* GetRotationAngle() { return &(m_RotationAngle); }
 		float& GetCurrentDepRate() { return m_CurrentDepRate; }
 		char** GetInputFilePath() { return &m_InputFilePath; }
@@ -64,9 +67,6 @@ namespace MSD {
 		std::string GetErrorMessage() { return m_ErrorMsg;}
 
 		bool& GetFilePathErr() { return m_FilePathErr; }
-
-		vec3 GetPos() { return msdpos; }
-		vec3 GetNormal() const { return msdnormal; }
 
 		Element& GetElement() { return m_Element; }
 
@@ -118,12 +118,6 @@ namespace MSD {
 
 		float CalcAngle();
 
-		float* GetPosX() { return &(subpos.x); }
-		float* GetPosY() { return &(subpos.y); }
-		float* GetPosZ() { return &(subpos.z); }
-		float* GetNormalX() { return &(subnormal.x); }
-		float* GetNormalY() { return &(subnormal.y); }
-		float* GetNormalZ() { return &(subnormal.z); }
 		float* GetRPM() { return &RPM; }
 		float* GetSubRPM() { return &subRPM; }
 		float* GetRotationAngle() { return &m_RotationAngle; }
@@ -137,14 +131,12 @@ namespace MSD {
 
 		Object* GetGraphicsObject() { return m_Object; }
 
-		vec3 GetPos() const { return subpos; };
-		vec3 GetNormal() const { return subnormal; };
 
 	private:
 		// Graphics container
 		Object* m_Object = nullptr;
 
-		vec3 subpos, subnormal;
+		vec3 msdpos, msdnormal;
 		float RPM, subRPM; // Rotations per minute
 		float m_RotationAngle = 0;
 		float m_TotalAngle = 0;
