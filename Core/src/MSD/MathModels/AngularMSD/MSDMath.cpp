@@ -4,6 +4,46 @@
 
 namespace MSD {
 
+	// VEC 2D //
+
+	vec2::vec2(float x, float y)
+		: x(x), y(y)
+	{
+	}
+
+	vec2& vec2::operator=(const vec2& a)
+	{
+		x = a.x;
+		y = a.y;
+
+		return *this;
+	}
+
+	vec2 vec2::operator*(const float& a)
+	{
+		return vec2(x * a, y * a);
+	}
+
+	vec2 vec2::operator+(const float& a) const
+	{
+		return vec2(x + a, y + a);
+	}
+
+	vec2 vec2::operator+(const vec2& a) const
+	{
+		return vec2(x + a.x, y + a.y);
+	}
+	vec2 vec2::operator-(const vec2& a) const
+	{
+		return vec2(x - a.x, y - a.y);
+	}
+	vec2 vec2::operator-() const
+	{
+		return vec2(-x, -y);
+	}
+
+	// VEC 3D //
+
 	vec3::vec3(float x, float y, float z)
 		: x(x), y(y), z(z)
 	{
@@ -76,6 +116,35 @@ namespace MSD {
 		float cosTheta = MSD::DotProduct(a, b) / (MSD::Magnitude(a) * MSD::Magnitude(b));
 		if (acos(cosTheta) != acos(cosTheta)) return 0;
 		return acos(cosTheta);
+	}
+
+	float Angle2D(const vec2& a, const vec2& b)
+	{
+		float dotProduct = a.x * b.x + a.y * b.y;
+		float cosTheta = dotProduct / (sqrt(a.x * a.x + a.y * a.y) * sqrt(b.x * b.x + b.y * b.y));
+		if (acos(cosTheta) != acos(cosTheta)) return 0;
+		return acos(cosTheta);
+	}
+
+	float AngleProjectionXY(vec3 a, vec3 b)
+	{
+		auto A = vec2(a.x, a.y);
+		auto B = vec2(b.x, b.y);
+		return Angle2D(A, B);
+	}
+
+	float AngleProjectionYZ(vec3 a, vec3 b)
+	{
+		auto A = vec2(a.y, a.z);
+		auto B = vec2(b.y, b.z);
+		return Angle2D(A, B);
+	}
+
+	float AngleProjectionXZ(vec3 a, vec3 b)
+	{
+		auto A = vec2(a.x, a.z);
+		auto B = vec2(b.x, b.z);
+		return Angle2D(A, B);
 	}
 
 	MSD::vec3 FindVector(const MSD::vec3& a, const MSD::vec3& b, bool reflected)

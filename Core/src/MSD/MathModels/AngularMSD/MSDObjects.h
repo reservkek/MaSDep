@@ -27,12 +27,14 @@ namespace MSD {
 		vec3& GetPos() { return msdpos; }
 		vec3& GetNormal() { return msdnormal; }
 
-	private:
+		float CalcAngle();
+
+	protected:
 		// Geometry
 		vec3 msdpos, msdnormal;
 	};
 
-	class MSD_API Magnetron : public AngMSDObject
+	class Magnetron : public AngMSDObject
 	{
 	public:
 		vec3 integrationvectorI;
@@ -49,8 +51,6 @@ namespace MSD {
 		void WritePhi(const float& phi);
 		void InputSputRates(const char* filepath, const float& integrationDelta);
 		void Clear();
-
-		float CalcAngle();
 
 		float FindSputRate(const float& radius);
 
@@ -69,13 +69,8 @@ namespace MSD {
 		bool& GetFilePathErr() { return m_FilePathErr; }
 
 		Element& GetElement() { return m_Element; }
-
-		extern friend class MainLayer;
-		extern friend class AngMSD;
-
 	private:
 		// Geometry
-		vec3 msdpos, msdnormal;
 		float m_Radius;
 
 		// Element
@@ -104,7 +99,7 @@ namespace MSD {
 		Object* m_Object = nullptr;
 	};
 
-	class MSD_API Substrate : public AngMSDObject
+	class Substrate : public AngMSDObject
 	{
 	public:
 		Substrate(const vec3& pos = { 0.0, 15.0, 0.0 }, const vec3& normal = { 0.0, 1.0, 0.0 },
@@ -115,8 +110,6 @@ namespace MSD {
 		void WriteDepEvolution();
 
 		void SetGraphicsObject(Object* obj) { m_Object = obj; }
-
-		float CalcAngle();
 
 		float* GetRPM() { return &RPM; }
 		float* GetSubRPM() { return &subRPM; }
@@ -130,13 +123,10 @@ namespace MSD {
 		std::vector<float>& GetDepEvolution() { return m_DepEvolution; }
 
 		Object* GetGraphicsObject() { return m_Object; }
-
-
 	private:
 		// Graphics container
 		Object* m_Object = nullptr;
 
-		vec3 msdpos, msdnormal;
 		float RPM, subRPM; // Rotations per minute
 		float m_RotationAngle = 0;
 		float m_TotalAngle = 0;

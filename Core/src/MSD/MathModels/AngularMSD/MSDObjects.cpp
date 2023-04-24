@@ -13,6 +13,13 @@ namespace MSD {
 	{
 	}
 
+	float AngMSDObject::CalcAngle()
+	{
+		auto res = AngleProjectionXY(msdnormal, { 0, 1, 0 });
+		if (msdnormal.x < 0) return res;
+		else return -res;
+	}
+
 	////////////////////////////////
 	// MAGNETRON OBJECT FUNCTIONS //
 	////////////////////////////////
@@ -102,13 +109,6 @@ namespace MSD {
 		m_PhiAngles.clear();
 	}
 
-	float Magnetron::CalcAngle()
-	{
-		auto res = Angle(msdnormal, { 0,1,0 });
-		if (msdnormal.x < 0) return res;
-		else return -res;
-	}
-
 	float Magnetron::FindSputRate(const float& radius)
 	{
 		if (auto it = m_SputRates.find(radius); it != m_SputRates.end())
@@ -170,13 +170,6 @@ namespace MSD {
 	void Substrate::WriteDepEvolution()
 	{
 		m_DepEvolution.push_back(m_TotalDeposited);
-	}
-
-	float Substrate::CalcAngle()
-	{
-		auto res = Angle(msdnormal, { 0,1,0 });
-		if (msdnormal.x < 0) return res;
-		else return -res;
 	}
 
 }

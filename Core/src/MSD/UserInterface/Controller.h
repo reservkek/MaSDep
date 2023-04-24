@@ -20,6 +20,12 @@ namespace MSD {
 		static void DisableEvents();
 		static void ResetCameraPosition();
 
+		static const float GetCameraZoomLevel() { return s_ZoomValue; };
+		static const float GetCameraRotation() { return s_CameraRotation; };
+		static const glm::vec3& GetCameraPosition() { return s_CameraPosition;  }
+		static const glm::mat4& GetViewMatrix();
+		static const glm::mat4& GetProjectionMatrix();
+		static const glm::mat4& GetViewProjectionMatrix();
 
 		static void HandleObjectInputs(Substrate* substrate, Timestep* timestep);
 		static void HandleObjectInputs(Magnetron* magnetron, Timestep* timestep);
@@ -35,6 +41,8 @@ namespace MSD {
 	private:
 		static OrthographicCamera* s_Camera;
 		static AngMSDObject* s_SelectedObject;
+
+		static const glm::mat4 s_NullMatrix;
 
 		static float s_CameraSpeed;
 		static float s_CameraRotation;

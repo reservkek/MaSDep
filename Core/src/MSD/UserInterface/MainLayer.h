@@ -80,7 +80,7 @@ namespace MSD {
 
 		bool m_ViewPortHandleInputs = false;
 
-		glm::vec2 m_ViewportBounds[2];
+		glm::vec2 m_ViewportBounds[2] = { glm::vec2(0), glm::vec2(0) };
 		float m_ViewportHeaderSize = 0.0f;
 		float m_ViewportWindowRelation = 1.0f;
 
@@ -95,6 +95,9 @@ namespace MSD {
 		nfdresult_t m_FileResult = NFD_ERROR;
 
 		Element* m_SelectedElement = nullptr;
+
+		double m_ViewportMousePosX = -1.0f;
+		double m_ViewportMousePosY = -1.0f;
 	};
 
 }

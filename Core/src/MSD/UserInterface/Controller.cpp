@@ -25,6 +25,12 @@ namespace MSD {
 	OrthographicCamera* Controller::s_Camera = nullptr;
 	AngMSDObject* Controller::s_SelectedObject = nullptr;
 
+	const glm::mat4 Controller::s_NullMatrix = glm::mat4(1.0f);
+
+	///////////////////
+	// CAMERA INPUTS // 
+	///////////////////
+
 	void Controller::HandleCameraInputs(OrthographicCamera* camera, Timestep* timestep)
 	{
 		s_Camera = camera;
@@ -152,8 +158,6 @@ namespace MSD {
 	{
 		ImGuiIO& io = ImGui::GetIO();
 
-		// TODO: FIX INTITIAL MOUSE POSITION WHEN DRAGGING
-
 		auto imguiWindow = ImGui::FindWindowByName("Model Viewport");
 
 		if (imguiWindow != nullptr)
@@ -195,6 +199,24 @@ namespace MSD {
 	///// OBJECT INPUTS /////
 	/////////////////////////
 
+	const glm::mat4& Controller::GetViewMatrix()
+	{
+		if (s_Camera == nullptr) return s_NullMatrix;
+		return s_Camera->GetViewMatrix();
+	}
+
+	const glm::mat4& Controller::GetProjectionMatrix()
+	{
+		if (s_Camera == nullptr) return s_NullMatrix;
+		return s_Camera->GetProjectionMatrix();
+	}
+
+	const glm::mat4& Controller::GetViewProjectionMatrix()
+	{
+		if (s_Camera == nullptr) return s_NullMatrix;
+		return s_Camera->GetViewProjectionMatrix();
+	}
+
 	void Controller::HandleObjectInputs(Substrate* object, Timestep* timestep)
 	{
 		s_SelectedObject = object;
@@ -211,12 +233,15 @@ namespace MSD {
 	{
 		if (s_SelectedObject == nullptr) return;
 
+		/*Substrate* obj = (Substrate*)(void*)s_SelectedObject;*/
+
 		//auto objectPosition = glm::vec3(s_SelectedObject->GetPosX(), s_SelectedObject->GetPosY(), s_SelectedObject->GetPosZ()); ;
 
 		//if (Input::IsKeyPressed(GLFW_KEY_LEFT))
 		//{
-		//	objectPosition.x = s_CameraSpeed * (*timestep);
+		//	*obj->GetRPM() = 12.0f;
 		//}
+
 		//if (Input::IsKeyPressed(GLFW_KEY_RIGHT))
 		//{
 		//	s_CameraPosition.x -= s_CameraSpeed * (*timestep);

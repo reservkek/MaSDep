@@ -14,8 +14,8 @@ namespace MSD {
 			case None:     return 0;
 			case Cr:       return 8.327e28f;
 			case Al:	   return 6.023e28f;
-			case Cu:	   return 8.497e28f;
 			case Ti:	   return 5.633e28f;
+			case Cu:	   return 8.497e28f;
 			}
 			return 0;
 		}
@@ -28,8 +28,8 @@ namespace MSD {
 			case None:     return 0;
 			case Cr:       return 7190.0f;
 			case Al:	   return 2700.0f;
-			case Cu:	   return 8960.0f;
 			case Ti:	   return 4505.0f;
+			case Cu:	   return 8960.0f;
 			}
 			return 0;
 		}
@@ -46,8 +46,8 @@ namespace MSD {
 			case None:     return "None";
 			case Cr:       return "Chromium";
 			case Al:	   return "Aluminium";
-			case Cu:	   return "Copper";
 			case Ti:	   return "Titanium";
+			case Cu:	   return "Copper";
 			}
 			return "Null";
 		}
@@ -59,8 +59,8 @@ namespace MSD {
 			case None:     return "None";
 			case Cr:       return "Cr";
 			case Al:	   return "Al";
-			case Cu:	   return "Cu";
 			case Ti:	   return "Ti";
+			case Cu:	   return "Cu";
 			}
 			return "Null";
 		}

@@ -1,7 +1,7 @@
 #include "msdpch.h"
 
 #include "MainLayer.h"
-#include "Graphics/Controller.h"
+#include "Controller.h"
 
 #include "GLFW/glfw3.h"
 
@@ -142,8 +142,11 @@ namespace MSD {
 		my -= m_ViewportBounds[0].y;
 		glm::vec2 viewportSize = m_ViewportBounds[1] - m_ViewportBounds[0];
 
-		int mouseX = (int)(mx * m_ViewportWindowRelation);
-		int mouseY = (int)(fbSize - (my * m_ViewportWindowRelation));
+		m_ViewportMousePosX = (mx * m_ViewportWindowRelation);
+		m_ViewportMousePosY = (fbSize - (my * m_ViewportWindowRelation));
+
+		auto mouseX = (int)m_ViewportMousePosX;
+		auto mouseY = (int)m_ViewportMousePosY;
 
 		if (mouseX > 0 && mouseY > 0 && mouseX < (int)fbSize && mouseY < (int)fbSize)
 		{
@@ -176,7 +179,7 @@ namespace MSD {
 				ImGui::EndTooltip();
 			}
 
-			std::cout << "ID: " << hoveredID << "\n";
+			//std::cout << "ID: " << hoveredID << "\n";
 		}
 	}
 
@@ -265,6 +268,10 @@ namespace MSD {
 		ImGui::PopID();
 
 		ImGui::Columns(1);
+	}
+
+	static void DrawCoordBox()
+	{
 	}
 
 	static void SetHandCursor()
@@ -483,7 +490,7 @@ namespace MSD {
 		}
 		ImGui::Separator();
 		ImGui::Text("Sput rates input");
-		ImGui::InputText("###SputRates",magnetron->m_InputFilePath,sizeof(magnetron->m_InputFilePath),ImGuiInputTextFlags_ReadOnly);
+		ImGui::InputText("###SputRates",*magnetron->GetInputFilePath(), sizeof(*magnetron->GetInputFilePath()), ImGuiInputTextFlags_ReadOnly);
 		ImGui::SameLine();
 		if (ImGui::Button("Browse"))
 		{
@@ -580,6 +587,48 @@ namespace MSD {
 
 		ImGui::Image(texID, ImVec2(length, length), ImVec2(0, 1), ImVec2(1, 0));
 		ImGui::PopStyleVar(2);
+
+		ImGui::SetCursorPosX(windowSize.x-90.0f);
+		ImGui::SetCursorPosY(windowSize.y-5.0f);
+
+		float zoom = Controller::GetCameraZoomLevel();
+		auto camPos = Controller::GetCameraPosition();
+		auto projectionMatrix = Controller::GetProjectionMatrix();
+		auto viewMatrix = Controller::GetViewMatrix();
+
+		double mouseX = (m_ViewportMousePosX - fbSize * 0.5);
+		double mouseY = (-m_ViewportMousePosY + fbSize * 0.5);
+
+		mouseX *= zoom * 0.5;
+		mouseY *= zoom * 0.5;
+
+		float angle = (180 - Controller::GetCameraRotation()) * PI / 180;
+
+		auto x = mouseX;
+		auto y = mouseY;
+
+		mouseX = + x * cos(angle) + y * sin(angle);
+		mouseY = y * cos(angle) - x * sin(angle);
+
+		mouseX -= camPos.x;
+		mouseY += camPos.y;
+
+		mouseX *= 0.1;
+		mouseY *= 0.1;
+
+		std::cout << "Cam pos X: " << camPos.x << "; Cam pos Y: " << camPos.y << std::endl;
+
+		// TODO: FIGURE OUT HOW TO TIE TOGETHER VIEWPROJECTION MATRIX,
+		// RATIOS OF VIEWPORT AND FRAMEBUFFER IN ORDER TO CREATE COORDINATES SYSTEM
+
+		std::string str = std::format("{:.2f}", mouseX) + " ; " + std::format("{:.2f}", mouseY);
+		str += std::string("###CoordBox");
+		const char* name = str.c_str();
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 1.0f, 0.8f, 0.5f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(1.0f, 1.0f, 0.8f, 0.5f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1.0f, 1.0f, 0.8f, 0.5f));
+		if (ImGui::Button(name, ImVec2(80.0f, 0.0f))) {}
+		ImGui::PopStyleColor(3);
 
 		if (ImGui::BeginPopupContextItem("Viewport Settings"))
 		{

@@ -3,7 +3,7 @@
 #include "GraphicsLayer.h"
 #include "GLFW/glfw3.h"
 
-#include "Graphics/Controller.h"
+#include "Controller.h"
 #include "Graphics/Internal/Objects.h"
 
 namespace MSD {
@@ -61,6 +61,7 @@ namespace MSD {
 		if (m_HandleInputs)
 		{
 			Controller::HandleCameraInputs(camera, &ts);
+			Controller::HandleObjectInputs(m_Model->m_Substrate, &ts);
 		}
 
 		fb->Bind();
