@@ -7,10 +7,17 @@
 
 namespace MSD {
 
+	enum class ObjectType
+	{
+		None, Rect, Arrow, Circle, Cube
+	};
+
 	class Object
 	{
 	public:
-		void SetPosition(const glm::vec3& pos);
+		Object();
+
+		virtual void SetPosition(const glm::vec3& pos);
 		void SetColor(const glm::vec4& color);
 		void SetScale(const glm::vec3& scale);
 		void SetAngle(float angle);
@@ -20,12 +27,17 @@ namespace MSD {
 
 		unsigned int GetID() { return m_ObjectID; }
 
+		virtual const ObjectType GetType() const = 0;
 
 		const glm::vec4& GetColor() const { return m_Color; };
 		const glm::vec4& GetOutlineColor() const { return m_OutlineColor; };
 		const glm::mat4& GetModelMatrix() const { return m_ModelMatrix; };
 		const BufferLayout& GetLayout() const { return m_BasicLayout; };
-	private:
+
+		static void AddObject(Object* obj);
+
+		static const std::vector<std::shared_ptr<Object>>& GetObjects() { return m_GraphicsObjectBuffer; }
+	protected:
 		glm::vec3 m_Scale = glm::vec3(1.0f,1.0f,1.0f);
 		glm::vec3 m_Pos = glm::vec3(0.0f);
 		glm::vec4 m_Color = glm::vec4(0.2f, 0.2f, 1.0f, 1.0f);
@@ -40,16 +52,20 @@ namespace MSD {
 		{
 			{ ShaderDataType::Float3, "a_Position"}
 		};
+
+	private:
+		static std::vector<std::shared_ptr<Object>> m_GraphicsObjectBuffer;
 	};
 
 	class Rect : public Object {
 	public:
-		Rect(unsigned int id = 0);
 
 		unsigned int m_ObjectID;
 		static float coords[12];
 		static unsigned int indices[6];
 		static unsigned int outlineIndices[8];
+
+		virtual const ObjectType GetType() const { return ObjectType::Rect;};
 	};
 
 	class Cube : public Object {
@@ -61,11 +77,13 @@ namespace MSD {
 	class Arrow : public Object
 	{
 	public:
-		unsigned int GetID() { return -1; }
+		virtual void SetPosition(const glm::vec3& pos) override;
 
 		static float coords[3*5];
 		static unsigned int indicesLine[2];
 		static unsigned int indicesHead[3];
+
+		virtual const ObjectType GetType() const { return ObjectType::Arrow; };
 	};
 
 	class Grid

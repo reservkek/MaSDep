@@ -16,7 +16,6 @@ namespace MSD {
 	bool AngMSD::Run()
 	{
 		m_MagnetronsBuffer = m_Magnetrons;
-		m_SubstrateBuffer = new Substrate();
 		*m_SubstrateBuffer = *m_Substrate;
 
 		m_TimeValues = {};

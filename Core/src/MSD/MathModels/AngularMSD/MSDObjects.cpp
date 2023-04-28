@@ -11,6 +11,8 @@ namespace MSD {
 	AngMSDObject::AngMSDObject(const vec3& pos, const vec3& normal)
 		: msdpos(pos), msdnormal(normal)
 	{
+		m_Object = new Rect();
+		m_NormalVectorArrow.reset(new Arrow);
 	}
 
 	float AngMSDObject::CalcAngle()

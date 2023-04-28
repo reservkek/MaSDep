@@ -588,7 +588,7 @@ namespace MSD {
 		ImGui::Image(texID, ImVec2(length, length), ImVec2(0, 1), ImVec2(1, 0));
 		ImGui::PopStyleVar(2);
 
-		ImGui::SetCursorPosX(windowSize.x-90.0f);
+		ImGui::SetCursorPosX(windowSize.x-140.0f);
 		ImGui::SetCursorPosY(windowSize.y-5.0f);
 
 		float zoom = Controller::GetCameraZoomLevel();
@@ -616,18 +616,13 @@ namespace MSD {
 		mouseX *= 0.1;
 		mouseY *= 0.1;
 
-		std::cout << "Cam pos X: " << camPos.x << "; Cam pos Y: " << camPos.y << std::endl;
-
-		// TODO: FIGURE OUT HOW TO TIE TOGETHER VIEWPROJECTION MATRIX,
-		// RATIOS OF VIEWPORT AND FRAMEBUFFER IN ORDER TO CREATE COORDINATES SYSTEM
-
-		std::string str = std::format("{:.2f}", mouseX) + " ; " + std::format("{:.2f}", mouseY);
+		std::string str = std::format("{:.3f} cm", mouseX) + " ; " + std::format("{:.3f} cm", mouseY);
 		str += std::string("###CoordBox");
 		const char* name = str.c_str();
 		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 1.0f, 0.8f, 0.5f));
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(1.0f, 1.0f, 0.8f, 0.5f));
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1.0f, 1.0f, 0.8f, 0.5f));
-		if (ImGui::Button(name, ImVec2(80.0f, 0.0f))) {}
+		if (ImGui::Button(name, ImVec2(130.0f, 0.0f))) {}
 		ImGui::PopStyleColor(3);
 
 		if (ImGui::BeginPopupContextItem("Viewport Settings"))

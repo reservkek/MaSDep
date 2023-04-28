@@ -37,6 +37,19 @@ namespace MSD {
 		glDrawElements(GL_TRIANGLES, va->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
 	}
 
+	void Renderer::DrawObject(Object* obj)
+	{
+		auto a = obj->GetType();
+		switch (obj->GetType())
+		{
+		case ObjectType::Rect: DrawRect(obj);
+			break;
+		case ObjectType::Arrow: DrawArrow(obj);
+			break;
+		default: return;
+		}
+	}
+
 	void Renderer::DrawLines(const std::shared_ptr<VertexArray> va, float thickness)
 	{
 		glLineWidth(thickness);
@@ -63,12 +76,10 @@ namespace MSD {
 		return obj;
 	}
 
-	void Renderer::DrawRect(Object* rect, glm::vec3 position)
+	void Renderer::DrawRect(Object* rect)
 	{
 		if (rect == nullptr)
 			rect = m_Objects.back();
-
-		rect->SetPosition(position);
 
 		m_va.reset(new VertexArray());
 		m_vb.reset(new VertexBuffer(Rect::coords, 3 * 4 * sizeof(float)));
@@ -124,7 +135,7 @@ namespace MSD {
 		Draw(m_va);
 	}
 
-	void Renderer::DrawArrow(Arrow* arrow, glm::vec3 position)
+	void Renderer::DrawArrow(Object* arrow)
 	{
 		if (arrow == nullptr)
 			return;
@@ -142,6 +153,7 @@ namespace MSD {
 		m_shader->SetUniformMat4("u_Model", arrow->GetModelMatrix());
 		m_shader->SetUniform1i("u_ID", arrow->GetID());
 
+
 		m_va->Bind();
 		DrawLines(m_va, 4);
 
@@ -149,16 +161,19 @@ namespace MSD {
 		m_va->SetIndexBuffer(m_ib);
 
 		Draw(m_va);
-
-		arrow->SetPosition(position);
 	}
 
 	void Renderer::DrawScene()
 	{
 		for (auto obj : m_Objects)
 		{
-			DrawRect(obj);
+			DrawObject(obj);
 		}
+	}
+
+	void Renderer::AddExistingObject(Object* obj)
+	{
+		m_Objects.push_back(obj);
 	}
 
 	void Renderer::SetObjectID(int index)

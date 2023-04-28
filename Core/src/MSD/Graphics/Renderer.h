@@ -21,13 +21,16 @@ namespace MSD {
 
 		void Submit(Shader* shader, const std::shared_ptr<VertexArray> va, glm::mat4 ModelMatrix = glm::mat4(1.0f));
 		void Draw(const std::shared_ptr<VertexArray> va);
+		void DrawObject(Object* obj);
 		void DrawLines(const std::shared_ptr<VertexArray> va, float thickness = 2.0f);
 		void DrawGrid(Shader* shader);
-		void DrawRect(Object* rect = nullptr, glm::vec3 position = glm::vec3(0, 0, 0));
+		void DrawRect(Object* rect = nullptr);
 		void DrawRectOutline(Object* rect = nullptr, glm::vec3 position = glm::vec3(0, 0, 0));
 		void DrawCube(glm::vec3 position = glm::vec3(0, 0, 0));
-		void DrawArrow(Arrow* arrow = nullptr, glm::vec3 position = glm::vec3(0, 0, 0));
+		void DrawArrow(Object* arrow = nullptr);
 		void DrawScene();
+
+		void AddExistingObject(Object* obj);
 
 		void SetObjectID(int index);
 

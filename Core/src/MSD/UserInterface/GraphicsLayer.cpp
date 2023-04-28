@@ -71,9 +71,6 @@ namespace MSD {
 
 		fb->ClearAttachment(1, -1);
 		fb->ClearAttachment(2, 0);
-
-		Arrow myFirstArrow;
-
  
 		glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
 		
@@ -84,7 +81,6 @@ namespace MSD {
 		shader->Bind();
 		shader->SetUniform4fv("u_Color", color);
 
-		renderer.DrawArrow(&myFirstArrow);
 		renderer.DrawScene();
 
 		/*renderer.DrawRect(nullptr, { 0.0f, 0.0f, 0.0f });*/
@@ -102,44 +98,99 @@ namespace MSD {
 	{
 		renderer.Flush();
 
-		auto s = renderer.CreateRect();
+		auto& substrate = m_Model->m_Substrate;
+		auto s = substrate->GetGraphicsObject();
+		renderer.AddExistingObject(s);
+
 		s->SetID(99999);
-		s->SetPosition(m_Model->m_Substrate->GetPos() * 10.0f);
+
+		auto pos = substrate->GetPos() * 10.0f;
+		auto angle = m_Model->m_Substrate->CalcAngle();
+
+		s->SetPosition(pos);
 		s->SetColor({ 0.9f, 0.05f, 0.05f, 1.0f });
 		s->SetScale({ 0.2f, 0.03f, 1.0f });
-		s->SetAngle(m_Model->m_Substrate->CalcAngle());
+		s->SetAngle(angle);
+
 		s->CalcModelMatrix();
 
-		m_Model->m_Substrate->SetGraphicsObject(s);
+		auto s_arrow = substrate->GetArrow();
+		renderer.AddExistingObject(s_arrow);
+
+		s_arrow->SetID(999999);
+
+		s_arrow->SetPosition(pos);
+		s_arrow->SetColor({ 0.9f, 0.05f, 0.9f, 1.0f });
+		s_arrow->SetScale({ 0.4f, 0.5f, 1.0f });
+		s_arrow->SetAngle(angle);
+
+		s_arrow->CalcModelMatrix();
 
 		for (auto magnetron : m_Model->m_Magnetrons)
 		{
-			auto m = renderer.CreateRect();
-			m->SetID(magnetron->GetIndex());
+			auto m = magnetron->GetGraphicsObject();
+			auto m_arrow = magnetron->GetArrow();
+
+			renderer.AddExistingObject(m);
+			renderer.AddExistingObject(m_arrow);
+
+
 			auto pos = magnetron->GetPos() * 10.0f;
+			auto angle = magnetron->CalcAngle();
+
+			m->SetID(magnetron->GetIndex()+10000);
+
 			m->SetPosition(pos);
 			m->SetScale({ 0.45f, 0.04f, 1.0f });
-			m->SetAngle(magnetron->CalcAngle());
+			m->SetAngle(angle);
+
 			m->CalcModelMatrix();
-			magnetron->SetGraphicsObject(m);
+
+			m_arrow->SetPosition(pos);
+			m_arrow->SetColor({ 0.9f, 0.05f, 0.9f, 1.0f });
+			m_arrow->SetScale({ 0.4f, 0.5f, 1.0f });
+			m_arrow->SetAngle(angle);
+
+			m_arrow->CalcModelMatrix();
 		}
 	}
 	void GraphicsLayer::UpdateObjectStates()
 	{
 		auto& substrate = m_Model->m_Substrate;
 		auto s = substrate->GetGraphicsObject();
-		s->SetPosition(substrate->GetPos() * 10.0f);
-		s->SetAngle(m_Model->m_Substrate->CalcAngle());
+		auto s_arrow = substrate->GetArrow();
+
+		auto pos = substrate->GetPos() * 10.0f;
+		auto angle = m_Model->m_Substrate->CalcAngle();
+
+		s->SetPosition(pos);
+		s->SetAngle(angle);
 		s->CalcModelMatrix();
+
+		s_arrow->SetPosition(pos);
+		s_arrow->SetAngle(angle);
+		s_arrow->CalcModelMatrix();
 
 		for (auto magnetron : m_Model->m_Magnetrons)
 		{
 			auto m = magnetron->GetGraphicsObject();
+			auto m_arrow = magnetron->GetArrow();
 			float scaleX = *magnetron->GetRadius() / 10.0f;
-			m->SetPosition(magnetron->GetPos() * 10.0f);
+
+			auto pos = magnetron->GetPos() * 10.0f;
+			auto angle = magnetron->CalcAngle();
+
+			m->SetPosition(pos);
 			m->SetScale({ scaleX , 0.04f, 1.0f });
-			m->SetAngle(magnetron->CalcAngle());
+			m->SetAngle(angle);
+
+			m_arrow->SetPosition(pos);
+			m_arrow->SetAngle(angle);
+			m_arrow->CalcModelMatrix();
+
 			m->CalcModelMatrix();
+
+
 		}
 	}
 }

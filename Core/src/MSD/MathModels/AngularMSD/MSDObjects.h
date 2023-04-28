@@ -29,9 +29,18 @@ namespace MSD {
 
 		float CalcAngle();
 
+		Arrow* GetArrow() { return m_NormalVectorArrow.get(); }
+
+		void SetGraphicsObject(Object* obj) { m_Object = obj; }
+		Object* GetGraphicsObject() const { return m_Object; }
 	protected:
 		// Geometry
 		vec3 msdpos, msdnormal;
+
+		// Graphics container
+		Object* m_Object = nullptr;
+
+		std::shared_ptr<Arrow> m_NormalVectorArrow;
 	};
 
 	class Magnetron : public AngMSDObject
@@ -44,7 +53,6 @@ namespace MSD {
 		~Magnetron();
 
 		void SetIndex(unsigned int val) { m_Index = val; }
-		void SetGraphicsObject(Object* obj) { m_Object = obj;  }
 		void Rotate();
 		void WriteDepRate();
 		void WriteGamma(const float& gamma);
@@ -59,8 +67,6 @@ namespace MSD {
 		float* GetRotationAngle() { return &(m_RotationAngle); }
 		float& GetCurrentDepRate() { return m_CurrentDepRate; }
 		char** GetInputFilePath() { return &m_InputFilePath; }
-
-		Object* GetGraphicsObject() const { return m_Object; }
 
 		std::vector<float>& GetDepRates() { return m_DepRates; }
 
@@ -94,9 +100,6 @@ namespace MSD {
 
 		bool m_FilePathErr = false;
 		std::string m_ErrorMsg = "";
-
-		// Graphics container
-		Object* m_Object = nullptr;
 	};
 
 	class Substrate : public AngMSDObject
@@ -109,8 +112,6 @@ namespace MSD {
 		void Update();
 		void WriteDepEvolution();
 
-		void SetGraphicsObject(Object* obj) { m_Object = obj; }
-
 		float* GetRPM() { return &RPM; }
 		float* GetSubRPM() { return &subRPM; }
 		float* GetRotationAngle() { return &m_RotationAngle; }
@@ -121,12 +122,7 @@ namespace MSD {
 		float& GetTotalDeposited() { return m_TotalDeposited; }
 
 		std::vector<float>& GetDepEvolution() { return m_DepEvolution; }
-
-		Object* GetGraphicsObject() { return m_Object; }
 	private:
-		// Graphics container
-		Object* m_Object = nullptr;
-
 		float RPM, subRPM; // Rotations per minute
 		float m_RotationAngle = 0;
 		float m_TotalAngle = 0;
