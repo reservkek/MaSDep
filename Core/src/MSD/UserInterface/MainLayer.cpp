@@ -158,6 +158,15 @@ namespace MSD {
 			if (ImGui::IsMouseClicked(ImGuiMouseButton_Left))
 			{
 				toBeSelected = true;
+
+				if (hoveredID == Renderer::GetSelectedItem() && hoveredID != 1)
+				{
+					Controller::DragObject = true;
+				}
+				else
+				{
+					Controller::DragObject = false;
+				}
 			}
 
 			if (ImGui::IsMouseDragging(ImGuiMouseButton_Left))
@@ -168,6 +177,7 @@ namespace MSD {
 			if (ImGui::IsMouseReleased(ImGuiMouseButton_Left) && toBeSelected)
 			{
 				app.GetGraphicsLayer()->SetSelectedItem(hoveredID);
+				if (hoveredID == -1) Controller::SetState(ControllerState::View);
 			}
 
 			if (hoveredID == 99999)
@@ -179,7 +189,13 @@ namespace MSD {
 				ImGui::EndTooltip();
 			}
 
-			//std::cout << "ID: " << hoveredID << "\n";
+			/*std::cout << "ID: " << hoveredID << "\n";*/
+
+			if (Renderer::GetSelectedItem() == model.m_Substrate->GetGraphicsObject()->GetID())
+			{
+				Controller::DisableCameraEvents();
+				Controller::ObjectStartTransform(model.m_Substrate);
+			}
 		}
 	}
 
@@ -546,12 +562,12 @@ namespace MSD {
 		if (ImGui::IsWindowFocused())
 		{
 			GraphicsLayer::m_HandleInputs = true;
-			Controller::EnableEvents();
+			Controller::EnableCameraEvents();
 		}
 		else
 		{
 			GraphicsLayer::m_HandleInputs = false;
-			Controller::DisableEvents();
+			Controller::DisableCameraEvents();
 		}
 
 		ApplicationCore& app = ApplicationCore::Get();
@@ -624,17 +640,6 @@ namespace MSD {
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1.0f, 1.0f, 0.8f, 0.5f));
 		if (ImGui::Button(name, ImVec2(130.0f, 0.0f))) {}
 		ImGui::PopStyleColor(3);
-
-		if (ImGui::BeginPopupContextItem("Viewport Settings"))
-		{
-			if (ImGui::MenuItem("Reset camera position")) { Controller::ResetCameraPosition(); };
-			if (ImGui::MenuItem("Add Magnetron"))
-			{
-				model.AddMagnetron();
-				graphicsLayer->UpdateObjects();
-			};
-			ImGui::EndPopup();
-		}
 
 		ImGui::End();
 		return;
@@ -809,7 +814,12 @@ namespace MSD {
 	{
 		if (!*p_open) return;
 
+		auto mousepos = ImGui::GetMousePos();
+		ImGui::SetNextWindowPos({ mousepos.x, mousepos.y }, ImGuiCond_Once);
+
 		ImGui::Begin("Choose element: ", p_open, ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking);
+		
+
 
 		// TODO Periodic table
 		for (int i = 0; i < num_elements; i++) {

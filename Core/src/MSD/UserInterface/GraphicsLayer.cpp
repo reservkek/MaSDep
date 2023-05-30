@@ -61,7 +61,6 @@ namespace MSD {
 		if (m_HandleInputs)
 		{
 			Controller::HandleCameraInputs(camera, &ts);
-			Controller::HandleObjectInputs(m_Model->m_Substrate, &ts);
 		}
 
 		fb->Bind();
@@ -98,34 +97,22 @@ namespace MSD {
 	{
 		renderer.Flush();
 
+		// Adding substrate
 		auto& substrate = m_Model->m_Substrate;
 		auto s = substrate->GetGraphicsObject();
 		renderer.AddExistingObject(s);
 
 		s->SetID(99999);
-
-		auto pos = substrate->GetPos() * 10.0f;
-		auto angle = m_Model->m_Substrate->CalcAngle();
-
-		s->SetPosition(pos);
 		s->SetColor({ 0.9f, 0.05f, 0.05f, 1.0f });
-		s->SetScale({ 0.2f, 0.03f, 1.0f });
-		s->SetAngle(angle);
 
-		s->CalcModelMatrix();
-
+		// Adding substrate normal vector
 		auto s_arrow = substrate->GetArrow();
 		renderer.AddExistingObject(s_arrow);
 
 		s_arrow->SetID(999999);
-
-		s_arrow->SetPosition(pos);
 		s_arrow->SetColor({ 0.9f, 0.05f, 0.9f, 1.0f });
-		s_arrow->SetScale({ 0.4f, 0.5f, 1.0f });
-		s_arrow->SetAngle(angle);
 
-		s_arrow->CalcModelMatrix();
-
+		// Adding magnetrons and magnetron normal vectors
 		for (auto magnetron : m_Model->m_Magnetrons)
 		{
 			auto m = magnetron->GetGraphicsObject();
@@ -134,25 +121,13 @@ namespace MSD {
 			renderer.AddExistingObject(m);
 			renderer.AddExistingObject(m_arrow);
 
-
-			auto pos = magnetron->GetPos() * 10.0f;
-			auto angle = magnetron->CalcAngle();
-
 			m->SetID(magnetron->GetIndex()+10000);
 
-			m->SetPosition(pos);
-			m->SetScale({ 0.45f, 0.04f, 1.0f });
-			m->SetAngle(angle);
-
-			m->CalcModelMatrix();
-
-			m_arrow->SetPosition(pos);
+			m_arrow->SetID((magnetron->GetIndex() + 10000)*50);
 			m_arrow->SetColor({ 0.9f, 0.05f, 0.9f, 1.0f });
-			m_arrow->SetScale({ 0.4f, 0.5f, 1.0f });
-			m_arrow->SetAngle(angle);
-
-			m_arrow->CalcModelMatrix();
 		}
+
+		UpdateObjectStates();
 	}
 	void GraphicsLayer::UpdateObjectStates()
 	{
@@ -164,11 +139,15 @@ namespace MSD {
 		auto angle = m_Model->m_Substrate->CalcAngle();
 
 		s->SetPosition(pos);
+		s->SetScale({ 0.2f, 0.03f, 1.0f });
 		s->SetAngle(angle);
+
 		s->CalcModelMatrix();
 
 		s_arrow->SetPosition(pos);
 		s_arrow->SetAngle(angle);
+		s_arrow->SetScale({ 0.4f, 0.4f, 1.0f });
+
 		s_arrow->CalcModelMatrix();
 
 		for (auto magnetron : m_Model->m_Magnetrons)
@@ -186,11 +165,10 @@ namespace MSD {
 
 			m_arrow->SetPosition(pos);
 			m_arrow->SetAngle(angle);
+			m_arrow->SetScale({ 0.4f, 0.4f, 1.0f });
 			m_arrow->CalcModelMatrix();
 
 			m->CalcModelMatrix();
-
-
 		}
 	}
 }

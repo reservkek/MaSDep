@@ -27,11 +27,12 @@ namespace MSD {
 
 		unsigned int GetID() { return m_ObjectID; }
 
-		virtual const ObjectType GetType() const = 0;
+		virtual const ObjectType GetType() const { return ObjectType::None; };
 
 		const glm::vec4& GetColor() const { return m_Color; };
 		const glm::vec4& GetOutlineColor() const { return m_OutlineColor; };
 		const glm::mat4& GetModelMatrix() const { return m_ModelMatrix; };
+		const glm::vec3& GetPosition() const { return m_Pos; };
 		const BufferLayout& GetLayout() const { return m_BasicLayout; };
 
 		static void AddObject(Object* obj);
@@ -41,7 +42,7 @@ namespace MSD {
 		glm::vec3 m_Scale = glm::vec3(1.0f,1.0f,1.0f);
 		glm::vec3 m_Pos = glm::vec3(0.0f);
 		glm::vec4 m_Color = glm::vec4(0.2f, 0.2f, 1.0f, 1.0f);
-		glm::vec4 m_OutlineColor = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
+		glm::vec4 m_OutlineColor = glm::vec4(0.8f, 0.8f, 0.0f, 0.7f);
 		glm::mat4 m_ModelMatrix = glm::mat4(1.0f);
 
 		float m_Angle = 0.0f;
@@ -82,6 +83,8 @@ namespace MSD {
 		static float coords[3*5];
 		static unsigned int indicesLine[2];
 		static unsigned int indicesHead[3];
+
+		static unsigned int outlineIndices[4];
 
 		virtual const ObjectType GetType() const { return ObjectType::Arrow; };
 	};

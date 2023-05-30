@@ -56,6 +56,12 @@ namespace MSD {
 		glDrawElements(GL_LINES, va->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
 	}
 
+	void Renderer::DrawPoints(const std::shared_ptr<VertexArray> va, float pointSize)
+	{
+		glPointSize(pointSize);
+		glDrawElements(GL_POINTS, va->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
+	}
+
 	void Renderer::DrawGrid(Shader* shader)
 	{
 		glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
@@ -98,12 +104,12 @@ namespace MSD {
 		m_va->Bind();
 		Draw(m_va);
 
-		if (s_SelectedID == rect->GetID())
+		if (s_SelectedID == rect->GetID() && s_SelectedID != -1)
 		{
 			m_ib.reset(new IndexBuffer(Rect::outlineIndices, 8));
 			m_va->SetIndexBuffer(m_ib);
 			m_shader->SetUniform4fv("u_Color", rect->GetOutlineColor());
-			DrawLines(m_va);
+			DrawLines(m_va, 3.0f);
 		}
 	}
 
@@ -161,6 +167,14 @@ namespace MSD {
 		m_va->SetIndexBuffer(m_ib);
 
 		Draw(m_va);
+
+		if (s_SelectedID == arrow->GetID() && s_SelectedID != -1)
+		{
+			m_ib.reset(new IndexBuffer(Arrow::outlineIndices, 4));
+			m_va->SetIndexBuffer(m_ib);
+			m_shader->SetUniform4fv("u_Color", arrow->GetOutlineColor());
+			DrawPoints(m_va, 7.0f);
+		}
 	}
 
 	void Renderer::DrawScene()

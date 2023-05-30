@@ -18,7 +18,8 @@ namespace MSD
 
 	void Object::SetColor(const glm::vec4& color)
 	{
-		m_Color = color; 
+		m_Color = color;
+		m_OutlineColor = glm::vec4(1.0f-color.x, 1.0f-color.y, 1.0f-color.z, 0.7f);
 	}
 
 
@@ -92,6 +93,7 @@ namespace MSD
 
 	unsigned int Arrow::indicesHead[3] = { 2, 3, 4 };
 
+	unsigned int Arrow::outlineIndices[4] = { 0, 2, 3, 4 };
 
 	std::vector<glm::vec3> Grid::u_Vertices = std::vector<glm::vec3>();
 	std::vector<glm::uvec4> Grid::u_Indices = std::vector<glm::uvec4>();

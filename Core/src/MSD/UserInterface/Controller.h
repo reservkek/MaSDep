@@ -8,17 +8,28 @@
 
 namespace MSD {
 
+	// This class is used to unite the controls to move camera or object in the viewport
+	// Controller has two states: View means that you move your camera and Transform is used
+	// to move selected object in your AngMSD space
+
+	enum class ControllerState
+	{
+		View = 0, Tranform = 1
+	};
+
 	class Controller
 	{
 	public:
 		Controller() {}
 
 		static void HandleCameraInputs(OrthographicCamera* camera, Timestep* timestep);
+		static void EnableCameraEvents();
+		static void DisableCameraEvents();
+		static void ResetCameraPosition();
 		static void CameraOnUpdate(Timestep* timestep);
 		static void CameraOnEvent(Event& event);
-		static void EnableEvents();
-		static void DisableEvents();
-		static void ResetCameraPosition();
+
+		static void SetState(ControllerState state) { s_ControllerState = state; };
 
 		static const float GetCameraZoomLevel() { return s_ZoomValue; };
 		static const float GetCameraRotation() { return s_CameraRotation; };
@@ -27,20 +38,30 @@ namespace MSD {
 		static const glm::mat4& GetProjectionMatrix();
 		static const glm::mat4& GetViewProjectionMatrix();
 
-		static void HandleObjectInputs(Substrate* substrate, Timestep* timestep);
-		static void HandleObjectInputs(Magnetron* magnetron, Timestep* timestep);
 		static void ObjectOnUpdate(Timestep* timestep);
 
+		static void ObjectStartTransform(AngMSDObject* object);
+
 		inline static void SetCameraSpeed(float speed) { s_CameraSpeed = speed; }
+
 	private:
+	// GLOBAL EVENTS 
+		static bool GlobalEventMouseMoved(MouseMovedEvent& event);
+	// CAMERA EVENTS
 		static bool CameraEventMouseScrolled(MouseScrolledEvent& event);
 		static bool CameraEventMouseDoubleClicked(MouseButtonDoubleClickedEvent& event);
 		static bool CameraEventMouseButtonPressed(MouseButtonPressedEvent& event);
 		static bool CameraEventMouseButtonReleased(MouseButtonReleasedEvent& event);
 		static bool CameraEventMouseMoved(MouseMovedEvent& event);
+
+	// OBJECT EVENTS
+		static bool ObjectEventMouseButtonPressed(MouseButtonPressedEvent& event);
+		static bool ObjectEventMouseButtonReleased(MouseButtonReleasedEvent& event);
+		static bool ObjectEventKeyPressed(KeyPressedEvent& event);
+		static bool ObjectEventKeyReleased(KeyReleasedEvent& event);
+		static bool ObjectEventMouseMoved(MouseMovedEvent& event);
 	private:
 		static OrthographicCamera* s_Camera;
-		static AngMSDObject* s_SelectedObject;
 
 		static const glm::mat4 s_NullMatrix;
 
@@ -53,11 +74,24 @@ namespace MSD {
 
 		static glm::vec2 s_CurrMousePos;
 		static glm::vec2 s_LastMousePos;
+		static glm::vec2 s_Delta;
+
+		static glm::vec2 s_ObjectPos;
 		static glm::vec2 s_WindowSizeRatio;
 
-		static bool s_Draggable;
-		static bool s_EnableEvents;
-		static bool s_isDragging;
+		static bool s_CameraDraggable;
+		static bool s_EnableCameraEvents;
+
+		static ControllerState s_ControllerState;
+
+		// Containers
+		static std::unique_ptr<Object> s_ObjectBeforeTransform;
+		static AngMSDObject* s_TransformingObject;
+
+		static bool s_ObjectSticking;
+
+	public:
+		static bool DragObject;
 	};
 
 }

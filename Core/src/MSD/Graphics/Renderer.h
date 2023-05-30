@@ -23,6 +23,7 @@ namespace MSD {
 		void Draw(const std::shared_ptr<VertexArray> va);
 		void DrawObject(Object* obj);
 		void DrawLines(const std::shared_ptr<VertexArray> va, float thickness = 2.0f);
+		void DrawPoints(const std::shared_ptr<VertexArray> va, float pointSize = 10.0f);
 		void DrawGrid(Shader* shader);
 		void DrawRect(Object* rect = nullptr);
 		void DrawRectOutline(Object* rect = nullptr, glm::vec3 position = glm::vec3(0, 0, 0));
