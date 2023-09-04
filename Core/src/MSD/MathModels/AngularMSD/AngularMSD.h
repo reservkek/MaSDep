@@ -14,9 +14,7 @@ namespace MSD {
 		AngMSD();
 		~AngMSD()
 		{
-			delete m_Substrate;
-			delete m_SubstrateBuffer;
-			for (auto i_magnetron : m_Magnetrons) delete i_magnetron;
+			delete s_Instance;
 		};
 		
 		inline int GetTimeTicksCounter() const { return m_TimeTicksCounter; }
@@ -52,7 +50,7 @@ namespace MSD {
 		float m_CurrentTime = 0;
 
 		// Пространство в модели
-		unsigned int m_spaceRatio = 100; // Разделение 1 метра пространства на виртуальные отрезки
+		unsigned int m_SpaceRatio = 100; // Разделение 1 метра пространства на виртуальные отрезки
 
 		// Другие параметры
 		float m_RotationLimit = 1;
@@ -83,6 +81,10 @@ namespace MSD {
 		// Данные для вывода в текстовый файл.
 		std::vector<std::vector<float>*> m_ExportData = {};
 		std::vector<std::string> m_ExportDataColumnNames = {};
+
+		// Simulation time calculations
+		float m_SimulationTime = 0.0f;
+		std::chrono::time_point<std::chrono::system_clock> m_TimePointStart;
 
 		static AngMSD* s_Instance;
 		bool m_ModelRunning = false;

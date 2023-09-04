@@ -48,6 +48,8 @@ namespace MSD {
 
 		m_ToBeCleared = true;
 		m_ModelRunning = true;
+
+		m_TimePointStart = std::chrono::system_clock::now();
 		return true;
 	}
 
@@ -62,6 +64,7 @@ namespace MSD {
 		if (m_ToBeCleared == false) return;
 		m_ToBeCleared = false;
 
+		m_SimulationTime = 0.0f;
 		m_TimeTicksCounter = 0;
 		m_RotationCounter = 0;
 		m_CurrentProgress = 0;
@@ -126,6 +129,9 @@ namespace MSD {
 		m_CurrentProgress += m_CurrentProgressDelta;
 		m_CurrentTime += m_TimePerTick;
 		m_TimeTicksCounter++;
+
+		auto timePointNow = std::chrono::system_clock::now();
+		m_SimulationTime = std::chrono::duration_cast<std::chrono::milliseconds>(timePointNow - m_TimePointStart).count()*0.001f;
 	}
 
 	void AngMSD::AddMagnetron()

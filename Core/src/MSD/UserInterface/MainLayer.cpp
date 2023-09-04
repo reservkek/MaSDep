@@ -433,6 +433,7 @@ namespace MSD {
 		ImGui::Text("Ticks: %d", model.m_TimeTicksCounter);
 		ImGui::Text("Magnetrons: %d", model.m_Magnetrons.size());
 		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+		ImGui::Text("Simulation time: %.1f s", model.m_SimulationTime);
 
 		if (ImGui::InputFloat("Rotation Limit", &model.m_RotationLimit)) {
 			if (model.m_RotationLimit < 0) model.m_RotationLimit = 0;
