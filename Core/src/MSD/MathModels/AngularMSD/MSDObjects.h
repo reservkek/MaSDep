@@ -16,6 +16,10 @@ namespace MSD {
 	{
 	public:
 		AngMSDObject(const vec3& pos, const vec3& normal);
+		~AngMSDObject();
+
+		void SetID(unsigned int val);
+		int GetID() const { return m_ID; }
 
 		float* GetPosX() { return &(msdpos.x); }
 		float* GetPosY() { return &(msdpos.y); }
@@ -23,6 +27,10 @@ namespace MSD {
 		float* GetNormalX() { return &(msdnormal.x); }
 		float* GetNormalY() { return &(msdnormal.y); }
 		float* GetNormalZ() { return &(msdnormal.z); }
+
+		virtual std::string GetType() const { return m_Type; }
+
+		static AngMSDObject* GetObject(unsigned int id);
 
 		vec3& GetPos() { return msdpos; }
 		vec3& GetNormal() { return msdnormal; }
@@ -33,7 +41,10 @@ namespace MSD {
 
 		void SetGraphicsObject(Object* obj) { m_Object = obj; }
 		Object* GetGraphicsObject() const { return m_Object; }
+
+		friend class MainLayer;
 	protected:
+		unsigned int m_ID;
 		// Geometry
 		vec3 msdpos, msdnormal;
 
@@ -41,6 +52,11 @@ namespace MSD {
 		Object* m_Object = nullptr;
 
 		std::shared_ptr<Arrow> m_NormalVectorArrow;
+
+		std::string m_Type;
+	private:
+		static std::unordered_map<unsigned int, AngMSDObject*> s_Objects;
+		static std::vector<unsigned int> s_KeyValues;
 	};
 
 	class Magnetron : public AngMSDObject
@@ -52,7 +68,6 @@ namespace MSD {
 		Magnetron(const vec3& pos = { 0.0, 25.0, 0.0 }, const vec3& normal = { 0.0, -1.0, 0.0 }, const float& radius = 4.5);
 		~Magnetron();
 
-		void SetIndex(unsigned int val) { m_Index = val; }
 		void Rotate();
 		void WriteDepRate();
 		void WriteGamma(const float& gamma);
@@ -60,9 +75,10 @@ namespace MSD {
 		void InputSputRates(const char* filepath, const float& integrationDelta);
 		void Clear();
 
+		virtual std::string GetType() const override { return m_Type; };
+
 		float FindSputRate(const float& radius);
 
-		int GetIndex() { return m_Index; }
 		float* GetRadius() { return &m_Radius; }
 		float* GetRotationAngle() { return &(m_RotationAngle); }
 		float& GetCurrentDepRate() { return m_CurrentDepRate; }
@@ -100,6 +116,8 @@ namespace MSD {
 
 		bool m_FilePathErr = false;
 		std::string m_ErrorMsg = "";
+
+		std::string m_Type = "Magnetron";
 	};
 
 	class Substrate : public AngMSDObject
@@ -121,6 +139,8 @@ namespace MSD {
 		float& GetTotalSubAngleDelta() { return m_TotalSubAngleDelta; }
 		float& GetTotalDeposited() { return m_TotalDeposited; }
 
+		virtual std::string GetType() const override { return m_Type; };
+
 		std::vector<float>& GetDepEvolution() { return m_DepEvolution; }
 	private:
 		float RPM, subRPM; // Rotations per minute
@@ -133,5 +153,7 @@ namespace MSD {
 
 		std::vector<float> m_TimeEvolution;
 		std::vector<float> m_DepEvolution;
+
+		std::string m_Type = "Substrate";
 	};
 }

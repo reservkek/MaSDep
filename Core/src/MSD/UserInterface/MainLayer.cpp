@@ -97,6 +97,7 @@ namespace MSD {
 		if (show_popup_file_path_err) FilePathErrPopup(&show_popup_file_path_err, &errorMsg);
 		if (show_popup_success) SuccessPopup(&show_popup_success);
 		if (show_app_model_parameters) ModelParametersWindow(&show_app_model_parameters);
+		if (show_app_model_objecttree) ModelObjectTree(&show_app_model_objecttree);
 		if (show_app_model_results) ModelResultsWindow(&show_app_model_results);
 		if (show_app_model_viewport) ModelViewportWindow(&show_app_model_viewport);
 		if (show_app_periodic_table) PeriodicTableWindow(&show_app_periodic_table, m_SelectedElement);
@@ -128,7 +129,6 @@ namespace MSD {
 	{
 		if (!show_app_model_viewport) return;
 
-
 		ApplicationCore& app = ApplicationCore::Get();
 		AngMSD& model = app.GetModel();
 		auto graphicsLayer = app.GetGraphicsLayer();
@@ -159,13 +159,13 @@ namespace MSD {
 			{
 				toBeSelected = true;
 
-				if (hoveredID == Renderer::GetSelectedItem() && hoveredID != 1)
+				if (hoveredID == Renderer::GetSelectedItemID() && hoveredID != -1)
 				{
-					Controller::DragObject = true;
+					Controller::DragObjectStart();
 				}
 				else
 				{
-					Controller::DragObject = false;
+					Controller::DragObjectStop();
 				}
 			}
 
@@ -176,27 +176,32 @@ namespace MSD {
 
 			if (ImGui::IsMouseReleased(ImGuiMouseButton_Left) && toBeSelected)
 			{
-				app.GetGraphicsLayer()->SetSelectedItem(hoveredID);
-				if (hoveredID == -1) Controller::SetState(ControllerState::View);
+				SetSelectedObject(hoveredID);
 			}
 
 			if (hoveredID == 99999)
 			{
-				ImGui::BeginTooltip();
-				ImGui::PushTextWrapPos(ImGui::GetFontSize() * 100.0f);
-				ImGui::TextUnformatted("Substrate");
-				ImGui::PopTextWrapPos();
-				ImGui::EndTooltip();
+				///
 			}
 
-			/*std::cout << "ID: " << hoveredID << "\n";*/
+			std::cout << "ID: " << hoveredID << "\n";
+			std::cout << "Selected Object: " << Renderer::GetSelectedItemID() << "\n";
 
-			if (Renderer::GetSelectedItem() == model.m_Substrate->GetGraphicsObject()->GetID())
+			if (Renderer::GetSelectedItemID() != -1)
 			{
 				Controller::DisableCameraEvents();
-				Controller::ObjectStartTransform(model.m_Substrate);
+				Controller::ObjectStartTransform(AngMSDObject::GetObject(Renderer::GetSelectedItemID()));
 			}
 		}
+	}
+
+	void MainLayer::SetSelectedObject(unsigned int id)
+	{
+		ApplicationCore& app = ApplicationCore::Get();
+
+		m_SelectedObjectID = id;
+		app.GetGraphicsLayer()->SetSelectedItem(id);
+		if (id == -1 or id == 0) Controller::SetState(ControllerState::View);
 	}
 
 	// STATIC FUNCTIONS
@@ -327,13 +332,16 @@ namespace MSD {
 				ImGui::MenuItem("Save", NULL, &show_app_console);
 				ImGui::EndMenu();
 			}
+			SetHandCursor();
 			if (ImGui::BeginMenu("Model"))
 			{
 				ImGui::MenuItem("Model parameters", NULL, &show_app_model_parameters);
+				ImGui::MenuItem("Object tree", NULL, &show_app_model_objecttree);
 				ImGui::MenuItem("Results", NULL, &show_app_model_results);
 				ImGui::MenuItem("Viewport", NULL, &show_app_model_viewport);
 				ImGui::EndMenu();
 			}
+			SetHandCursor();
 			if (ImGui::BeginMenu("Tools"))
 			{
 				ImGui::MenuItem("null", NULL, &show_app_property_editor);
@@ -385,6 +393,7 @@ namespace MSD {
 						}
 					}
 				}
+				SetHandCursor();
 
 				// Always center this window when appearing
 				ImVec2 center = ImGui::GetMainViewport()->GetCenter();
@@ -396,6 +405,7 @@ namespace MSD {
 					ImGui::Separator();
 
 					if (ImGui::Button("OK", ImVec2(120, 0))) { ImGui::CloseCurrentPopup(); }
+					SetHandCursor();
 					ImGui::SetItemDefaultFocus();
 					ImGui::SameLine();
 					ImGui::EndPopup();
@@ -452,44 +462,92 @@ namespace MSD {
 		{
 			model.AddMagnetron();
 			graphicsLayer->UpdateObjects();
+			ImGui::SetWindowFocus("Object tree");
+			SetSelectedObject(model.m_Magnetrons.back()->GetID());
 		}
 
-		unsigned int count = 0;
-		for (auto i_magnetron : model.m_Magnetrons)
+		ImGui::End();
+	}
+
+	void MainLayer::ModelObjectTree(bool* p_open)
+	{
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2(400, 400));
+		if (!ImGui::Begin("Object tree", p_open))
 		{
-			count++;
-			bool keepMagnetron = true; // Deletes magnetron if false
-			if (!i_magnetron->GetIndex()) { i_magnetron->SetIndex(model.m_MagnetronIndex); }
-			std::string countstr = "Magnetron " + std::to_string(i_magnetron->GetIndex());
-			ImGui::PushID(count);
-			if (ImGui::CollapsingHeader((const char*)countstr.c_str(), &keepMagnetron, ImGuiTreeNodeFlags_DefaultOpen))
-			{
-				ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 5.0f);
-				ImGui::BeginChild("DA", ImVec2(0, 200), true);
-				MagnetronParameters(i_magnetron);
-				ImGui::PopStyleVar();
-				ImGui::EndChild();
-			}
-			if (keepMagnetron == false)
-			{
-				model.DeleteMagnetron(count);
-				graphicsLayer->UpdateObjects();
-				if (model.m_Magnetrons.size() != 0) { model.m_MagnetronIndex = model.m_Magnetrons.back()->GetIndex(); }
-				else { model.m_MagnetronIndex = 0; }
-			}
-			ImGui::PopID();
+			ImGui::PopStyleVar();
+			ImGui::End();
+			return;
 		}
+		ImGui::PopStyleVar();
+
+		ApplicationCore& app = ApplicationCore::Get();
+		AngMSD& model = app.GetModel();
+		GraphicsLayer* graphicsLayer = app.GetGraphicsLayer();
+		ImGuiIO& io = ImGui::GetIO();
+		ImGuiWindowFlags window_flags = ImGuiWindowFlags_HorizontalScrollbar;
+
+		ImGui::BeginChild("ChildObjectTree", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y*0.5f), false, window_flags);
+
+		bool is_selected = false;
+		unsigned int selectedElement = 0;
+
+		unsigned int count = 1;
+		auto& objects = AngMSDObject::s_Objects;
+		auto& keys = AngMSDObject::s_KeyValues;
+
+		std::vector<std::string> name_container;
+		name_container.push_back("Magnetron");
+
+		for (int i = 0; i < keys.size(); ++i)
+		{
+			is_selected = objects[keys[i]]->GetID() == m_SelectedObjectID;
+			std::string name = objects[keys[i]]->GetType();
+			while (std::find(name_container.begin(), name_container.end(), name) != name_container.end())
+			{
+				name = objects[keys[i]]->GetType() + " " + std::to_string(count);
+				count++;
+			}
+			count = 1;
+			name_container.push_back(name);
+
+			ImGui::Selectable((const char*)name.c_str(), is_selected);
+			if (ImGui::IsItemClicked()) SetSelectedObject(objects[keys[i]]->GetID());
+		}
+
+		ImGui::EndChild();
 		ImGui::Separator();
-		SubstrateParameters(model.m_Substrate);
+
+		if (m_SelectedObjectID == -1 or m_SelectedObjectID == 0)
+		{
+			ImGui::End();
+			return;
+		}
+
+		if (objects[m_SelectedObjectID]->GetType() == "Substrate")
+		{
+			SubstrateParameters((Substrate*)objects[m_SelectedObjectID]);
+		}
+
+		if (objects[m_SelectedObjectID]->GetType() == "Magnetron")
+		{
+			MagnetronParameters((Magnetron*)objects[m_SelectedObjectID]);
+
+			if (ImGui::Button("Delete magnetron"))
+			{
+			}
+		}
 
 		ImGui::End();
 	}
 
 	void MainLayer::MagnetronParameters(Magnetron* magnetron)
 	{
-		ImGui::InputFloat("Radius", magnetron->GetRadius());
+		if (magnetron == nullptr) return;
+
+		ImGui::Button("Magnetron Properties", ImVec2(ImGui::GetContentRegionAvail().x, 20));
+		ImGui::InputFloat("Radius (cm)", magnetron->GetRadius());
 		float* pos[3] = { magnetron->GetPosX(), magnetron->GetPosY(), magnetron->GetPosZ() };
-		DrawVec3Control("Magnetron position", *pos);
+		DrawVec3Control("Magnetron position (cm)", *pos);
 		float* normal[3] = { magnetron->GetNormalX(), magnetron->GetNormalY(), magnetron->GetNormalZ() };
 		DrawVec3Control("Magnetron normal vector", *normal);
 		ImGui::InputFloat("###rotate", magnetron->GetRotationAngle());
@@ -520,26 +578,24 @@ namespace MSD {
 
 	void MainLayer::SubstrateParameters(Substrate* substrate)
 	{
-		if (ImGui::CollapsingHeader("Substrate", ImGuiTreeNodeFlags_DefaultOpen))
+		ImGui::Button("Substrate Properties", ImVec2(ImGui::GetContentRegionAvail().x, 20));
+		float* pos[3] = { substrate->GetPosX(), substrate->GetPosY(), substrate->GetPosZ() };
+		DrawVec3Control("Magnetron position", *pos);
+		float* normal[3] = { substrate->GetNormalX(), substrate->GetNormalY(), substrate->GetNormalZ() };
+		DrawVec3Control("Magnetron normal vector", *normal);
+		ImGui::InputFloat("###rotate", substrate->GetRotationAngle());
+		ImGui::SameLine();
+		if (ImGui::Button("Rotate clockwise"))
 		{
-			float* pos[3] = { substrate->GetPosX(), substrate->GetPosY(), substrate->GetPosZ() };
-			DrawVec3Control("Magnetron position", *pos);
-			float* normal[3] = { substrate->GetNormalX(), substrate->GetNormalY(), substrate->GetNormalZ() };
-			DrawVec3Control("Magnetron normal vector", *normal);
-			ImGui::InputFloat("###rotate", substrate->GetRotationAngle());
-			ImGui::SameLine();
-			if (ImGui::Button("Rotate clockwise"))
-			{
-				substrate->Rotate();
-			}
-			ImGui::PushItemWidth(110.0f);
-			ImGui::InputFloat("RPM", substrate->GetRPM());
-			ImGui::SameLine();
-			ImGui::Dummy(ImVec2(20.0f, ImGui::GetFrameHeight()));
-			ImGui::SameLine();
-			ImGui::InputFloat("Sub RPM", substrate->GetSubRPM());
-			ImGui::PopItemWidth();
+			substrate->Rotate();
 		}
+		ImGui::PushItemWidth(110.0f);
+		ImGui::InputFloat("RPM", substrate->GetRPM());
+		ImGui::SameLine();
+		ImGui::Dummy(ImVec2(20.0f, ImGui::GetFrameHeight()));
+		ImGui::SameLine();
+		ImGui::InputFloat("Sub RPM", substrate->GetSubRPM());
+		ImGui::PopItemWidth();
 	}
 
 
@@ -633,6 +689,7 @@ namespace MSD {
 		mouseX *= 0.1;
 		mouseY *= 0.1;
 
+		// MOUSE COORDS CORNER BOX //
 		std::string str = std::format("{:.3f} cm", mouseX) + " ; " + std::format("{:.3f} cm", mouseY);
 		str += std::string("###CoordBox");
 		const char* name = str.c_str();
@@ -641,6 +698,7 @@ namespace MSD {
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1.0f, 1.0f, 0.8f, 0.5f));
 		if (ImGui::Button(name, ImVec2(130.0f, 0.0f))) {}
 		ImGui::PopStyleColor(3);
+		//////////////
 
 		ImGui::End();
 		return;
@@ -684,7 +742,7 @@ namespace MSD {
 			depRatesData.push_back(&depRates);
 
 			ImGui::PushID(count);
-			std::string countstr = "Deposition rate of magnetron " + std::to_string(magnetron->GetIndex());;
+			std::string countstr = "Deposition rate of magnetron " + std::to_string(magnetron->GetID());;
 			if (ImGui::CollapsingHeader((const char*)countstr.c_str()))
 			{
 				DynamicPlot(FindPlotCond(), depRates, axesDepRates);

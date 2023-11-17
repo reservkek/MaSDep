@@ -18,13 +18,14 @@ namespace MSD {
 	glm::vec2 Controller::s_LastMousePos = glm::vec2(0.0f, 0.0f);
 	glm::vec2 Controller::s_Delta = glm::vec2(0.0f, 0.0f);
 	glm::vec2 Controller::s_ObjectPos = glm::vec2(0.0f, 0.0f);
+	glm::vec2 Controller::s_ObjectPosVirtual = glm::vec2(0.0f, 0.0f);
 	glm::vec2 Controller::s_WindowSizeRatio = glm::vec2(0.0f, 0.0f);
 
 
 	bool Controller::s_CameraDraggable = false;
 	bool Controller::s_EnableCameraEvents = true;
 
-	bool Controller::DragObject = false;
+	bool Controller::s_DragObject = false;
 
 	ControllerState Controller::s_ControllerState = ControllerState::View;
 
@@ -238,6 +239,20 @@ namespace MSD {
 	///// OBJECT INPUTS /////
 	/////////////////////////
 
+	void Controller::DragObjectStart()
+	{
+		s_DragObject = true;
+		if (s_TransformingObject != nullptr) {
+			s_ObjectPos.x = s_TransformingObject->GetPos().x;
+			s_ObjectPos.y = s_TransformingObject->GetPos().y;
+		}
+	}
+
+	void Controller::DragObjectStop()
+	{
+		s_DragObject = false;
+	}
+
 	bool Controller::ObjectEventMouseButtonPressed(MouseButtonPressedEvent& event)
 	{
 		if (event.GetMouseButton() == 0)
@@ -273,7 +288,7 @@ namespace MSD {
 
 	bool Controller::ObjectEventMouseMoved(MouseMovedEvent& event)
 	{
-		if (s_CameraDraggable && DragObject)
+		if (s_CameraDraggable && s_DragObject)
 		{
 			float angle = s_CameraRotation * PI / 180;
 
@@ -282,13 +297,13 @@ namespace MSD {
 
 			if (s_TransformingObject != nullptr)
 			{
-				s_ObjectPos.x = s_TransformingObject->GetPos().x - dX;
-				s_ObjectPos.y = s_TransformingObject->GetPos().y - dY;
+				s_ObjectPos.x = s_ObjectPos.x - dX;
+				s_ObjectPos.y = s_ObjectPos.y - dY;
 
 				if (s_ObjectSticking)
 				{
-/*					s_TransformingObject->GetPos().x = std::round(s_ObjectPos.x);
-					s_TransformingObject->GetPos().y = std::round(s_ObjectPos.y);	*/			
+					s_TransformingObject->GetPos().x = std::round(s_ObjectPos.x);
+					s_TransformingObject->GetPos().y = std::round(s_ObjectPos.y);
 				}
 				else
 				{

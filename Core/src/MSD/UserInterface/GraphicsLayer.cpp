@@ -90,7 +90,7 @@ namespace MSD {
 	}
 	void GraphicsLayer::SetSelectedItem(int id)
 	{
-		Renderer::GetSelectedItem() = id;
+		Renderer::GetSelectedItemID() = id;
 	}
 
 	void GraphicsLayer::UpdateObjects()
@@ -102,7 +102,7 @@ namespace MSD {
 		auto s = substrate->GetGraphicsObject();
 		renderer.AddExistingObject(s);
 
-		s->SetID(99999);
+		s->SetID(substrate->GetID());
 		s->SetColor({ 0.9f, 0.05f, 0.05f, 1.0f });
 
 		// Adding substrate normal vector
@@ -121,9 +121,9 @@ namespace MSD {
 			renderer.AddExistingObject(m);
 			renderer.AddExistingObject(m_arrow);
 
-			m->SetID(magnetron->GetIndex()+10000);
+			m->SetID(magnetron->GetID());
 
-			m_arrow->SetID((magnetron->GetIndex() + 10000)*50);
+			m_arrow->SetID((magnetron->GetID() + 10000)*50);
 			m_arrow->SetColor({ 0.9f, 0.05f, 0.9f, 1.0f });
 		}
 

@@ -39,7 +39,7 @@ namespace MSD {
 		void Flush();
 
 
-		static int& GetSelectedItem() { return s_SelectedID; }
+		static int& GetSelectedItemID() { return s_SelectedID; }
 		static void GetOpenGLVersion();
 		//void CreateElement(const MSMagnetron& object, VertexArray& va, const VertexBufferLayout& layout);
 	private:

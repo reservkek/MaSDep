@@ -38,6 +38,7 @@ namespace MSD {
 		void MainPanel();
 
 		// WINDOWS
+		void ModelObjectTree(bool* p_open);
 		void ModelParametersWindow(bool* p_open);
 		void ModelResultsWindow(bool* p_open);
 		void ModelViewportWindow(bool* p_open);
@@ -58,15 +59,17 @@ namespace MSD {
 		// FUNCTIONS
 		bool GetViewportStatus() { return show_app_model_viewport; }
 		void ReadViewPortObjects();
+		void SetSelectedObject(unsigned int id);
 
 		ImPlotCond FindPlotCond();
 	private:
+		bool show_app_model_objecttree = true;
 		bool show_app_main_menu_bar = false;
 		bool show_app_console = false;
-		bool show_app_model_parameters = false;
+		bool show_app_model_parameters = true;
 		bool show_app_model_results = false;
 		bool show_app_property_editor = false;
-		bool show_app_model_viewport = false;
+		bool show_app_model_viewport = true;
 		bool show_app_periodic_table = false;
 
 		bool show_popup_file_path_err = false;
@@ -79,6 +82,8 @@ namespace MSD {
 		float m_Time = 0.0f;
 
 		bool m_ViewPortHandleInputs = false;
+
+		int m_SelectedObjectID = -1;
 
 		glm::vec2 m_ViewportBounds[2] = { glm::vec2(0), glm::vec2(0) };
 		float m_ViewportHeaderSize = 0.0f;

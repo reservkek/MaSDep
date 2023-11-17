@@ -11,6 +11,7 @@ namespace MSD {
 	AngMSD::AngMSD()
 	{
 		s_Instance = this;
+		m_Substrate->SetID(1248956);
 	}
 
 	bool AngMSD::Run()
@@ -90,7 +91,7 @@ namespace MSD {
 		for (auto magnetron : m_MagnetronsBuffer)
 		{
 			m_ExportData.push_back(&magnetron->GetDepRates());
-			std::string name = std::string("Dep rate from magnetron No.") + std::to_string(magnetron->GetIndex()) + std::string(" (m/s)");
+			std::string name = std::string("Dep rate from magnetron No.") + std::to_string(magnetron->GetID()) + std::string(" (m/s)");
 
 			m_ExportDataColumnNames.push_back(name);
 		}
@@ -137,13 +138,16 @@ namespace MSD {
 	void AngMSD::AddMagnetron()
 	{
 		m_Magnetrons.push_back(new Magnetron());
-		m_MagnetronIndex++;
-		m_Magnetrons.back()->SetIndex(m_MagnetronIndex);
+		m_Magnetrons.back()->SetID(m_MagnetronIndex+1);
+		m_MagnetronIndex = (unsigned int)m_Magnetrons.size();
+		m_RecentMagnetronID = m_MagnetronIndex+1;
 	}
 
 	void AngMSD::DeleteMagnetron(unsigned int& index)
 	{
+		delete m_Magnetrons.at(index - 1);
 		m_Magnetrons.erase(m_Magnetrons.begin()+index-1);
+		m_MagnetronIndex = index;
 	}
 
 	void AngMSD::CalculateFlux(Magnetron* magnetron, Substrate* substrate, bool write)

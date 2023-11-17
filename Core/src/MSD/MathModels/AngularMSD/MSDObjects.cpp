@@ -8,11 +8,46 @@ namespace MSD {
 	// GENERAL ANGULAR MSD OBJECT //
 	////////////////////////////////
 
+	std::unordered_map<unsigned int, AngMSDObject*> AngMSDObject::s_Objects
+		= std::unordered_map<unsigned int, AngMSDObject*>();
+	
+	std::vector<unsigned int> AngMSDObject::s_KeyValues = std::vector<unsigned int>();
+
+	AngMSDObject* AngMSDObject::GetObject(unsigned int id)
+	{
+		return s_Objects[id];
+	}
+
 	AngMSDObject::AngMSDObject(const vec3& pos, const vec3& normal)
 		: msdpos(pos), msdnormal(normal)
 	{
 		m_Object = new Rect();
 		m_NormalVectorArrow.reset(new Arrow);
+		m_ID = NULL;
+	}
+
+	AngMSDObject::~AngMSDObject()
+	{
+		s_Objects.erase(m_ID);
+	}
+
+	void AngMSDObject::SetID(unsigned int val)
+	{
+		if (val == m_ID) return;
+		bool validID = (s_Objects.find(val) == s_Objects.end());
+		if (val == 0) validID = true;
+		if (!validID)
+		{
+			std::cout << "ID " << val <<" is already taken. Trying next...\n";
+			SetID(val + 1);
+			return;
+		}
+		s_Objects.insert({ val, this });
+		s_KeyValues.push_back(val);
+
+		m_ID = val;
+		m_Object->SetID(val);
+		std::cout << "ID: " << val << " was set to " << GetType() << std::endl;
 	}
 
 	float AngMSDObject::CalcAngle()
@@ -35,6 +70,7 @@ namespace MSD {
 
 	Magnetron::~Magnetron()
 	{
+		std::cout << "ID " << m_ID << " was set free when " << GetType() << " was deleted.\n";
 	}
 
 	void Magnetron::Rotate()

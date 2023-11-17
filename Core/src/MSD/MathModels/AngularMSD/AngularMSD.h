@@ -19,6 +19,7 @@ namespace MSD {
 		
 		inline int GetTimeTicksCounter() const { return m_TimeTicksCounter; }
 		inline float GetCurrentProgress() const { return m_CurrentProgress; }
+		inline unsigned int GetRecentMagnetronID() const { return m_RecentMagnetronID; }
 		bool& GetStatus() { return m_ModelRunning; }
 
 		inline static AngMSD& GetModelID() { return *s_Instance; }
@@ -32,6 +33,7 @@ namespace MSD {
 
 		void AddMagnetron();
 		void DeleteMagnetron(unsigned int& index);
+
 
 		std::string GetErrorMessage() { return m_ErrorMsg; }
 		float& GetCurrentTime() { return m_CurrentTime; }
@@ -70,6 +72,7 @@ namespace MSD {
 		Substrate* m_Substrate = new Substrate();
 		std::vector<Magnetron*> m_Magnetrons;
 		unsigned int m_MagnetronIndex = 0;
+		unsigned int m_RecentMagnetronID = 0;
 
 		// Буфер для расчёта
 		Substrate* m_SubstrateBuffer = new Substrate();
