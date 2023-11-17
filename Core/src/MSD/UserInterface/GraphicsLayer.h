@@ -33,7 +33,7 @@ namespace MSD {
 		void SetModel(AngMSD* model) { m_Model = model; };
 
 		bool& isUpdating() { return m_Updating; }
-		void SetSelectedItem(unsigned int id);
+		void SetSelectedItem(int id);
 
 		void UpdateObjects();
 		void UpdateObjectStates();
@@ -56,21 +56,6 @@ namespace MSD {
 		Shader* gridShader;
 
 		std::shared_ptr<FrameBuffer> fb;
-
-		glm::mat4 proj = glm::ortho(-400.0f, 400.0f, -400.0f, 400.0f);
-		glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
-
-		glm::mat4 mvp = proj;
-
-		float coords[12] =
-		{
-			-200.0f, -200.0f, 0.0f,
-			 200.0f, -200.0f, 0.0f,
-			-200.0f,  200.0f, 0.0f,
-			 200.0f,  200.0f, 0.0f
-		};
-
-		uint32_t indices[6] = { 0, 1, 2, 1, 2, 3 };
 
 		BufferLayout layout =
 		{

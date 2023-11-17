@@ -38,6 +38,7 @@ namespace MSD {
 		void MainPanel();
 
 		// WINDOWS
+		void ModelObjectTree(bool* p_open);
 		void ModelParametersWindow(bool* p_open);
 		void ModelResultsWindow(bool* p_open);
 		void ModelViewportWindow(bool* p_open);
@@ -49,7 +50,7 @@ namespace MSD {
 
 		// WIDGETS
 		void DynamicPlot(ImPlotCond cond, std::vector<float>& data, const char* axes[2]);
-		void ExportButton(std::vector<std::vector<float>*> data, const char* id = "");
+		void ExportButton(std::vector<std::vector<float>*> data, std::vector<std::string> column_names = {});
 
 		// POPUPS
 		void SuccessPopup(bool* p_open);
@@ -58,23 +59,23 @@ namespace MSD {
 		// FUNCTIONS
 		bool GetViewportStatus() { return show_app_model_viewport; }
 		void ReadViewPortObjects();
+		void SetSelectedObject(unsigned int id);
 
 		ImPlotCond FindPlotCond();
 	private:
-		bool toBeSelected = false;
-
-		int val = 0;
-
+		bool show_app_model_objecttree = true;
 		bool show_app_main_menu_bar = false;
 		bool show_app_console = false;
-		bool show_app_model_parameters = false;
+		bool show_app_model_parameters = true;
 		bool show_app_model_results = false;
 		bool show_app_property_editor = false;
-		bool show_app_model_viewport = false;
+		bool show_app_model_viewport = true;
 		bool show_app_periodic_table = false;
 
 		bool show_popup_file_path_err = false;
 		bool show_popup_success = false;
+
+		bool toBeSelected = false;
 
 		float m_ProgressBar = 0;
 
@@ -82,7 +83,9 @@ namespace MSD {
 
 		bool m_ViewPortHandleInputs = false;
 
-		glm::vec2 m_ViewportBounds[2];
+		int m_SelectedObjectID = -1;
+
+		glm::vec2 m_ViewportBounds[2] = { glm::vec2(0), glm::vec2(0) };
 		float m_ViewportHeaderSize = 0.0f;
 		float m_ViewportWindowRelation = 1.0f;
 
@@ -92,11 +95,14 @@ namespace MSD {
 		const char* axesDepEvolution[2] = { "Time (s)", "Number of deposited atoms (1/m2)" };
 		const char* axesDepRates[2] = { "Time (s)", "Deposition rate (m/s)" } ;
 
-		nfdchar_t* outPath = (nfdchar_t*)"";
+		nfdchar_t* m_OutPath = (nfdchar_t*)"";
 		bool m_AllowInputWindow = true;
-		nfdresult_t result = NFD_ERROR;
+		nfdresult_t m_FileResult = NFD_ERROR;
 
 		Element* m_SelectedElement = nullptr;
+
+		double m_ViewportMousePosX = -1.0f;
+		double m_ViewportMousePosY = -1.0f;
 	};
 
 }

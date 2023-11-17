@@ -1,7 +1,7 @@
 #include "msdpch.h"
 
 #include "MainLayer.h"
-#include "Input/Controller.h"
+#include "Controller.h"
 
 #include "GLFW/glfw3.h"
 
@@ -97,6 +97,7 @@ namespace MSD {
 		if (show_popup_file_path_err) FilePathErrPopup(&show_popup_file_path_err, &errorMsg);
 		if (show_popup_success) SuccessPopup(&show_popup_success);
 		if (show_app_model_parameters) ModelParametersWindow(&show_app_model_parameters);
+		if (show_app_model_objecttree) ModelObjectTree(&show_app_model_objecttree);
 		if (show_app_model_results) ModelResultsWindow(&show_app_model_results);
 		if (show_app_model_viewport) ModelViewportWindow(&show_app_model_viewport);
 		if (show_app_periodic_table) PeriodicTableWindow(&show_app_periodic_table, m_SelectedElement);
@@ -128,7 +129,6 @@ namespace MSD {
 	{
 		if (!show_app_model_viewport) return;
 
-
 		ApplicationCore& app = ApplicationCore::Get();
 		AngMSD& model = app.GetModel();
 		auto graphicsLayer = app.GetGraphicsLayer();
@@ -141,10 +141,12 @@ namespace MSD {
 		mx -= m_ViewportBounds[0].x;
 		my -= m_ViewportBounds[0].y;
 		glm::vec2 viewportSize = m_ViewportBounds[1] - m_ViewportBounds[0];
-		//my = viewportSize.y - m_ViewportHeaderSize - my;
 
-		int mouseX = (int)(mx * m_ViewportWindowRelation);
-		int mouseY = (int)(fbSize - (my * m_ViewportWindowRelation));
+		m_ViewportMousePosX = (mx * m_ViewportWindowRelation);
+		m_ViewportMousePosY = (fbSize - (my * m_ViewportWindowRelation));
+
+		auto mouseX = (int)m_ViewportMousePosX;
+		auto mouseY = (int)m_ViewportMousePosY;
 
 		if (mouseX > 0 && mouseY > 0 && mouseX < (int)fbSize && mouseY < (int)fbSize)
 		{
@@ -156,6 +158,15 @@ namespace MSD {
 			if (ImGui::IsMouseClicked(ImGuiMouseButton_Left))
 			{
 				toBeSelected = true;
+
+				if (hoveredID == Renderer::GetSelectedItemID() && hoveredID != -1)
+				{
+					Controller::DragObjectStart();
+				}
+				else
+				{
+					Controller::DragObjectStop();
+				}
 			}
 
 			if (ImGui::IsMouseDragging(ImGuiMouseButton_Left))
@@ -165,28 +176,37 @@ namespace MSD {
 
 			if (ImGui::IsMouseReleased(ImGuiMouseButton_Left) && toBeSelected)
 			{
-				app.GetGraphicsLayer()->SetSelectedItem(hoveredID);
+				SetSelectedObject(hoveredID);
 			}
 
 			if (hoveredID == 99999)
 			{
-				ImGui::BeginTooltip();
-				ImGui::PushTextWrapPos(ImGui::GetFontSize() * 100.0f);
-				ImGui::TextUnformatted("Substrate");
-				ImGui::PopTextWrapPos();
-				ImGui::EndTooltip();
+				///
 			}
 
 			std::cout << "ID: " << hoveredID << "\n";
+			std::cout << "Selected Object: " << Renderer::GetSelectedItemID() << "\n";
+
+			if (Renderer::GetSelectedItemID() != -1)
+			{
+				Controller::DisableCameraEvents();
+				Controller::ObjectStartTransform(AngMSDObject::GetObject(Renderer::GetSelectedItemID()));
+			}
 		}
 	}
 
-	// STATIC FUNCTIONS
-	static bool ExportCSV(const char* outpath, std::vector<std::vector<float>*> data, int number_of_vectors, nfdresult_t result)
+	void MainLayer::SetSelectedObject(unsigned int id)
 	{
-		if (result != NFD_OKAY) return false;
+		ApplicationCore& app = ApplicationCore::Get();
 
-		// Open the file for writing
+		m_SelectedObjectID = id;
+		app.GetGraphicsLayer()->SetSelectedItem(id);
+		if (id == -1 or id == 0) Controller::SetState(ControllerState::View);
+	}
+
+	// STATIC FUNCTIONS
+	static bool ExportCSV(const char* outpath, std::vector<std::vector<float>*> data, std::vector<std::string> column_names)
+	{
 		std::filesystem::path filepath = outpath;
 		if (filepath.extension() == "") filepath.replace_extension(".csv");
 
@@ -196,15 +216,32 @@ namespace MSD {
 			return false;
 		}
 
-		// Loop through each vector in the data array
-		for (int i = 0; i < number_of_vectors; ++i) {
-			// Get a reference to the current vector
-			std::vector<float>& vec = *data[i];
+		size_t number_of_vectors = data.size();
+		size_t elements_per_vector = 0;
+		for (auto& vec : data) {
+			elements_per_vector = std::max(elements_per_vector, vec->size());
+		}
+		
+		for (size_t i = 0; i < column_names.size(); ++i)
+		{
+			file << column_names[i];
+			if (i < column_names.size() - 1) file << ",";
+		}
+		file << std::endl;
 
-			// Write the contents of the vector to the file
-			auto size = vec.size();
-			for (int j = 0; j < (int)size; ++j) {
-				file << j << "," << vec[j] << std::endl;
+		// Write each row of the CSV file
+		for (size_t row = 0; row < elements_per_vector; ++row) {
+			for (size_t col = 0; col < number_of_vectors; ++col) {
+				if (col == 0)
+				{
+					file << row+1 << ",";
+				}
+				if (row < data[col]->size()) {
+					file <<  (*(data[col]))[row];
+				}
+				if (col != number_of_vectors - 1) {
+					file << ",";
+				}
 			}
 			file << std::endl;
 		}
@@ -254,6 +291,10 @@ namespace MSD {
 		ImGui::Columns(1);
 	}
 
+	static void DrawCoordBox()
+	{
+	}
+
 	static void SetHandCursor()
 	{
 		if (ImGui::IsItemHovered())
@@ -291,13 +332,16 @@ namespace MSD {
 				ImGui::MenuItem("Save", NULL, &show_app_console);
 				ImGui::EndMenu();
 			}
+			SetHandCursor();
 			if (ImGui::BeginMenu("Model"))
 			{
 				ImGui::MenuItem("Model parameters", NULL, &show_app_model_parameters);
+				ImGui::MenuItem("Object tree", NULL, &show_app_model_objecttree);
 				ImGui::MenuItem("Results", NULL, &show_app_model_results);
 				ImGui::MenuItem("Viewport", NULL, &show_app_model_viewport);
 				ImGui::EndMenu();
 			}
+			SetHandCursor();
 			if (ImGui::BeginMenu("Tools"))
 			{
 				ImGui::MenuItem("null", NULL, &show_app_property_editor);
@@ -349,6 +393,7 @@ namespace MSD {
 						}
 					}
 				}
+				SetHandCursor();
 
 				// Always center this window when appearing
 				ImVec2 center = ImGui::GetMainViewport()->GetCenter();
@@ -360,6 +405,7 @@ namespace MSD {
 					ImGui::Separator();
 
 					if (ImGui::Button("OK", ImVec2(120, 0))) { ImGui::CloseCurrentPopup(); }
+					SetHandCursor();
 					ImGui::SetItemDefaultFocus();
 					ImGui::SameLine();
 					ImGui::EndPopup();
@@ -397,6 +443,7 @@ namespace MSD {
 		ImGui::Text("Ticks: %d", model.m_TimeTicksCounter);
 		ImGui::Text("Magnetrons: %d", model.m_Magnetrons.size());
 		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+		ImGui::Text("Simulation time: %.1f s", model.m_SimulationTime);
 
 		if (ImGui::InputFloat("Rotation Limit", &model.m_RotationLimit)) {
 			if (model.m_RotationLimit < 0) model.m_RotationLimit = 0;
@@ -415,44 +462,92 @@ namespace MSD {
 		{
 			model.AddMagnetron();
 			graphicsLayer->UpdateObjects();
+			ImGui::SetWindowFocus("Object tree");
+			SetSelectedObject(model.m_Magnetrons.back()->GetID());
 		}
 
-		unsigned int count = 0;
-		for (auto i_magnetron : model.m_Magnetrons)
+		ImGui::End();
+	}
+
+	void MainLayer::ModelObjectTree(bool* p_open)
+	{
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2(400, 400));
+		if (!ImGui::Begin("Object tree", p_open))
 		{
-			count++;
-			bool keepMagnetron = true; // Deletes magnetron if false
-			if (!i_magnetron->GetIndex()) { i_magnetron->SetIndex(model.m_MagnetronIndex); }
-			std::string countstr = "Magnetron " + std::to_string(i_magnetron->GetIndex());
-			ImGui::PushID(count);
-			if (ImGui::CollapsingHeader((const char*)countstr.c_str(), &keepMagnetron, ImGuiTreeNodeFlags_DefaultOpen))
-			{
-				ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 5.0f);
-				ImGui::BeginChild("DA", ImVec2(0, 200), true);
-				MagnetronParameters(i_magnetron);
-				ImGui::PopStyleVar();
-				ImGui::EndChild();
-			}
-			if (keepMagnetron == false)
-			{
-				model.DeleteMagnetron(count);
-				graphicsLayer->UpdateObjects();
-				if (model.m_Magnetrons.size() != 0) { model.m_MagnetronIndex = model.m_Magnetrons.back()->GetIndex(); }
-				else { model.m_MagnetronIndex = 0; }
-			}
-			ImGui::PopID();
+			ImGui::PopStyleVar();
+			ImGui::End();
+			return;
 		}
+		ImGui::PopStyleVar();
+
+		ApplicationCore& app = ApplicationCore::Get();
+		AngMSD& model = app.GetModel();
+		GraphicsLayer* graphicsLayer = app.GetGraphicsLayer();
+		ImGuiIO& io = ImGui::GetIO();
+		ImGuiWindowFlags window_flags = ImGuiWindowFlags_HorizontalScrollbar;
+
+		ImGui::BeginChild("ChildObjectTree", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y*0.5f), false, window_flags);
+
+		bool is_selected = false;
+		unsigned int selectedElement = 0;
+
+		unsigned int count = 1;
+		auto& objects = AngMSDObject::s_Objects;
+		auto& keys = AngMSDObject::s_KeyValues;
+
+		std::vector<std::string> name_container;
+		name_container.push_back("Magnetron");
+
+		for (int i = 0; i < keys.size(); ++i)
+		{
+			is_selected = objects[keys[i]]->GetID() == m_SelectedObjectID;
+			std::string name = objects[keys[i]]->GetType();
+			while (std::find(name_container.begin(), name_container.end(), name) != name_container.end())
+			{
+				name = objects[keys[i]]->GetType() + " " + std::to_string(count);
+				count++;
+			}
+			count = 1;
+			name_container.push_back(name);
+
+			ImGui::Selectable((const char*)name.c_str(), is_selected);
+			if (ImGui::IsItemClicked()) SetSelectedObject(objects[keys[i]]->GetID());
+		}
+
+		ImGui::EndChild();
 		ImGui::Separator();
-		SubstrateParameters(model.m_Substrate);
+
+		if (m_SelectedObjectID == -1 or m_SelectedObjectID == 0)
+		{
+			ImGui::End();
+			return;
+		}
+
+		if (objects[m_SelectedObjectID]->GetType() == "Substrate")
+		{
+			SubstrateParameters((Substrate*)objects[m_SelectedObjectID]);
+		}
+
+		if (objects[m_SelectedObjectID]->GetType() == "Magnetron")
+		{
+			MagnetronParameters((Magnetron*)objects[m_SelectedObjectID]);
+
+			if (ImGui::Button("Delete magnetron"))
+			{
+			}
+		}
 
 		ImGui::End();
 	}
 
 	void MainLayer::MagnetronParameters(Magnetron* magnetron)
 	{
-		ImGui::InputFloat("Radius", magnetron->GetRadius());
+		if (magnetron == nullptr) return;
+
+		ImGui::Button("Magnetron Properties", ImVec2(ImGui::GetContentRegionAvail().x, 20));
+		ImGui::InputFloat("Radius (cm)", magnetron->GetRadius());
 		float* pos[3] = { magnetron->GetPosX(), magnetron->GetPosY(), magnetron->GetPosZ() };
-		DrawVec3Control("Magnetron position", *pos);
+		DrawVec3Control("Magnetron position (cm)", *pos);
 		float* normal[3] = { magnetron->GetNormalX(), magnetron->GetNormalY(), magnetron->GetNormalZ() };
 		DrawVec3Control("Magnetron normal vector", *normal);
 		ImGui::InputFloat("###rotate", magnetron->GetRotationAngle());
@@ -470,39 +565,37 @@ namespace MSD {
 		}
 		ImGui::Separator();
 		ImGui::Text("Sput rates input");
-		ImGui::InputText("###SputRates",magnetron->m_InputFilePath,sizeof(magnetron->m_InputFilePath),ImGuiInputTextFlags_ReadOnly);
+		ImGui::InputText("###SputRates",*magnetron->GetInputFilePath(), sizeof(*magnetron->GetInputFilePath()), ImGuiInputTextFlags_ReadOnly);
 		ImGui::SameLine();
 		if (ImGui::Button("Browse"))
 		{
 			//if (!m_AllowInputWindow) return;
 			//m_AllowInputWindow = false;
-			result = NFD_OpenDialog(NULL, NULL, &outPath);
-			*magnetron->GetInputFilePath() = outPath;
+			m_FileResult = NFD_OpenDialog(NULL, NULL, &m_OutPath);
+			*magnetron->GetInputFilePath() = m_OutPath;
 		}
 	}
 
 	void MainLayer::SubstrateParameters(Substrate* substrate)
 	{
-		if (ImGui::CollapsingHeader("Substrate", ImGuiTreeNodeFlags_DefaultOpen))
+		ImGui::Button("Substrate Properties", ImVec2(ImGui::GetContentRegionAvail().x, 20));
+		float* pos[3] = { substrate->GetPosX(), substrate->GetPosY(), substrate->GetPosZ() };
+		DrawVec3Control("Magnetron position", *pos);
+		float* normal[3] = { substrate->GetNormalX(), substrate->GetNormalY(), substrate->GetNormalZ() };
+		DrawVec3Control("Magnetron normal vector", *normal);
+		ImGui::InputFloat("###rotate", substrate->GetRotationAngle());
+		ImGui::SameLine();
+		if (ImGui::Button("Rotate clockwise"))
 		{
-			float* pos[3] = { substrate->GetPosX(), substrate->GetPosY(), substrate->GetPosZ() };
-			DrawVec3Control("Magnetron position", *pos);
-			float* normal[3] = { substrate->GetNormalX(), substrate->GetNormalY(), substrate->GetNormalZ() };
-			DrawVec3Control("Magnetron normal vector", *normal);
-			ImGui::InputFloat("###rotate", substrate->GetRotationAngle());
-			ImGui::SameLine();
-			if (ImGui::Button("Rotate clockwise"))
-			{
-				substrate->Rotate();
-			}
-			ImGui::PushItemWidth(110.0f);
-			ImGui::InputFloat("RPM", substrate->GetRPM());
-			ImGui::SameLine();
-			ImGui::Dummy(ImVec2(20.0f, ImGui::GetFrameHeight()));
-			ImGui::SameLine();
-			ImGui::InputFloat("Sub RPM", substrate->GetSubRPM());
-			ImGui::PopItemWidth();
+			substrate->Rotate();
 		}
+		ImGui::PushItemWidth(110.0f);
+		ImGui::InputFloat("RPM", substrate->GetRPM());
+		ImGui::SameLine();
+		ImGui::Dummy(ImVec2(20.0f, ImGui::GetFrameHeight()));
+		ImGui::SameLine();
+		ImGui::InputFloat("Sub RPM", substrate->GetSubRPM());
+		ImGui::PopItemWidth();
 	}
 
 
@@ -526,8 +619,13 @@ namespace MSD {
 		if (ImGui::IsWindowFocused())
 		{
 			GraphicsLayer::m_HandleInputs = true;
+			Controller::EnableCameraEvents();
 		}
-		else GraphicsLayer::m_HandleInputs = false;
+		else
+		{
+			GraphicsLayer::m_HandleInputs = false;
+			Controller::DisableCameraEvents();
+		}
 
 		ApplicationCore& app = ApplicationCore::Get();
 		AngMSD& model = app.GetModel();
@@ -563,16 +661,44 @@ namespace MSD {
 		ImGui::Image(texID, ImVec2(length, length), ImVec2(0, 1), ImVec2(1, 0));
 		ImGui::PopStyleVar(2);
 
-		if (ImGui::BeginPopupContextItem("Viewport Settings"))
-		{
-			if (ImGui::MenuItem("Reset camera position")) { Controller::ResetCameraPosition(); };
-			if (ImGui::MenuItem("Add Magnetron"))
-			{
-				model.AddMagnetron();
-				graphicsLayer->UpdateObjects();
-			};
-			ImGui::EndPopup();
-		}
+		ImGui::SetCursorPosX(windowSize.x-140.0f);
+		ImGui::SetCursorPosY(windowSize.y-5.0f);
+
+		float zoom = Controller::GetCameraZoomLevel();
+		auto camPos = Controller::GetCameraPosition();
+		auto projectionMatrix = Controller::GetProjectionMatrix();
+		auto viewMatrix = Controller::GetViewMatrix();
+
+		double mouseX = (m_ViewportMousePosX - fbSize * 0.5);
+		double mouseY = (-m_ViewportMousePosY + fbSize * 0.5);
+
+		mouseX *= zoom * 0.5;
+		mouseY *= zoom * 0.5;
+
+		float angle = (180 - Controller::GetCameraRotation()) * PI / 180;
+
+		auto x = mouseX;
+		auto y = mouseY;
+
+		mouseX = + x * cos(angle) + y * sin(angle);
+		mouseY = y * cos(angle) - x * sin(angle);
+
+		mouseX -= camPos.x;
+		mouseY += camPos.y;
+
+		mouseX *= 0.1;
+		mouseY *= 0.1;
+
+		// MOUSE COORDS CORNER BOX //
+		std::string str = std::format("{:.3f} cm", mouseX) + " ; " + std::format("{:.3f} cm", mouseY);
+		str += std::string("###CoordBox");
+		const char* name = str.c_str();
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 1.0f, 0.8f, 0.5f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(1.0f, 1.0f, 0.8f, 0.5f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1.0f, 1.0f, 0.8f, 0.5f));
+		if (ImGui::Button(name, ImVec2(130.0f, 0.0f))) {}
+		ImGui::PopStyleColor(3);
+		//////////////
 
 		ImGui::End();
 		return;
@@ -594,11 +720,6 @@ namespace MSD {
 		ApplicationCore& app = ApplicationCore::Get();
 		AngMSD& model = app.GetModel();
 
-		std::vector<float>& data = model.m_SubstrateBuffer->GetDepEvolution();
-		std::vector<std::vector<float>*> depEvolutionData;
-		depEvolutionData.push_back(&data);
-
-
 		std::vector<std::vector<float>*> depRatesData;
 
 		if (ImGui::CollapsingHeader("Deposition Evolution"))
@@ -609,10 +730,9 @@ namespace MSD {
 			std::vector<float>& data = model.m_SubstrateBuffer->GetDepEvolution();
 
 			DynamicPlot(FindPlotCond(), data, axesDepEvolution);
-			ExportButton(depEvolutionData);
+			ExportButton(model.m_ExportData, model.m_ExportDataColumnNames);
 			ImGui::Separator();
 		}
-		depEvolutionData.pop_back();
 
 
 		unsigned int count = 0;
@@ -622,7 +742,7 @@ namespace MSD {
 			depRatesData.push_back(&depRates);
 
 			ImGui::PushID(count);
-			std::string countstr = "Deposition rate of magnetron " + std::to_string(magnetron->GetIndex());;
+			std::string countstr = "Deposition rate of magnetron " + std::to_string(magnetron->GetID());;
 			if (ImGui::CollapsingHeader((const char*)countstr.c_str()))
 			{
 				DynamicPlot(FindPlotCond(), depRates, axesDepRates);
@@ -634,7 +754,7 @@ namespace MSD {
 		depRatesData.clear();
 	}
 
-	void MainLayer::ExportButton(std::vector<std::vector<float>*> data, const char* id)
+	void MainLayer::ExportButton(std::vector<std::vector<float>*> data, std::vector<std::string> column_names)
 	{
 		ImGuiStyle& style = ImGui::GetStyle();
 
@@ -648,12 +768,15 @@ namespace MSD {
 
 		if (ImGui::Button("Export CSV file"))
 		{
-			outPath = (nfdchar_t*)(projectDirPath.c_str());
-			result = NFD_SaveDialog("csv", NULL, &outPath);
-			if (ExportCSV(outPath, data, 1, result))
+			m_OutPath = (nfdchar_t*)(projectDirPath.c_str());
+			m_FileResult = NFD_SaveDialog("csv", NULL, &m_OutPath);
+			if (m_FileResult == NFD_OKAY)
 			{
-				show_popup_success = true;
-			};
+				if (ExportCSV(m_OutPath, data, column_names))
+				{
+					show_popup_success = true;
+				};
+			}
 		}
 	}
 
@@ -750,15 +873,20 @@ namespace MSD {
 	{
 		if (!*p_open) return;
 
+		auto mousepos = ImGui::GetMousePos();
+		ImGui::SetNextWindowPos({ mousepos.x, mousepos.y }, ImGuiCond_Once);
+
 		ImGui::Begin("Choose element: ", p_open, ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking);
+		
+
 
 		// TODO Periodic table
 		for (int i = 0; i < num_elements; i++) {
-			// Set up a button for each element
+
 			ImGui::PushID(i);
 			ImGui::Button(GetSymbol(elements[i]), ImVec2(40, 40));
 
-			// Show element name as tooltip
+			// Element name and atomic number as tooltip
 			if (ImGui::IsItemHovered()) {
 				ImGui::BeginTooltip();
 				ImGui::Text("%s", GetName(elements[i]));
@@ -766,16 +894,14 @@ namespace MSD {
 				ImGui::EndTooltip();
 			}
 
-			// Handle element click
 			if (ImGui::IsItemClicked()) {
-				// Do something with the clicked element, such as print its atomic number
 				*element = elements[i];
 				*p_open = false;
 			}
 
 			ImGui::PopID();
 
-			// Add spacing to create periodic table layout
+			// Periodic table layout
 			if ((i + 1) % 18 != 0) {
 				ImGui::SameLine();
 			}

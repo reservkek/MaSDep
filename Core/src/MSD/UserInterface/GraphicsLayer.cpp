@@ -2,8 +2,8 @@
 
 #include "GraphicsLayer.h"
 #include "GLFW/glfw3.h"
-#include "Input/Controller.h"
 
+#include "Controller.h"
 #include "Graphics/Internal/Objects.h"
 
 namespace MSD {
@@ -20,10 +20,7 @@ namespace MSD {
 
 	void GraphicsLayer::OnEvent(Event& event)
 	{
-		if (m_HandleInputs)
-		{
-			Controller::CameraOnEvent(event);
-		}
+		Controller::CameraOnEvent(event);
 	}
 
 	void GraphicsLayer::OnAttach()
@@ -49,8 +46,7 @@ namespace MSD {
 
 		gridShader = new Shader("../assets/shaders/Grid.glsl");
 
-		/*auto rect = renderer.CreateRect();
-		rect->SetID(42);*/
+
 	}
 
 	void GraphicsLayer::OnDetach()
@@ -60,6 +56,7 @@ namespace MSD {
 	void GraphicsLayer::OnUpdate(Timestep ts)
 	{
 		if (!m_Updating) return;
+
 
 		if (m_HandleInputs)
 		{
@@ -73,11 +70,12 @@ namespace MSD {
 
 		fb->ClearAttachment(1, -1);
 		fb->ClearAttachment(2, 0);
-
+ 
 		glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
 		
 		gridShader->Bind();
 		gridShader->SetUniformMat4("u_ViewProjection", camera->GetViewProjectionMatrix());
+		renderer.DrawGrid(gridShader);
 
 		shader->Bind();
 		shader->SetUniform4fv("u_Color", color);
@@ -90,52 +88,86 @@ namespace MSD {
 
 		fb->Unbind();
 	}
-	void GraphicsLayer::SetSelectedItem(unsigned int id)
+	void GraphicsLayer::SetSelectedItem(int id)
 	{
-		Renderer::GetSelectedItem() = id;
+		Renderer::GetSelectedItemID() = id;
 	}
 
 	void GraphicsLayer::UpdateObjects()
 	{
 		renderer.Flush();
 
-		auto s = renderer.CreateRect();
-		s->SetID(99999);
-		s->SetPosition(m_Model->m_Substrate->GetPos() * 10.0f);
+		// Adding substrate
+		auto& substrate = m_Model->m_Substrate;
+		auto s = substrate->GetGraphicsObject();
+		renderer.AddExistingObject(s);
+
+		s->SetID(substrate->GetID());
 		s->SetColor({ 0.9f, 0.05f, 0.05f, 1.0f });
-		s->SetScale({ 0.2f, 0.03f, 1.0f });
-		s->SetAngle(m_Model->m_Substrate->CalcAngle());
-		s->CalcModelMatrix();
 
-		m_Model->m_Substrate->SetGraphicsObject(s);
+		// Adding substrate normal vector
+		auto s_arrow = substrate->GetArrow();
+		renderer.AddExistingObject(s_arrow);
 
+		s_arrow->SetID(999999);
+		s_arrow->SetColor({ 0.9f, 0.05f, 0.9f, 1.0f });
+
+		// Adding magnetrons and magnetron normal vectors
 		for (auto magnetron : m_Model->m_Magnetrons)
 		{
-			auto m = renderer.CreateRect();
-			m->SetID(magnetron->GetIndex());
-			auto pos = magnetron->GetPos() * 10.0f;
-			m->SetPosition(pos);
-			m->SetScale({ 0.45f, 0.04f, 1.0f });
-			m->SetAngle(magnetron->CalcAngle());
-			m->CalcModelMatrix();
-			magnetron->SetGraphicsObject(m);
+			auto m = magnetron->GetGraphicsObject();
+			auto m_arrow = magnetron->GetArrow();
+
+			renderer.AddExistingObject(m);
+			renderer.AddExistingObject(m_arrow);
+
+			m->SetID(magnetron->GetID());
+
+			m_arrow->SetID((magnetron->GetID() + 10000)*50);
+			m_arrow->SetColor({ 0.9f, 0.05f, 0.9f, 1.0f });
 		}
+
+		UpdateObjectStates();
 	}
 	void GraphicsLayer::UpdateObjectStates()
 	{
 		auto& substrate = m_Model->m_Substrate;
 		auto s = substrate->GetGraphicsObject();
-		s->SetPosition(substrate->GetPos() * 10.0f);
-		s->SetAngle(m_Model->m_Substrate->CalcAngle());
+		auto s_arrow = substrate->GetArrow();
+
+		auto pos = substrate->GetPos() * 10.0f;
+		auto angle = m_Model->m_Substrate->CalcAngle();
+
+		s->SetPosition(pos);
+		s->SetScale({ 0.2f, 0.03f, 1.0f });
+		s->SetAngle(angle);
+
 		s->CalcModelMatrix();
+
+		s_arrow->SetPosition(pos);
+		s_arrow->SetAngle(angle);
+		s_arrow->SetScale({ 0.4f, 0.4f, 1.0f });
+
+		s_arrow->CalcModelMatrix();
 
 		for (auto magnetron : m_Model->m_Magnetrons)
 		{
 			auto m = magnetron->GetGraphicsObject();
+			auto m_arrow = magnetron->GetArrow();
 			float scaleX = *magnetron->GetRadius() / 10.0f;
-			m->SetPosition(magnetron->GetPos() * 10.0f);
+
+			auto pos = magnetron->GetPos() * 10.0f;
+			auto angle = magnetron->CalcAngle();
+
+			m->SetPosition(pos);
 			m->SetScale({ scaleX , 0.04f, 1.0f });
-			m->SetAngle(magnetron->CalcAngle());
+			m->SetAngle(angle);
+
+			m_arrow->SetPosition(pos);
+			m_arrow->SetAngle(angle);
+			m_arrow->SetScale({ 0.4f, 0.4f, 1.0f });
+			m_arrow->CalcModelMatrix();
+
 			m->CalcModelMatrix();
 		}
 	}

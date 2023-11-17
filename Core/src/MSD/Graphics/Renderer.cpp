@@ -37,28 +37,38 @@ namespace MSD {
 		glDrawElements(GL_TRIANGLES, va->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
 	}
 
-	void Renderer::DrawLines(const std::shared_ptr<VertexArray> va)
+	void Renderer::DrawObject(Object* obj)
 	{
-		glLineWidth(2);
+		auto a = obj->GetType();
+		switch (obj->GetType())
+		{
+		case ObjectType::Rect: DrawRect(obj);
+			break;
+		case ObjectType::Arrow: DrawArrow(obj);
+			break;
+		default: return;
+		}
+	}
+
+	void Renderer::DrawLines(const std::shared_ptr<VertexArray> va, float thickness)
+	{
+		glLineWidth(thickness);
 		glDrawElements(GL_LINES, va->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
 	}
 
-	void Renderer::DrawGrid()
+	void Renderer::DrawPoints(const std::shared_ptr<VertexArray> va, float pointSize)
 	{
-		//m_va.reset(new VertexArray());
-		//m_vb.reset(new VertexBuffer(Grid::u_Vertices));
-		//m_ib.reset(new IndexBuffer(Grid::u_Indices));
+		glPointSize(pointSize);
+		glDrawElements(GL_POINTS, va->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
+	}
 
-		//m_vb->SetLayout(Grid::u_BasicLayout);
-		//m_va->AddVertexBuffer(m_vb);
-		//m_va->SetIndexBuffer(m_ib);
+	void Renderer::DrawGrid(Shader* shader)
+	{
+		glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+		glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
 
-		//m_shader->Bind();
-		//m_shader->SetUniform4fv("u_Color", Grid::u_Color);
-		//m_shader->SetUniformMat4("u_Model", Grid::u_ModelMatrix);
-
-		//m_va->Bind();
-		//DrawLines(m_va);
+		glEnable(GL_LINE_SMOOTH);
+		glEnable(GL_POLYGON_SMOOTH);
 
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -72,12 +82,10 @@ namespace MSD {
 		return obj;
 	}
 
-	void Renderer::DrawRect(Object* rect, glm::vec3 position)
+	void Renderer::DrawRect(Object* rect)
 	{
 		if (rect == nullptr)
 			rect = m_Objects.back();
-
-		rect->SetPosition(position);
 
 		m_va.reset(new VertexArray());
 		m_vb.reset(new VertexBuffer(Rect::coords, 3 * 4 * sizeof(float)));
@@ -96,15 +104,19 @@ namespace MSD {
 		m_va->Bind();
 		Draw(m_va);
 
-		if (s_SelectedID == rect->GetID())
+		if (s_SelectedID == rect->GetID() && s_SelectedID != -1)
 		{
 			m_ib.reset(new IndexBuffer(Rect::outlineIndices, 8));
 			m_va->SetIndexBuffer(m_ib);
 			m_shader->SetUniform4fv("u_Color", rect->GetOutlineColor());
-			m_shader->SetUniform1i("u_Border", 1);
-			DrawLines(m_va);
+			DrawLines(m_va, 3.0f);
 		}
 	}
+
+	void Renderer::DrawRectOutline(Object* rect, glm::vec3 position)
+	{
+	}
+
 
 	void Renderer::DrawCube(glm::vec3 position)
 	{
@@ -129,12 +141,53 @@ namespace MSD {
 		Draw(m_va);
 	}
 
+	void Renderer::DrawArrow(Object* arrow)
+	{
+		if (arrow == nullptr)
+			return;
+
+		m_va.reset(new VertexArray());
+		m_vb.reset(new VertexBuffer(Arrow::coords, 3 * 5 * sizeof(float)));
+		m_ib.reset(new IndexBuffer(Arrow::indicesLine, 2));
+
+		m_vb->SetLayout(arrow->GetLayout());
+		m_va->AddVertexBuffer(m_vb);
+		m_va->SetIndexBuffer(m_ib);
+
+		m_shader->Bind();
+		m_shader->SetUniform4fv("u_Color", arrow->GetColor());
+		m_shader->SetUniformMat4("u_Model", arrow->GetModelMatrix());
+		m_shader->SetUniform1i("u_ID", arrow->GetID());
+
+
+		m_va->Bind();
+		DrawLines(m_va, 4);
+
+		m_ib.reset(new IndexBuffer(Arrow::indicesHead, 3));
+		m_va->SetIndexBuffer(m_ib);
+
+		Draw(m_va);
+
+		if (s_SelectedID == arrow->GetID() && s_SelectedID != -1)
+		{
+			m_ib.reset(new IndexBuffer(Arrow::outlineIndices, 4));
+			m_va->SetIndexBuffer(m_ib);
+			m_shader->SetUniform4fv("u_Color", arrow->GetOutlineColor());
+			DrawPoints(m_va, 7.0f);
+		}
+	}
+
 	void Renderer::DrawScene()
 	{
 		for (auto obj : m_Objects)
 		{
-			DrawRect(obj);
+			DrawObject(obj);
 		}
+	}
+
+	void Renderer::AddExistingObject(Object* obj)
+	{
+		m_Objects.push_back(obj);
 	}
 
 	void Renderer::SetObjectID(int index)

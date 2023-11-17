@@ -3,6 +3,14 @@
 
 namespace MSD 
 {
+	std::vector<std::shared_ptr<Object>> Object::m_GraphicsObjectBuffer = {};
+
+	Object::Object()
+	{
+		AddObject(this);
+		m_ObjectID = -1;
+	}
+
 	void Object::SetPosition(const glm::vec3& pos)
 	{
 		m_Pos = pos;
@@ -10,7 +18,8 @@ namespace MSD
 
 	void Object::SetColor(const glm::vec4& color)
 	{
-		m_Color = color; 
+		m_Color = color;
+		m_OutlineColor = glm::vec4(1.0f-color.x, 1.0f-color.y, 1.0f-color.z, 0.7f);
 	}
 
 
@@ -32,12 +41,17 @@ namespace MSD
 		m_ModelMatrix = translation * rotation * scale;
 	}
 
+	void Object::AddObject(Object* obj)
+	{
+		m_GraphicsObjectBuffer.push_back(std::unique_ptr<Object>(obj));
+	}
+
 	float Rect::coords[12] =
 	{
-		-100.0f, -100.0f, 0.0f, // 0 
-		 100.0f, -100.0f, 0.0f, // 1 
-		-100.0f,  100.0f, 0.0f, // 2 
-		 100.0f,  100.0f, 0.0f  // 3
+		-100.0f, -200.0f, 0.0f, // 0 
+		 100.0f, -200.0f, 0.0f, // 1 
+		-100.0f,  0.0f, 0.0f, // 2 
+		 100.0f,  0.0f, 0.0f  // 3
 	};
 
 	unsigned int Rect::indices[6] = { 0, 1, 2, 1, 2, 3 };
@@ -57,13 +71,29 @@ namespace MSD
 	};
 
 	unsigned int Cube::indices[36] =
-	{ 0, 1, 2, 1, 2, 3,
+	{
+	  0, 1, 2, 1, 2, 3,
 	  4, 5, 6, 5, 6, 7,
 	  0, 2, 4, 2, 4, 6,
 	  1, 3, 5, 3, 5, 6,
 	  0, 1, 4, 1, 4, 5,
 	  2, 3, 7, 3, 7, 6
 	};
+
+	float Arrow::coords[3 * 5] =
+	{
+		 0.0f,  0.0f, 0.0f, // Arrow line start
+		 0.0f,  75.0f, 0.0f, // Arrow line end
+		 0.0f,  100.0f, 0.0f, // Arrow head vertex 1
+		-10.0f, 75.0f, 0.0f, // Arrow head vertex 2
+		 10.0f, 75.0f, 0.0f  // Arrow head vertex 3
+	};
+
+	unsigned int Arrow::indicesLine[2] = { 0, 1 };
+
+	unsigned int Arrow::indicesHead[3] = { 2, 3, 4 };
+
+	unsigned int Arrow::outlineIndices[4] = { 0, 2, 3, 4 };
 
 	std::vector<glm::vec3> Grid::u_Vertices = std::vector<glm::vec3>();
 	std::vector<glm::uvec4> Grid::u_Indices = std::vector<glm::uvec4>();
@@ -75,12 +105,8 @@ namespace MSD
 		{ ShaderDataType::Float3, "a_Position"}
 	};
 
-
-	Rect::Rect(unsigned int id)
+	void Arrow::SetPosition(const glm::vec3& pos)
 	{
-		m_ObjectID = id;
-		if (id == 0)
-		{
-		}
+		m_Pos = pos;
 	}
 }

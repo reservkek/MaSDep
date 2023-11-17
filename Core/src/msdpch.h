@@ -1,15 +1,18 @@
 #pragma once
 
 #include <stdlib.h>
+
 #include <memory> 
 #include <functional>
+#include <algorithm>
+#include <utility>
+#include <chrono>
+#include <format>
+
 #include <sstream>
 #include <iostream>
 #include <fstream>
 #include <filesystem>
-#include <algorithm>
-#include <utility>
-#include <chrono>
 
 #include <string>
 #include <vector>

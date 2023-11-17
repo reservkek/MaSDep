@@ -19,6 +19,12 @@ namespace MSD {
 		CalcViewMatrix();
 	}
 
+	void OrthographicCamera::SetRotationAroundZ(float rotation)
+	{
+		m_RotationAroundZ = rotation; 
+		CalcViewMatrix();
+	}
+
 	void OrthographicCamera::CalcViewMatrix()
 	{
 		glm::mat4 translate = glm::translate(glm::mat4(1.0f), m_Position);

@@ -11,12 +11,12 @@ namespace MSD {
 	AngMSD::AngMSD()
 	{
 		s_Instance = this;
+		m_Substrate->SetID(1248956);
 	}
 
 	bool AngMSD::Run()
 	{
 		m_MagnetronsBuffer = m_Magnetrons;
-		m_SubstrateBuffer = new Substrate();
 		*m_SubstrateBuffer = *m_Substrate;
 
 		m_TimeValues = {};
@@ -49,6 +49,8 @@ namespace MSD {
 
 		m_ToBeCleared = true;
 		m_ModelRunning = true;
+
+		m_TimePointStart = std::chrono::system_clock::now();
 		return true;
 	}
 
@@ -63,10 +65,14 @@ namespace MSD {
 		if (m_ToBeCleared == false) return;
 		m_ToBeCleared = false;
 
+		m_SimulationTime = 0.0f;
 		m_TimeTicksCounter = 0;
 		m_RotationCounter = 0;
 		m_CurrentProgress = 0;
 		m_CurrentTime = 0;
+
+		m_ExportData.clear();
+		m_ExportDataColumnNames.clear();
 	}
 
 	void AngMSD::Complete()
@@ -74,6 +80,21 @@ namespace MSD {
 		m_ToBeCleared = false;
 		m_ModelRunning = false;
 		m_CurrentProgress = 1.0f;
+
+		m_ExportDataColumnNames.push_back("Tick");
+		m_ExportDataColumnNames.push_back("Time (s)");
+		m_ExportDataColumnNames.push_back("Substrate deposition (1/m2)");
+
+		m_ExportData.push_back(&m_TimeValues);
+		m_ExportData.push_back(&m_SubstrateBuffer->GetDepEvolution());
+
+		for (auto magnetron : m_MagnetronsBuffer)
+		{
+			m_ExportData.push_back(&magnetron->GetDepRates());
+			std::string name = std::string("Dep rate from magnetron No.") + std::to_string(magnetron->GetID()) + std::string(" (m/s)");
+
+			m_ExportDataColumnNames.push_back(name);
+		}
 	}
 
 	void AngMSD::OnUpdate()
@@ -109,18 +130,24 @@ namespace MSD {
 		m_CurrentProgress += m_CurrentProgressDelta;
 		m_CurrentTime += m_TimePerTick;
 		m_TimeTicksCounter++;
+
+		auto timePointNow = std::chrono::system_clock::now();
+		m_SimulationTime = std::chrono::duration_cast<std::chrono::milliseconds>(timePointNow - m_TimePointStart).count()*0.001f;
 	}
 
 	void AngMSD::AddMagnetron()
 	{
 		m_Magnetrons.push_back(new Magnetron());
-		m_MagnetronIndex++;
-		m_Magnetrons.back()->SetIndex(m_MagnetronIndex);
+		m_Magnetrons.back()->SetID(m_MagnetronIndex+1);
+		m_MagnetronIndex = (unsigned int)m_Magnetrons.size();
+		m_RecentMagnetronID = m_MagnetronIndex+1;
 	}
 
 	void AngMSD::DeleteMagnetron(unsigned int& index)
 	{
+		delete m_Magnetrons.at(index - 1);
 		m_Magnetrons.erase(m_Magnetrons.begin()+index-1);
+		m_MagnetronIndex = index;
 	}
 
 	void AngMSD::CalculateFlux(Magnetron* magnetron, Substrate* substrate, bool write)

@@ -14,12 +14,12 @@ namespace MSD {
 		AngMSD();
 		~AngMSD()
 		{
-			delete m_Substrate;
-			for (auto i_magnetron : m_Magnetrons) delete i_magnetron;
+			delete s_Instance;
 		};
 		
 		inline int GetTimeTicksCounter() const { return m_TimeTicksCounter; }
 		inline float GetCurrentProgress() const { return m_CurrentProgress; }
+		inline unsigned int GetRecentMagnetronID() const { return m_RecentMagnetronID; }
 		bool& GetStatus() { return m_ModelRunning; }
 
 		inline static AngMSD& GetModelID() { return *s_Instance; }
@@ -34,6 +34,7 @@ namespace MSD {
 		void AddMagnetron();
 		void DeleteMagnetron(unsigned int& index);
 
+
 		std::string GetErrorMessage() { return m_ErrorMsg; }
 		float& GetCurrentTime() { return m_CurrentTime; }
 		std::vector<float>& GetTimeValues() { return m_TimeValues; }
@@ -47,11 +48,11 @@ namespace MSD {
 		int m_TicksPerSecond = 5; // Количество тиков в секунду
 		float m_TimePerTick = 1.0f / m_TicksPerSecond; // Количество времени за 1 тик.
 
-		int m_TimeLimit = 60; // Лимит моделирования во времени в секундах
+		int m_TimeLimit = 60; // Ограничения моделирования по времени в секундах
 		float m_CurrentTime = 0;
 
 		// Пространство в модели
-		unsigned int spaceRatio = 100; // Разделение 1 метра пространства на виртуальные отрезки
+		unsigned int m_SpaceRatio = 100; // Разделение 1 метра пространства на виртуальные отрезки
 
 		// Другие параметры
 		float m_RotationLimit = 1;
@@ -63,7 +64,7 @@ namespace MSD {
 		float m_CurrentGamma = 0;
 		float m_CurrentPhi = 0;
 
-		// Прогресс-бар
+		// Прогресс-шкала
 		float m_CurrentProgress = 0;
 		float m_CurrentProgressDelta = 0;
 
@@ -71,12 +72,22 @@ namespace MSD {
 		Substrate* m_Substrate = new Substrate();
 		std::vector<Magnetron*> m_Magnetrons;
 		unsigned int m_MagnetronIndex = 0;
+		unsigned int m_RecentMagnetronID = 0;
 
 		// Буфер для расчёта
 		Substrate* m_SubstrateBuffer = new Substrate();
 		std::vector<Magnetron*> m_MagnetronsBuffer;
 
+		// Контейнер для значений по времени
 		std::vector<float> m_TimeValues = {};
+
+		// Данные для вывода в текстовый файл.
+		std::vector<std::vector<float>*> m_ExportData = {};
+		std::vector<std::string> m_ExportDataColumnNames = {};
+
+		// Simulation time calculations
+		float m_SimulationTime = 0.0f;
+		std::chrono::time_point<std::chrono::system_clock> m_TimePointStart;
 
 		static AngMSD* s_Instance;
 		bool m_ModelRunning = false;

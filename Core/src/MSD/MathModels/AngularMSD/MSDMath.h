@@ -9,8 +9,25 @@
 namespace MSD {
 	constexpr float PI = 3.14159265358979f;
 
+	// 2D VECTOR DATATYPE /////////////////
+	struct vec2
+	{
+		float x, y;
+
+		vec2(float x = 0, float y = 0);
+
+		vec2& operator=(const vec2& a);
+		vec2 operator*(const float& a);
+		vec2 operator+(const float& a) const;
+		vec2 operator+(const vec2& a) const;
+		vec2 operator-(const vec2& a) const;
+		vec2 operator-() const;
+
+		operator glm::vec2() const { return { x,y }; }
+	};
+
 	// 3D VECTOR DATATYPE /////////////////
-	struct MSD_API vec3
+	struct vec3
 	{
 		float x, y, z;
 		
@@ -30,6 +47,10 @@ namespace MSD {
 	float Magnitude(const vec3& a);
 	float DotProduct(const vec3& a, const vec3& b);
 	float Angle(vec3 a, vec3 b);
+	float Angle2D(const vec2& a, const vec2& b);
+	float AngleProjectionXY(vec3 a, vec3 b);
+	float AngleProjectionYZ(vec3 a, vec3 b);
+	float AngleProjectionXZ(vec3 a, vec3 b);
 	float Approx(const float& radius, std::map<float, float> map);
 	vec3 Normalize(const vec3& a);
 	vec3 CrossProduct(const vec3& a, const vec3& b);
