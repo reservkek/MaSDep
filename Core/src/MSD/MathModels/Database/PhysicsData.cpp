@@ -34,6 +34,20 @@ namespace MSD {
 			return 0;
 		}
 
+		float GetAtomicMass(Element element)
+		{
+			switch (element)
+			{
+			case None: return 0;
+			case Cr: return 51.996f;
+			case Al: return 26.982f;
+			case Ti: return 47.867f;
+			case Cu: return 63.546f;
+			case Ar: return 39.948f;
+			}
+			return 0.0f;
+		}
+
 		int GetAtomicNumber(Element element)
 		{
 			return (int)element;
@@ -48,6 +62,7 @@ namespace MSD {
 			case Al:	   return "Aluminium";
 			case Ti:	   return "Titanium";
 			case Cu:	   return "Copper";
+			case Ar:	   return "Argon";
 			}
 			return "Null";
 		}
@@ -61,6 +76,7 @@ namespace MSD {
 			case Al:	   return "Al";
 			case Ti:	   return "Ti";
 			case Cu:	   return "Cu";
+			case Ar:	   return "Ar";
 			}
 			return "Null";
 		}

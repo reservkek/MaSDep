@@ -113,8 +113,10 @@ namespace MSD {
 		s_arrow->SetColor({ 0.9f, 0.05f, 0.9f, 1.0f });
 
 		// Adding magnetrons and magnetron normal vectors
-		for (auto magnetron : m_Model->m_Magnetrons)
+		for (auto mpair : m_Model->m_Magnetrons)
 		{
+			auto& magnetron = mpair.second;
+
 			auto m = magnetron->GetGraphicsObject();
 			auto m_arrow = magnetron->GetArrow();
 
@@ -150,8 +152,10 @@ namespace MSD {
 
 		s_arrow->CalcModelMatrix();
 
-		for (auto magnetron : m_Model->m_Magnetrons)
+		for (auto mpair : m_Model->m_Magnetrons)
 		{
+			auto& magnetron = mpair.second;
+
 			auto m = magnetron->GetGraphicsObject();
 			auto m_arrow = magnetron->GetArrow();
 			float scaleX = *magnetron->GetRadius() / 10.0f;

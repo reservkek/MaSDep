@@ -20,6 +20,8 @@ namespace MSD {
 
 		void SetID(unsigned int val);
 		int GetID() const { return m_ID; }
+		static void DeleteObject(unsigned int val);
+		void Delete();
 
 		float* GetPosX() { return &(msdpos.x); }
 		float* GetPosY() { return &(msdpos.y); }
@@ -54,7 +56,7 @@ namespace MSD {
 		std::shared_ptr<Arrow> m_NormalVectorArrow;
 
 		std::string m_Type;
-	private:
+
 		static std::unordered_map<unsigned int, AngMSDObject*> s_Objects;
 		static std::vector<unsigned int> s_KeyValues;
 	};
@@ -77,6 +79,7 @@ namespace MSD {
 
 		virtual std::string GetType() const override { return m_Type; };
 
+		const int AngleContainerSize() const { return (int)m_PhiAngles.size(); }
 		float FindSputRate(const float& radius);
 
 		float* GetRadius() { return &m_Radius; }

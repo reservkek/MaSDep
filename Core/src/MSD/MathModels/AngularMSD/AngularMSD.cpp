@@ -32,8 +32,9 @@ namespace MSD {
 		float expectedRotationTicks = (m_RotationLimit * 2 * PI) / m_SubstrateBuffer->GetTotalAngleDelta();
 		int expectedTimeLimitTicks = m_TimeLimit * m_TicksPerSecond;
 
-		for (auto m : m_MagnetronsBuffer)
+		for (auto mpair : m_MagnetronsBuffer)
 		{
+			auto& m = mpair.second;
 			m->Clear();
 
 			m->InputSputRates(*(m->GetInputFilePath()), m_IntegrationDelta);
@@ -88,8 +89,9 @@ namespace MSD {
 		m_ExportData.push_back(&m_TimeValues);
 		m_ExportData.push_back(&m_SubstrateBuffer->GetDepEvolution());
 
-		for (auto magnetron : m_MagnetronsBuffer)
+		for (auto mpair : m_MagnetronsBuffer)
 		{
+			auto& magnetron = mpair.second;
 			m_ExportData.push_back(&magnetron->GetDepRates());
 			std::string name = std::string("Dep rate from magnetron No.") + std::to_string(magnetron->GetID()) + std::string(" (m/s)");
 
@@ -116,8 +118,9 @@ namespace MSD {
 
 		static bool write = false;
 		unsigned short count = 0;
-		for (auto m : m_MagnetronsBuffer)
+		for (auto mpair : m_MagnetronsBuffer)
 		{
+			auto& m = mpair.second;
 			count++;
 			if (count == m_MagnetronsBuffer.size()) write = true;
 			else write = false;
@@ -137,17 +140,26 @@ namespace MSD {
 
 	void AngMSD::AddMagnetron()
 	{
-		m_Magnetrons.push_back(new Magnetron());
-		m_Magnetrons.back()->SetID(m_MagnetronIndex+1);
-		m_MagnetronIndex = (unsigned int)m_Magnetrons.size();
-		m_RecentMagnetronID = m_MagnetronIndex+1;
+		m_MagnetronCount += 1;
+		if (m_Magnetrons.count(m_MagnetronCount))
+		{
+			AddMagnetron();
+			return;
+		}
+		m_Magnetrons.emplace(m_MagnetronCount, new Magnetron());
+		m_Magnetrons[m_MagnetronCount]->SetID(m_MagnetronCount);
+		m_RecentMagnetronID = m_MagnetronCount;
 	}
 
-	void AngMSD::DeleteMagnetron(unsigned int& index)
+	void AngMSD::DeleteMagnetron(unsigned int id)
 	{
-		delete m_Magnetrons.at(index - 1);
-		m_Magnetrons.erase(m_Magnetrons.begin()+index-1);
-		m_MagnetronIndex = index;
+		if (m_Magnetrons.count(id))
+		{
+			AngMSDObject::GetObject(id)->Delete();
+			m_Magnetrons.erase(id);
+			m_MagnetronCount -= 1;
+		}
+		else std::cout << "There is no such magnetron present in the model.\n";
 	}
 
 	void AngMSD::CalculateFlux(Magnetron* magnetron, Substrate* substrate, bool write)
@@ -178,8 +190,8 @@ namespace MSD {
 			}
 		}
 
-		const static float CrDensity = GetAtomicDensity(magnetron->GetElement());
-		substrate->GetTotalDeposited() += fullDepRate * m_TimePerTick * CrDensity;
+		const static float atomicDensity = GetAtomicDensity(magnetron->GetElement());
+		substrate->GetTotalDeposited() += fullDepRate * m_TimePerTick * atomicDensity;
 
 		if (write) substrate->WriteDepEvolution();
 
@@ -194,5 +206,13 @@ namespace MSD {
 		magnetron->WriteGamma(m_CurrentGamma);
 		magnetron->WritePhi(m_CurrentPhi);
 
+		CalculateMeanFluxAngle(magnetron->AngleContainerSize());
+	}
+
+	void AngMSD::CalculateMeanFluxAngle(int count)
+	{
+		if (!m_MeanFluxAngleCalculation) return;
+
+		m_MeanFluxAngle = m_MeanFluxAngle * (1 - 1 / count) + 1 / count * m_CurrentPhi;
 	}
 }

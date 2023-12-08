@@ -463,7 +463,7 @@ namespace MSD {
 			model.AddMagnetron();
 			graphicsLayer->UpdateObjects();
 			ImGui::SetWindowFocus("Object tree");
-			SetSelectedObject(model.m_Magnetrons.back()->GetID());
+			SetSelectedObject(model.m_RecentMagnetronID);
 		}
 
 		ImGui::End();
@@ -523,6 +523,12 @@ namespace MSD {
 			return;
 		}
 
+		if (objects[m_SelectedObjectID] == nullptr)
+		{
+			ImGui::End();
+			return;
+		}
+
 		if (objects[m_SelectedObjectID]->GetType() == "Substrate")
 		{
 			SubstrateParameters((Substrate*)objects[m_SelectedObjectID]);
@@ -534,6 +540,9 @@ namespace MSD {
 
 			if (ImGui::Button("Delete magnetron"))
 			{
+				model.DeleteMagnetron(m_SelectedObjectID);
+				graphicsLayer->UpdateObjects();
+				m_SelectedObjectID = 0;
 			}
 		}
 
@@ -736,8 +745,9 @@ namespace MSD {
 
 
 		unsigned int count = 0;
-		for (auto magnetron : model.m_Magnetrons)
+		for (auto mpair : model.m_Magnetrons)
 		{
+			auto& magnetron = mpair.second;
 			std::vector<float>& depRates = magnetron->GetDepRates();
 			depRatesData.push_back(&depRates);
 

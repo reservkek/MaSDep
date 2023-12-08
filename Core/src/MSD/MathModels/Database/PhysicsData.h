@@ -15,6 +15,7 @@ namespace MSD {
 
 		float GetAtomicDensity(Element element);
 		float GetDensity(Element element);
+		float GetAtomicMass(Element element);
 		int GetAtomicNumber(Element element);
 		const char* GetName(Element element);
 		const char* GetSymbol(Element element);

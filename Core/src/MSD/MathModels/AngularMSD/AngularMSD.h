@@ -6,6 +6,9 @@
 
 #include "imgui.h"
 
+import ReactiveMSD;
+import SputteringRates;
+import EnergyDistribution;
 
 namespace MSD {
 
@@ -25,6 +28,7 @@ namespace MSD {
 		inline static AngMSD& GetModelID() { return *s_Instance; }
 
 		void CalculateFlux(Magnetron* magnetron, Substrate* substrate, bool write = true);
+		void CalculateMeanFluxAngle(int count);
 		bool Run();
 		void Stop();
 		void Clear();
@@ -32,7 +36,7 @@ namespace MSD {
 		void OnUpdate();
 
 		void AddMagnetron();
-		void DeleteMagnetron(unsigned int& index);
+		void DeleteMagnetron(unsigned int index);
 
 
 		std::string GetErrorMessage() { return m_ErrorMsg; }
@@ -61,8 +65,9 @@ namespace MSD {
 		float m_IntegrationDelta = 0.1f;
 
 		vec3 m_CurrentFluxVector;
-		float m_CurrentGamma = 0;
-		float m_CurrentPhi = 0;
+		float m_CurrentGamma = 0; //  Incident angle to substrate
+		float m_CurrentPhi = 0; // Angle between flux and target
+		float m_MeanFluxAngle = 0; // Mean incident angle
 
 		// Прогресс-шкала
 		float m_CurrentProgress = 0;
@@ -70,13 +75,13 @@ namespace MSD {
 
 		// Объекты (Начальные значения)
 		Substrate* m_Substrate = new Substrate();
-		std::vector<Magnetron*> m_Magnetrons;
-		unsigned int m_MagnetronIndex = 0;
+		std::unordered_map<unsigned int, Magnetron*> m_Magnetrons;
+		unsigned int m_MagnetronCount = 0;
 		unsigned int m_RecentMagnetronID = 0;
 
 		// Буфер для расчёта
 		Substrate* m_SubstrateBuffer = new Substrate();
-		std::vector<Magnetron*> m_MagnetronsBuffer;
+		std::unordered_map<unsigned int, Magnetron*> m_MagnetronsBuffer;
 
 		// Контейнер для значений по времени
 		std::vector<float> m_TimeValues = {};
@@ -92,6 +97,7 @@ namespace MSD {
 		static AngMSD* s_Instance;
 		bool m_ModelRunning = false;
 		bool m_ToBeCleared = false;
+		bool m_MeanFluxAngleCalculation = false;
 
 		std::string m_ErrorMsg = "";
 	};

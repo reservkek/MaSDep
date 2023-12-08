@@ -28,7 +28,6 @@ namespace MSD {
 
 	AngMSDObject::~AngMSDObject()
 	{
-		s_Objects.erase(m_ID);
 	}
 
 	void AngMSDObject::SetID(unsigned int val)
@@ -42,12 +41,31 @@ namespace MSD {
 			SetID(val + 1);
 			return;
 		}
-		s_Objects.insert({ val, this });
+		s_Objects.emplace(std::make_pair(val, this));
 		s_KeyValues.push_back(val);
 
 		m_ID = val;
 		m_Object->SetID(val);
 		std::cout << "ID: " << val << " was set to " << GetType() << std::endl;
+	}
+
+	void AngMSDObject::DeleteObject(unsigned int val)
+	{
+		auto pos = std::find(s_KeyValues.begin(), s_KeyValues.end(), val);
+		if (pos != s_KeyValues.end())
+		{
+			s_Objects.erase(val);
+			s_KeyValues.erase(pos);			
+		}
+		else
+			std::cout << "Could not delete an object. Object does not have a record in \"Key Values\"\n";
+	}
+
+	void AngMSDObject::Delete()
+	{
+		s_KeyValues.erase(std::remove(s_KeyValues.begin(), s_KeyValues.end(), m_ID), s_KeyValues.end());
+		s_Objects.erase(m_ID);
+		delete this;
 	}
 
 	float AngMSDObject::CalcAngle()
