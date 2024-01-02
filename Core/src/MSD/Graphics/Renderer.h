@@ -26,10 +26,11 @@ namespace MSD {
 		void DrawPoints(const std::shared_ptr<VertexArray> va, float pointSize = 10.0f);
 		void DrawGrid(Shader* shader);
 		void DrawRect(Object* rect = nullptr);
-		void DrawRectOutline(Object* rect = nullptr, glm::vec3 position = glm::vec3(0, 0, 0));
-		void DrawCube(glm::vec3 position = glm::vec3(0, 0, 0));
+		void DrawCube(Object* cube = nullptr);
 		void DrawArrow(Object* arrow = nullptr);
+
 		void DrawScene();
+		void DrawScene3D();
 
 		void AddExistingObject(Object* obj);
 
@@ -51,6 +52,7 @@ namespace MSD {
 		OrthographicCamera* m_Camera = nullptr;
 
 		std::vector<Object*> m_Objects;
+		std::vector<Object*> m_Objects3D;
 
 		static int s_SelectedID;
 	};

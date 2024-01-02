@@ -10,8 +10,9 @@ namespace MSD {
 	void Renderer::Clear() const
 	{
 		//glClearColor(0.94f, 0.94f, 0.94f, 1.0f);
-		glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+		//glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
+		glClear(GL_DEPTH_BUFFER_BIT);
 	}
 
 	void Renderer::BeginScene(OrthographicCamera* camera, Shader* shader)
@@ -46,6 +47,7 @@ namespace MSD {
 			break;
 		case ObjectType::Arrow: DrawArrow(obj);
 			break;
+		case ObjectType::Cube: DrawCube(obj);
 		default: return;
 		}
 	}
@@ -113,32 +115,30 @@ namespace MSD {
 		}
 	}
 
-	void Renderer::DrawRectOutline(Object* rect, glm::vec3 position)
+	void Renderer::DrawCube(Object* cube)
 	{
-	}
-
-
-	void Renderer::DrawCube(glm::vec3 position)
-	{
-		Rect* obj = new Rect();
-		m_Objects.push_back(obj);
-		obj->SetPosition(position);
-
 		m_va.reset(new VertexArray());
-		m_vb.reset(new VertexBuffer(Rect::coords, 3 * 8 * sizeof(float)));
-		m_ib.reset(new IndexBuffer(Rect::indices, 36));
+		m_vb.reset(new VertexBuffer(Cube::coords, 24 * sizeof(float)));
+		m_ib.reset(new IndexBuffer(Cube::indices, 36));
 
 
-		m_vb->SetLayout(obj->GetLayout());
+		m_vb->SetLayout(cube->GetLayout());
 		m_va->AddVertexBuffer(m_vb);
 		m_va->SetIndexBuffer(m_ib);
 
 		m_shader->Bind();
-		m_shader->SetUniform4fv("u_Color", obj->GetColor());
-		m_shader->SetUniformMat4("u_Model", obj->GetModelMatrix());
+		m_shader->SetUniform4fv("u_Color", cube->GetColor());
+		m_shader->SetUniformMat4("u_Model", cube->GetModelMatrix());
 
 		m_va->Bind();
 		Draw(m_va);
+
+		{
+			m_ib.reset(new IndexBuffer(Cube::outlineIndices, 24));
+			m_va->SetIndexBuffer(m_ib);
+			m_shader->SetUniform4fv("u_Color", cube->GetOutlineColor());
+			DrawLines(m_va, 10.0f);
+		}
 	}
 
 	void Renderer::DrawArrow(Object* arrow)
@@ -179,7 +179,17 @@ namespace MSD {
 
 	void Renderer::DrawScene()
 	{
+		glEnable(GL_DEPTH_TEST);
+
 		for (auto obj : m_Objects)
+		{
+			DrawObject(obj);
+		}
+	}
+
+	void Renderer::DrawScene3D()
+	{
+		for (auto obj : m_Objects3D)
 		{
 			DrawObject(obj);
 		}
@@ -221,6 +231,7 @@ namespace MSD {
 	void Renderer::Flush()
 	{
 		m_Objects.clear();
+		m_Objects3D.clear();
 	}
 
 	void Renderer::GetOpenGLVersion()

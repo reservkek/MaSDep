@@ -15,7 +15,7 @@ namespace MSD {
 	class Object
 	{
 	public:
-		Object();
+		Object(int id = 0);
 
 		virtual void SetPosition(const glm::vec3& pos);
 		void SetColor(const glm::vec4& color);
@@ -71,8 +71,13 @@ namespace MSD {
 
 	class Cube : public Object {
 	public:
-		static float coords[3*4*2];
-		static unsigned int indices[6*6];
+		Cube(int id = 0);
+
+		unsigned int m_ObjectID;
+
+		static float coords[24];
+		static unsigned int indices[36];
+		static unsigned int outlineIndices[24];
 	};
 
 	class Arrow : public Object

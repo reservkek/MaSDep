@@ -9,7 +9,7 @@
 namespace MSD {
 
 	// This class is used to unite the controls to move camera or object in the viewport
-	// Controller has two states: View means that you move your camera and Transform is used
+	// Controller has two states: "View" means that you move your camera and "Transform" is used
 	// to move selected object in your AngMSD space
 
 	enum class ControllerState

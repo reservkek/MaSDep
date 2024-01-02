@@ -11,7 +11,8 @@ namespace MSD {
 		float GetRotation() const { return m_RotationAroundZ; }
 		float GetZoomLevel() const { return m_Zoom; }
 
-		OrthographicCamera(float left, float right, float bottom, float top);
+		OrthographicCamera(float left, float right, float bottom, float to, float close = -4000.0f, float far = 4000.0f);
+		OrthographicCamera(float dimenstion);
 		void SetPositon(const glm::vec3& position);
 		void SetRotationAroundZ(float rotation);
 		void SetRotationAroundX(float rotation) { m_RotationAroundX = rotation; CalcViewMatrix(); }
@@ -21,7 +22,7 @@ namespace MSD {
 		const glm::mat4& GetViewMatrix() const { return m_ViewMatrix; }
 		const glm::mat4& GetViewProjectionMatrix() const { return m_ViewProjectionMatrix; }
 
-		float m_left, m_right, m_bottom, m_top = 0.0f;
+		float m_left, m_right, m_bottom, m_top, m_close, m_far = 0.0f;
 	private:
 		void CalcViewMatrix();
 		void CalcProjectionMatrix();

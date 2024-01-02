@@ -46,7 +46,8 @@ namespace MSD {
 
 		gridShader = new Shader("../assets/shaders/Grid.glsl");
 
-
+		testCube = new Cube();
+		testCube->SetID(15);
 	}
 
 	void GraphicsLayer::OnDetach()
@@ -81,6 +82,8 @@ namespace MSD {
 		shader->SetUniform4fv("u_Color", color);
 
 		renderer.DrawScene();
+		renderer.DrawScene3D();
+		renderer.DrawCube(testCube);
 
 		/*renderer.DrawRect(nullptr, { 0.0f, 0.0f, 0.0f });*/
 

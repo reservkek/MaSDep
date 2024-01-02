@@ -68,6 +68,8 @@ namespace MSD {
 		glm::vec3 m_CameraPosition = glm::vec3(0.0f,0.0f,0.0f);
 
 		float m_CameraSpeed = 1000.0f;
+
+		Cube* testCube = nullptr;
 	};
 
 }

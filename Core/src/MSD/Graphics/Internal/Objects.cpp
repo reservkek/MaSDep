@@ -5,7 +5,8 @@ namespace MSD
 {
 	std::vector<std::shared_ptr<Object>> Object::m_GraphicsObjectBuffer = {};
 
-	Object::Object()
+	Object::Object(int id)
+		: m_ObjectID(id)
 	{
 		AddObject(this);
 		m_ObjectID = -1;
@@ -58,26 +59,35 @@ namespace MSD
 
 	unsigned int Rect::outlineIndices[8] = { 0, 1, 1, 3, 3, 2, 2, 0 };
 
+	Cube::Cube(int id) : m_ObjectID(id) {}
+
 	float Cube::coords[24] =
 	{
-		-200.0f, -200.0f, -200.0f, //0
-		 200.0f, -200.0f, -200.0f, //1
-		-200.0f,  200.0f, -200.0f, //2
-		 200.0f,  200.0f, -200.0f, //3
-		-200.0f, -200.0f,  200.0f, //4
-		 200.0f, -200.0f,  200.0f, //5
-		-200.0f,  200.0f,  200.0f, //6
-		 200.0f,  200.0f,  200.0f  //7
+		-200.0f, -200.0f, 200.0f, // 0 
+		 200.0f, -200.0f, 200.0f, // 1 
+		-200.0f,  200.0f, 200.0f, // 2 
+		 200.0f,  200.0f, 200.0f,  // 3
+		-200.0f, -200.0f, 300.0f, // 4
+		 200.0f, -200.0f, 300.0f, // 5
+		-200.0f,  200.0f, 300.0f, // 6
+		 200.0f,  200.0f, 300.0f  // 7
 	};
 
 	unsigned int Cube::indices[36] =
 	{
 	  0, 1, 2, 1, 2, 3,
 	  4, 5, 6, 5, 6, 7,
-	  0, 2, 4, 2, 4, 6,
-	  1, 3, 5, 3, 5, 6,
-	  0, 1, 4, 1, 4, 5,
-	  2, 3, 7, 3, 7, 6
+	  2, 6, 3, 6, 3, 7,
+	  0, 4, 1, 4, 1, 5,
+	  5, 7, 3, 7, 3, 1,
+	  4, 6, 2, 6, 2, 0
+	};
+
+	unsigned int Cube::outlineIndices[24] =
+	{
+		0, 1, 1, 3, 3, 2, 2, 0,
+		4, 5, 5, 7, 7, 6, 6, 4,
+		0, 4, 2, 6, 3, 7, 1, 5
 	};
 
 	float Arrow::coords[3 * 5] =
