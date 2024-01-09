@@ -9,6 +9,7 @@
 import ReactiveMSD;
 import SputteringRates;
 import EnergyDistribution;
+import FluxScattering;
 
 namespace MSD {
 

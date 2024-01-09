@@ -53,6 +53,8 @@ namespace MSD {
 
 		m_TimePointStart = std::chrono::system_clock::now();
 		return true;
+
+
 	}
 
 	void AngMSD::Stop()
