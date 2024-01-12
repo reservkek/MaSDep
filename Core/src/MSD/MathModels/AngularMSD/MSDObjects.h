@@ -85,6 +85,7 @@ namespace MSD {
 		float* GetRadius() { return &m_Radius; }
 		float* GetRotationAngle() { return &(m_RotationAngle); }
 		float& GetCurrentDepRate() { return m_CurrentDepRate; }
+		float& GetPD() { return m_pd; }
 		char** GetInputFilePath() { return &m_InputFilePath; }
 
 		std::vector<float>& GetDepRates() { return m_DepRates; }
@@ -111,6 +112,9 @@ namespace MSD {
 		std::vector<float> m_DepRates; // Deposition rates onto substrate;
 		std::vector<float> m_GammaAngles; 
 		std::vector<float> m_PhiAngles;
+
+		// Flux scattering
+		float m_pd = 0;
 
 		char* m_InputFilePath = new char();
 

@@ -52,6 +52,21 @@ namespace MSD {
 		m_ModelRunning = true;
 
 		m_TimePointStart = std::chrono::system_clock::now();
+		
+		if (!m_EnableFluxScattering) return true;
+
+		for (auto mpair : m_MagnetronsBuffer)
+		{
+			auto& m = mpair.second;
+			auto m1 = Database::GetAtomicMass(m->GetElement());
+			auto m2 = Database::GetAtomicMass(m_Gas);
+			auto r1 = Database::GetAtomicRadius(m->GetElement());
+			auto r2 = Database::GetAtomicRadius(m_Gas);
+			auto& temp = m_Temperature;
+			auto en_bind = Database::GetBindingEnergy(m->GetElement());
+			m->GetPD() = FluxScattering::CalcPD(m1,m2,r1,r2,temp,en_bind);
+		}
+
 		return true;
 
 
@@ -190,6 +205,15 @@ namespace MSD {
 				localDepRate = localSputRate * m_IntegrationDelta * m_IntegrationDelta * cos(m_CurrentPhi) * cos(m_CurrentGamma) / (PI * (float)pow(Magnitude(m_CurrentFluxVector), 2));
 				fullDepRate += localDepRate;
 			}
+		}
+
+		if (m_EnableFluxScattering)
+		{
+			vec3 MagnetronSubstrateVec = FindVector(substrate->GetPos(), magnetron->GetPos());
+			float distance = Magnitude(MagnetronSubstrateVec);
+			float geometryfactor = FluxScattering::GeometryFactor(*magnetron->GetRadius(), distance);
+			m_ScatteringCoeff = FluxScattering::FluxPressureInteractionCoeff(distance, m_Pressure, magnetron->GetPD(), 1);
+			fullDepRate *= m_ScatteringCoeff;
 		}
 
 		const static float atomicDensity = GetAtomicDensity(magnetron->GetElement());

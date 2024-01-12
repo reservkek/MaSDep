@@ -91,6 +91,13 @@ namespace MSD {
 		std::vector<std::vector<float>*> m_ExportData = {};
 		std::vector<std::string> m_ExportDataColumnNames = {};
 
+		// FLUX SCATTERING
+		bool m_EnableFluxScattering = 0;
+		float m_Pressure = 0.18f;
+		float m_Temperature = 300.0f;
+		float m_ScatteringCoeff = 1.0f;
+		Element m_Gas = Ar;
+
 		// Simulation time calculations
 		float m_SimulationTime = 0.0f;
 		std::chrono::time_point<std::chrono::system_clock> m_TimePointStart;

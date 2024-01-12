@@ -443,7 +443,7 @@ namespace MSD {
 		ImGui::Text("Ticks: %d", model.m_TimeTicksCounter);
 		ImGui::Text("Magnetrons: %d", model.m_Magnetrons.size());
 		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
-		ImGui::Text("Simulation time: %.1f s", model.m_SimulationTime);
+		ImGui::Text("Simulation time: %.2f s", model.m_SimulationTime);
 
 		if (ImGui::InputFloat("Rotation Limit", &model.m_RotationLimit)) {
 			if (model.m_RotationLimit < 0) model.m_RotationLimit = 0;
@@ -458,6 +458,26 @@ namespace MSD {
 		};
 		ImGui::Separator();
 
+		ImGui::Checkbox("Enable flux scattering calculation", &model.m_EnableFluxScattering);
+		if (model.m_EnableFluxScattering)
+		{
+			if (ImGui::InputFloat("Pressure (Pa)", &model.m_Pressure)) {
+				if (model.m_Pressure < 0) model.m_Pressure = 0;
+			};
+			if (ImGui::InputFloat("Temperature (K)", &model.m_Temperature)) {
+				if (model.m_Temperature < 0) model.m_Temperature = 0;
+			};
+			ImGui::Text("Gas: %s", GetSymbol(model.m_Gas));
+			ImGui::SameLine();
+			if (ImGui::Button("..."))
+			{
+				show_app_periodic_table = true;
+				m_SelectedElement = &model.m_Gas;
+			}
+			ImGui::Text("Scattering Coeff: %.3f", model.m_ScatteringCoeff);
+			ImGui::Separator();
+		};
+
 		if (ImGui::Button("Add Magnetron"))
 		{
 			model.AddMagnetron();
@@ -465,7 +485,6 @@ namespace MSD {
 			ImGui::SetWindowFocus("Object tree");
 			SetSelectedObject(model.m_RecentMagnetronID);
 		}
-
 		ImGui::End();
 	}
 
@@ -875,7 +894,7 @@ namespace MSD {
 		}
 	}
 
-	static const Element elements[] = { Al, Ti, Cr, Cu };
+	static const Element elements[] = { Al, Ti, Cr, Cu, Ar };
 
 	static const int num_elements = sizeof(elements) / sizeof(Element);
 
