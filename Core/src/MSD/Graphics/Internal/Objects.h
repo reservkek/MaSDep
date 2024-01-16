@@ -37,6 +37,8 @@ namespace MSD {
 
 		static void AddObject(Object* obj);
 
+		static Object* LoadObject(std::string path);
+
 		static const std::vector<std::shared_ptr<Object>>& GetObjects() { return m_GraphicsObjectBuffer; }
 	protected:
 		glm::vec3 m_Scale = glm::vec3(1.0f,1.0f,1.0f);
@@ -104,6 +106,5 @@ namespace MSD {
 
 		static BufferLayout u_BasicLayout;
 	};
-
 }
 

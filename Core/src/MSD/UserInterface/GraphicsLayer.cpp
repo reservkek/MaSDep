@@ -38,7 +38,7 @@ namespace MSD {
 		va->AddVertexBuffer(vb);
 		va->SetIndexBuffer(ib);
 
-		camera = new OrthographicCamera(-400.0f, 400.0f, -400.0f, 400.0f);
+		camera = new OrthographicCamera(-400.0f, 400.0f, -400.0f, 400.0f, -400.0f, 1600.0f);
 
 		shader = new Shader("../assets/shaders/Basic.glsl");
 		shader->Bind();

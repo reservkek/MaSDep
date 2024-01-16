@@ -226,9 +226,11 @@ namespace MSD {
 		if (s_CameraDraggable)
 		{
 			float angle = s_CameraRotation * PI / 180;
+			float angleV = s_CameraRotationVertical * PI / 180;
 
-			s_CameraPosition.x += -s_Delta.x * cos(angle) + s_Delta.y * sin(angle);
-			s_CameraPosition.y += s_Delta.x * sin(angle) + s_Delta.y * cos(angle);
+			s_CameraPosition.x += (- s_Delta.x * cos(angle) + s_Delta.y * sin(angle));
+			s_CameraPosition.y += (s_Delta.x * sin(angle) + s_Delta.y * cos(angle));
+			s_CameraPosition.z += (-s_Delta.y) * sin(angleV);
 		}
 
 		return true;
@@ -291,6 +293,7 @@ namespace MSD {
 		if (s_CameraDraggable && s_DragObject)
 		{
 			float angle = s_CameraRotation * PI / 180;
+			float angleV = s_CameraRotationVertical * PI / 180;
 
 			float dX = 0.1f * (- s_Delta.x * cos(angle) + s_Delta.y * sin(angle));
 			float dY = 0.1f * (s_Delta.x * sin(angle) + s_Delta.y * cos(angle));

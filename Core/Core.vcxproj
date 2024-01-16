@@ -93,7 +93,7 @@
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <UndefineAllPreprocessorDefinitions>false</UndefineAllPreprocessorDefinitions>
       <UndefinePreprocessorDefinitions>%(UndefinePreprocessorDefinitions)</UndefinePreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)Core\vendor;$(SolutionDir)Core\vendor\GLFW\include;$(SolutionDir)Core\vendor\imgui;$(SolutionDir)Core\src\MSD;$(SolutionDir)Glad\include;$(ProjectDir)vendor\NFD\include;$(SolutionDir)Core\src</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Core\vendor;$(SolutionDir)Core\vendor\GLFW\include;$(SolutionDir)Core\vendor\imgui;$(SolutionDir)Core\src\MSD;$(SolutionDir)Glad\include;$(ProjectDir)vendor\NFD\include;$(SolutionDir)Core\src;$(SolutionDir)lib_assimp\</AdditionalIncludeDirectories>
       <FloatingPointModel>Strict</FloatingPointModel>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
@@ -115,7 +115,7 @@
       <IgnoreSpecificDefaultLibraries>libcmt.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
     </Link>
     <Lib>
-      <AdditionalDependencies>glfw3_mt.lib;glad.lib</AdditionalDependencies>
+      <AdditionalDependencies>glfw3_mt.lib;glad.lib;</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)Core\vendor\GLFW\lib-vc2022;$(SolutionDir)bin\$(Platform)-$(Configuration)-$(SolutionName)\;%(AdditionalLibraryDirectories);$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
@@ -166,7 +166,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <AdditionalIncludeDirectories>$(SolutionDir)Core\vendor;$(SolutionDir)Core\vendor\GLFW\include;$(SolutionDir)Core\vendor\imgui;$(SolutionDir)Core\src\MSD;$(SolutionDir)Glad\include;$(ProjectDir)vendor\NFD\include;$(SolutionDir)Core\src</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Core\vendor;$(SolutionDir)Core\vendor\GLFW\include;$(SolutionDir)Core\vendor\imgui;$(SolutionDir)Core\src\MSD;$(SolutionDir)Glad\include;$(ProjectDir)vendor\NFD\include;$(SolutionDir)Core\src;$(SolutionDir)lib_assimp\</AdditionalIncludeDirectories>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>GLFW_INCLUDE_NONE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -179,7 +179,7 @@
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
     <Lib>
-      <AdditionalDependencies>glfw3_mt.lib;glad.lib</AdditionalDependencies>
+      <AdditionalDependencies>glfw3_mt.lib;glad.lib;</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)Core\vendor\GLFW\lib-vc2022;$(SolutionDir)bin\$(Platform)-$(Configuration)-$(SolutionName)\;%(AdditionalLibraryDirectories);</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>

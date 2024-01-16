@@ -47,6 +47,13 @@ namespace MSD
 		m_GraphicsObjectBuffer.push_back(std::unique_ptr<Object>(obj));
 	}
 
+	Object* Object::LoadObject(std::string path)
+	{
+		Object* obj = new Object();
+
+		return nullptr;
+	}
+
 	float Rect::coords[12] =
 	{
 		-100.0f, -200.0f, 0.0f, // 0 
@@ -66,11 +73,11 @@ namespace MSD
 		-200.0f, -200.0f, 200.0f, // 0 
 		 200.0f, -200.0f, 200.0f, // 1 
 		-200.0f,  200.0f, 200.0f, // 2 
-		 200.0f,  200.0f, 200.0f,  // 3
-		-200.0f, -200.0f, 300.0f, // 4
-		 200.0f, -200.0f, 300.0f, // 5
-		-200.0f,  200.0f, 300.0f, // 6
-		 200.0f,  200.0f, 300.0f  // 7
+		 200.0f,  200.0f, 200.0f, // 3 
+		-200.0f, -200.0f, 300.0f, // 4 
+		 200.0f, -200.0f, 300.0f, // 5 
+		-200.0f,  200.0f, 300.0f, // 6 
+		 200.0f,  200.0f, 300.0f  // 7 
 	};
 
 	unsigned int Cube::indices[36] =
@@ -80,7 +87,7 @@ namespace MSD
 	  2, 6, 3, 6, 3, 7,
 	  0, 4, 1, 4, 1, 5,
 	  5, 7, 3, 7, 3, 1,
-	  4, 6, 2, 6, 2, 0
+	  0, 2, 4, 2, 4, 6
 	};
 
 	unsigned int Cube::outlineIndices[24] =

@@ -24,6 +24,7 @@ namespace MSD {
 	{
 		m_Position = position;
 		CalcViewMatrix();
+		CalcProjectionMatrix();
 	}
 
 	void OrthographicCamera::SetRotationAroundZ(float rotation)
