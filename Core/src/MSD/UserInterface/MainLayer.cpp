@@ -374,6 +374,7 @@ namespace MSD {
 				ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(5.0f, 8.0f));
 				if (ImGui::Button(!running ? "Run Program###Run" : "Stop Program###Run"))
 				{
+					ImGui::SetWindowFocus("Model Parameters");
 					if (running)
 					{
 						model.Stop();
@@ -384,6 +385,7 @@ namespace MSD {
 						{ 
 							if (!model.Run())
 							{
+								ImGui::SetWindowFocus("Object tree");
 								show_popup_file_path_err = true;
 							};
 						}

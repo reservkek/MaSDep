@@ -211,7 +211,7 @@ namespace MSD {
 		{
 			vec3 MagnetronSubstrateVec = FindVector(substrate->GetPos(), magnetron->GetPos());
 			float distance = Magnitude(MagnetronSubstrateVec);
-			float geometryfactor = FluxScattering::GeometryFactor(*magnetron->GetRadius(), distance);
+			//float geometryfactor = FluxScattering::GeometryFactor(*magnetron->GetRadius(), distance);
 			m_ScatteringCoeff = FluxScattering::FluxPressureInteractionCoeff(distance, m_Pressure, magnetron->GetPD(), 1);
 			fullDepRate *= m_ScatteringCoeff;
 		}
