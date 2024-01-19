@@ -421,7 +421,7 @@ namespace MSD {
 	}
 
 
-	// PARAMETERS 
+	// MODEL PARAMETERS 
 	void MainLayer::ModelParametersWindow(bool* p_open)
 	{
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2(400, 400));
@@ -440,6 +440,8 @@ namespace MSD {
 
 		m_ProgressBar = model.GetCurrentProgress();
 		ImGui::ProgressBar(m_ProgressBar);
+
+
 		ImGui::Separator();
 
 		ImGui::Text("Ticks: %d", model.m_TimeTicksCounter);
@@ -460,8 +462,13 @@ namespace MSD {
 		};
 		ImGui::Separator();
 
+		if (model.m_ModelType == ANGMSD_REACTIVE)
+		{
+			
+		}
+
 		ImGui::Checkbox("Enable flux scattering calculation", &model.m_EnableFluxScattering);
-		if (model.m_EnableFluxScattering)
+		if (model.m_EnableFluxScattering or model.m_ModelType == ANGMSD_REACTIVE)
 		{
 			if (ImGui::InputFloat("Pressure (Pa)", &model.m_Pressure)) {
 				if (model.m_Pressure < 0) model.m_Pressure = 0;
@@ -476,9 +483,9 @@ namespace MSD {
 				show_app_periodic_table = true;
 				m_SelectedElement = &model.m_Gas;
 			}
-			ImGui::Text("Scattering Coeff: %.3f", model.m_ScatteringCoeff);
-			ImGui::Separator();
 		};
+		ImGui::Text("Scattering Coeff: %.3f", model.m_ScatteringCoeff);
+		ImGui::Separator();
 
 		if (ImGui::Button("Add Magnetron"))
 		{
@@ -500,6 +507,7 @@ namespace MSD {
 			return;
 		}
 		ImGui::PopStyleVar();
+
 
 		ApplicationCore& app = ApplicationCore::Get();
 		AngMSD& model = app.GetModel();
@@ -644,6 +652,7 @@ namespace MSD {
 			return;
 		}
 
+
 		ImVec2 viewportOffset = ImGui::GetCursorPos();
 
 		if (ImGui::IsWindowFocused())
@@ -763,7 +772,6 @@ namespace MSD {
 			ExportButton(model.m_ExportData, model.m_ExportDataColumnNames);
 			ImGui::Separator();
 		}
-
 
 		unsigned int count = 0;
 		for (auto mpair : model.m_Magnetrons)

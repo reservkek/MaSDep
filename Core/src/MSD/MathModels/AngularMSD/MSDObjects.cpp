@@ -65,7 +65,6 @@ namespace MSD {
 	{
 		s_KeyValues.erase(std::remove(s_KeyValues.begin(), s_KeyValues.end(), m_ID), s_KeyValues.end());
 		s_Objects.erase(m_ID);
-		delete this;
 	}
 
 	float AngMSDObject::CalcAngle()
@@ -116,7 +115,8 @@ namespace MSD {
 		if (!stream.good())
 		{
 			m_FilePathErr = true;
-			m_ErrorMsg = std::string("Couldn't find the file for magnetron #") + std::to_string(m_Index) + std::string("\nPlease make sure that the path is correct \n\n");
+			m_ErrorMsg = std::string("Couldn't find the file for the magnetron.") + std::string("\nPlease make sure that the path is correct \n\n");
+			stream.close();
 			return;
 		}
 
@@ -124,14 +124,15 @@ namespace MSD {
 		size_t pos = 0;
 		auto linecount = 0;
 
-		while (getline(stream, line))
+		while (std::getline(stream, line))
 		{
 			if (!line.length())
 			{
-				m_ErrorMsg = std::string("An error occured while reading input file for magnetron #");
+				m_ErrorMsg = std::string("An error occured while reading input file for the magnetron #");
 				m_ErrorMsg.append(std::to_string(m_Index));
 				m_ErrorMsg.append("\nPlease make sure that the file has correct format.\n\n");
 				m_FilePathErr = true;
+				stream.close();
 				return;
 			}
 			++linecount;
@@ -156,6 +157,8 @@ namespace MSD {
 				m_SputRates.insert({ localRadius, localSputRate });
 			}
 		}
+
+		stream.close();
 	}
 
 	void Magnetron::Clear()
@@ -196,6 +199,11 @@ namespace MSD {
 	Substrate::Substrate(const vec3& pos, const vec3& normal, const float& rpm, const float& subrpm)
 		: AngMSDObject(pos, normal), RPM(rpm), subRPM(subrpm)
 	{
+	}
+
+	Substrate* Substrate::clone()
+	{
+		return new Substrate(msdpos, msdnormal, RPM, subRPM);
 	}
 
 	void Substrate::Rotate()

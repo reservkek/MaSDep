@@ -8,9 +8,9 @@ namespace MSD
 export namespace FluxScattering
 {
 	// m1, m2, r1, r2, T, en_bind
-	double CalcPD(float m1, float m2, float r1, float r2, float T, float en_bind)
+	float CalcPD(float m1, float m2, float r1, float r2, float T, float en_bind)
 	{
-		return (0.107 * pow((m1 / m2), 0.69) * (0.62 + 0.23 * log(7736.4 * en_bind / T)) * T / (pow((r1 + r2), 2)));
+		return (0.107f * pow((m1 / m2), 0.69f) * (0.62f + 0.23f * log(7736.4f * en_bind / T)) * T / (pow((r1 + r2), 2.0f)));
 	}
 
 	float GeometryFactor(float r, float d)

@@ -14,6 +14,8 @@
 
 #include "../glm/gtc/matrix_transform.hpp"
 
+#define MSD_VERSION 0.5.0
+
 namespace MSD {
 
 	class MSD_API ApplicationCore

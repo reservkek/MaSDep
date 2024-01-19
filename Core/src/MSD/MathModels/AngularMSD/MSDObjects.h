@@ -133,6 +133,8 @@ namespace MSD {
 		Substrate(const vec3& pos = { 0.0, 15.0, 0.0 }, const vec3& normal = { 0.0, 1.0, 0.0 },
 			const float& rpm = 0, const float& subrpm = 0);
 
+		Substrate* clone();
+
 		void Rotate();
 		void Update();
 		void WriteDepEvolution();

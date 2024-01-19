@@ -13,7 +13,13 @@ import FluxScattering;
 
 namespace MSD {
 
-	class MSD_API AngMSD {
+	enum ModelType : int
+	{
+		ANGMSD_STANDARD = 1,
+		ANGMSD_REACTIVE = 2
+	};
+
+	class AngMSD {
 	public:
 		AngMSD();
 		~AngMSD()
@@ -47,6 +53,7 @@ namespace MSD {
 		extern friend class MainLayer;
 		extern friend class GraphicsLayer;
 	private:
+		ModelType m_ModelType = ANGMSD_STANDARD;
 
 		// Время в модели
 		int m_TimeTicksCounter = 0; // Счётчик времени в тиках
@@ -57,7 +64,7 @@ namespace MSD {
 		float m_CurrentTime = 0;
 
 		// Пространство в модели
-		unsigned int m_SpaceRatio = 100; // Разделение 1 метра пространства на виртуальные отрезки
+		// unsigned int m_SpaceRatio = 100; // Разделение 1 метра пространства на виртуальные отрезки
 
 		// Другие параметры
 		float m_RotationLimit = 1;
@@ -109,4 +116,13 @@ namespace MSD {
 
 		std::string m_ErrorMsg = "";
 	};
+
+	class ReactiveMSD
+	{
+	friend AngMSD;
+	private:
+		Element m_ReactiveGas = N;
+		
+	};
+
 }

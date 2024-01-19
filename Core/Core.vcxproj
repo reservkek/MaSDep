@@ -94,7 +94,7 @@
       <UndefineAllPreprocessorDefinitions>false</UndefineAllPreprocessorDefinitions>
       <UndefinePreprocessorDefinitions>%(UndefinePreprocessorDefinitions)</UndefinePreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(SolutionDir)Core\vendor;$(SolutionDir)Core\vendor\GLFW\include;$(SolutionDir)Core\vendor\imgui;$(SolutionDir)Core\src\MSD;$(SolutionDir)Glad\include;$(ProjectDir)vendor\NFD\include;$(SolutionDir)Core\src</AdditionalIncludeDirectories>
-      <FloatingPointModel>Strict</FloatingPointModel>
+      <FloatingPointModel>Precise</FloatingPointModel>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>msdpch.h</PrecompiledHeaderFile>
@@ -132,7 +132,7 @@
       <UndefineAllPreprocessorDefinitions>false</UndefineAllPreprocessorDefinitions>
       <UndefinePreprocessorDefinitions>%(UndefinePreprocessorDefinitions)</UndefinePreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(SolutionDir)Core\vendor;$(SolutionDir)Core\vendor\GLFW\include;$(SolutionDir)Core\vendor\imgui;$(SolutionDir)Core\src\MSD;$(SolutionDir)Glad\include;$(ProjectDir)vendor\NFD\include;$(SolutionDir)Core\src</AdditionalIncludeDirectories>
-      <FloatingPointModel>Strict</FloatingPointModel>
+      <FloatingPointModel>Precise</FloatingPointModel>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>msdpch.h</PrecompiledHeaderFile>
@@ -172,7 +172,7 @@
       <PreprocessorDefinitions>GLFW_INCLUDE_NONE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <UndefinePreprocessorDefinitions>%(UndefinePreprocessorDefinitions)</UndefinePreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <FloatingPointModel>Strict</FloatingPointModel>
+      <FloatingPointModel>Precise</FloatingPointModel>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>msdpch.h</PrecompiledHeaderFile>
       <UndefineAllPreprocessorDefinitions>false</UndefineAllPreprocessorDefinitions>
@@ -197,7 +197,7 @@
       <PreprocessorDefinitions>GLFW_INCLUDE_NONE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <UndefinePreprocessorDefinitions>%(UndefinePreprocessorDefinitions)</UndefinePreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <FloatingPointModel>Strict</FloatingPointModel>
+      <FloatingPointModel>Precise</FloatingPointModel>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>msdpch.h</PrecompiledHeaderFile>
       <UndefineAllPreprocessorDefinitions>false</UndefineAllPreprocessorDefinitions>
