@@ -68,6 +68,8 @@ namespace MSD {
 
 		ImGui_ImplOpenGL3_Init("#version 430");
 		ImGui_ImplGlfw_InitForOpenGL(window, true);
+
+		ImGui::SetWindowFocus("Model parameters");
 	}
 
 	void MainLayer::OnDetach()
@@ -96,8 +98,8 @@ namespace MSD {
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 10.0f);
 		if (show_popup_file_path_err) FilePathErrPopup(&show_popup_file_path_err, &errorMsg);
 		if (show_popup_success) SuccessPopup(&show_popup_success);
-		if (show_app_model_parameters) ModelParametersWindow(&show_app_model_parameters);
 		if (show_app_model_objecttree) ModelObjectTree(&show_app_model_objecttree);
+		if (show_app_model_parameters) ModelParametersWindow(&show_app_model_parameters);
 		if (show_app_model_results) ModelResultsWindow(&show_app_model_results);
 		if (show_app_model_viewport) ModelViewportWindow(&show_app_model_viewport);
 		if (show_app_periodic_table) PeriodicTableWindow(&show_app_periodic_table, m_SelectedElement);
@@ -187,7 +189,7 @@ namespace MSD {
 			std::cout << "ID: " << hoveredID << "\n";
 			std::cout << "Selected Object: " << Renderer::GetSelectedItemID() << "\n";
 
-			if (Renderer::GetSelectedItemID() != -1)
+			if (Renderer::GetSelectedItemID() != -1 && !model.GetStatus())
 			{
 				Controller::DisableCameraEvents();
 				Controller::ObjectStartTransform(AngMSDObject::GetObject(Renderer::GetSelectedItemID()));
@@ -375,6 +377,8 @@ namespace MSD {
 				if (ImGui::Button(!running ? "Run Program###Run" : "Stop Program###Run"))
 				{
 					ImGui::SetWindowFocus("Model Parameters");
+					m_SelectedObjectID = -1;
+					Renderer::GetSelectedItemID() = -1;
 					if (running)
 					{
 						model.Stop();
@@ -462,10 +466,7 @@ namespace MSD {
 		};
 		ImGui::Separator();
 
-		if (model.m_ModelType == ANGMSD_REACTIVE)
-		{
-			
-		}
+		ImGui::Checkbox("Show real time movement of objects", &model.m_ShowMovementRealTime);
 
 		ImGui::Checkbox("Enable flux scattering calculation", &model.m_EnableFluxScattering);
 		if (model.m_EnableFluxScattering or model.m_ModelType == ANGMSD_REACTIVE)
@@ -484,6 +485,18 @@ namespace MSD {
 				m_SelectedElement = &model.m_Gas;
 			}
 		};
+
+		if (model.m_ModelType == ANGMSD_REACTIVE)
+		{
+			ImGui::Text("Reactive gas: %s", GetSymbol(model.m_ReactiveGas));
+			ImGui::SameLine();
+			if (ImGui::Button("...##reactive"))
+			{
+				show_app_periodic_table = true;
+				m_SelectedElement = &model.m_ReactiveGas;
+			}
+		}
+
 		ImGui::Text("Scattering Coeff: %.3f", model.m_ScatteringCoeff);
 		ImGui::Separator();
 
@@ -573,6 +586,8 @@ namespace MSD {
 				graphicsLayer->UpdateObjects();
 				m_SelectedObjectID = 0;
 			}
+
+
 		}
 
 		ImGui::End();
@@ -644,12 +659,29 @@ namespace MSD {
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2(400, 400 + m_ViewportHeaderSize));
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 
+		ApplicationCore& app = ApplicationCore::Get();
+		AngMSD& model = app.GetModel();
+		GraphicsLayer* graphicsLayer = app.GetGraphicsLayer();
+
 		if (!ImGui::Begin("Model Viewport", p_open, ImGuiWindowFlags_NoScrollbar
 			| ImGuiWindowFlags_NoScrollWithMouse))
 		{
 			ImGui::PopStyleVar(2);
 			ImGui::End();
 			return;
+		}
+
+		ImGui::SetNextItemWidth(200);
+		if (ImGui::BeginPopupContextWindow())
+		{
+			if (ImGui::MenuItem("Add Magnetron"))
+			{
+				model.AddMagnetron();
+				graphicsLayer->UpdateObjects();
+				ImGui::SetWindowFocus("Object tree");
+				SetSelectedObject(model.m_RecentMagnetronID);
+			}
+			ImGui::EndPopup();
 		}
 
 
@@ -666,9 +698,6 @@ namespace MSD {
 			Controller::DisableCameraEvents();
 		}
 
-		ApplicationCore& app = ApplicationCore::Get();
-		AngMSD& model = app.GetModel();
-		GraphicsLayer* graphicsLayer = app.GetGraphicsLayer();
 		ImTextureID texID = (ImTextureID)app.GetGraphicsLayer()->GetFrameBuffer()->GetColorAttachment();
 		auto fbSize = app.GetGraphicsLayer()->GetFrameBuffer()->GetSpecification().Width;
 
@@ -904,7 +933,7 @@ namespace MSD {
 		}
 	}
 
-	static const Element elements[] = { Al, Ti, Cr, Cu, Ar };
+	static const Element elements[] = { Al, Ti, Cr, Cu, Ar, N };
 
 	static const int num_elements = sizeof(elements) / sizeof(Element);
 

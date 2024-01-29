@@ -92,6 +92,7 @@ namespace MSD {
 			case Ti:	   return "Titanium";
 			case Cu:	   return "Copper";
 			case Ar:	   return "Argon";
+			case N:		   return "Nitrogen";
 			}
 			return "Null";
 		}
@@ -106,6 +107,7 @@ namespace MSD {
 			case Ti:	   return "Ti";
 			case Cu:	   return "Cu";
 			case Ar:	   return "Ar";
+			case N:		   return "N";
 			}
 			return "Null";
 		}

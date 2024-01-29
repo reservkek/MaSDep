@@ -14,7 +14,7 @@
 
 #include "../glm/gtc/matrix_transform.hpp"
 
-#define MSD_VERSION 0.5.0
+#define MSD_VERSION 0.5.1
 
 namespace MSD {
 

@@ -2,6 +2,7 @@
 
 #include "AngularMSD.h"
 #include "../Database/PhysicsData.h"
+#include "UserInterface/Controller.h"
 
 namespace MSD {
 	using namespace Database;

@@ -16,6 +16,9 @@
 
 namespace MSD {
 
+	// This class is needed to manipulate and update graphics objects
+	// of broader objects such as magnetrons and substrates.
+
 	class GraphicsLayer : public Layer
 	{
 	public:

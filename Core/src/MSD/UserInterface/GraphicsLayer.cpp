@@ -98,12 +98,13 @@ namespace MSD {
 		renderer.Flush();
 
 		// Adding substrate
-		auto& substrate = m_Model->m_Substrate;
+		auto substrate = m_Model->m_Substrate;
 		auto s = substrate->GetGraphicsObject();
 		renderer.AddExistingObject(s);
 
 		s->SetID(substrate->GetID());
-		s->SetColor({ 0.9f, 0.05f, 0.05f, 1.0f });
+		s->SetColor({ 0.9f, 0.25f, 0.05f, 1.0f });
+		s->SetScale({ 0.2f, 0.03f, 1.0f });
 
 		// Adding substrate normal vector
 		auto s_arrow = substrate->GetArrow();
@@ -111,6 +112,7 @@ namespace MSD {
 
 		s_arrow->SetID(999999);
 		s_arrow->SetColor({ 0.9f, 0.05f, 0.9f, 1.0f });
+		s_arrow->SetScale({ 0.4f, 0.4f, 1.0f });
 
 		// Adding magnetrons and magnetron normal vectors
 		for (auto mpair : m_Model->m_Magnetrons)
@@ -125,8 +127,9 @@ namespace MSD {
 
 			m->SetID(magnetron->GetID());
 
-			m_arrow->SetID((magnetron->GetID() + 10000)*50);
+			m_arrow->SetID(magnetron->GetID() + 50000);
 			m_arrow->SetColor({ 0.9f, 0.05f, 0.9f, 1.0f });
+			m_arrow->SetScale({ 0.4f, 0.4f, 1.0f });
 		}
 
 		UpdateObjectStates();
@@ -137,18 +140,26 @@ namespace MSD {
 		auto s = substrate->GetGraphicsObject();
 		auto s_arrow = substrate->GetArrow();
 
-		auto pos = substrate->GetPos() * 10.0f;
-		auto angle = m_Model->m_Substrate->CalcAngle();
+		vec3 pos; float angle;
+		if (m_Model->m_ShowMovementRealTime and m_Model->m_ModelRunning)
+		{
+			auto& substratebuffer = m_Model->m_SubstrateBuffer;
+			pos = substratebuffer->GetPos() * 10.0f;
+			angle = substratebuffer->CalcAngle();
+		}
+		else
+		{
+			pos = substrate->GetPos() * 10.0f;
+			angle = substrate->CalcAngle();
+		};
 
 		s->SetPosition(pos);
-		s->SetScale({ 0.2f, 0.03f, 1.0f });
 		s->SetAngle(angle);
 
 		s->CalcModelMatrix();
 
 		s_arrow->SetPosition(pos);
 		s_arrow->SetAngle(angle);
-		s_arrow->SetScale({ 0.4f, 0.4f, 1.0f });
 
 		s_arrow->CalcModelMatrix();
 
@@ -169,7 +180,6 @@ namespace MSD {
 
 			m_arrow->SetPosition(pos);
 			m_arrow->SetAngle(angle);
-			m_arrow->SetScale({ 0.4f, 0.4f, 1.0f });
 			m_arrow->CalcModelMatrix();
 
 			m->CalcModelMatrix();

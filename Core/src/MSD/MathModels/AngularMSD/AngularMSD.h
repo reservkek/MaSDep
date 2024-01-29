@@ -53,7 +53,7 @@ namespace MSD {
 		extern friend class MainLayer;
 		extern friend class GraphicsLayer;
 	private:
-		ModelType m_ModelType = ANGMSD_STANDARD;
+		ModelType m_ModelType = ANGMSD_REACTIVE;
 
 		// Время в модели
 		int m_TimeTicksCounter = 0; // Счётчик времени в тиках
@@ -70,7 +70,7 @@ namespace MSD {
 		float m_RotationLimit = 1;
 		float m_RotationCounter = 0;
 
-		float m_IntegrationDelta = 0.1f;
+		float m_IntegrationDelta = 0.05f;
 
 		vec3 m_CurrentFluxVector;
 		float m_CurrentGamma = 0; //  Incident angle to substrate
@@ -113,16 +113,21 @@ namespace MSD {
 		bool m_ModelRunning = false;
 		bool m_ToBeCleared = false;
 		bool m_MeanFluxAngleCalculation = false;
+		bool m_ShowMovementRealTime = false;
 
 		std::string m_ErrorMsg = "";
+
+		// REACTIVE MODEL
+		Element m_ReactiveGas = N;
+		float GasRatio = 0.5f; // Ratio of noble to reactive gases
+		float m_Coverage = 0.0f;
 	};
 
+	// NOT SURE IF WILL BE IMPLEMENTED FURTHER
 	class ReactiveMSD
 	{
 	friend AngMSD;
 	private:
-		Element m_ReactiveGas = N;
-		
 	};
 
 }
