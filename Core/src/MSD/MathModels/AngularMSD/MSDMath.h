@@ -34,6 +34,7 @@ namespace MSD {
 		vec3(float x = 0, float y = 0, float z = 0);
 
 		vec3& operator=(const vec3& a);
+		vec3& operator=(const glm::vec3& a);
 		vec3 operator*(const float& a);
 		vec3 operator+(const float& a) const;
 		vec3 operator+(const vec3& a) const;

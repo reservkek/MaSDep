@@ -119,8 +119,8 @@ namespace MSD {
 
 		// REACTIVE MODEL
 		Element m_ReactiveGas = N;
-		float GasRatio = 0.5f; // Ratio of noble to reactive gases
-		float m_Coverage = 0.0f;
+		float m_GasRatio = 0.0f; // Ratio of noble to reactive gases
+		float m_PumpingSpeed = 0.0f;
 	};
 
 	// NOT SURE IF WILL BE IMPLEMENTED FURTHER

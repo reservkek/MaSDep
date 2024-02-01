@@ -176,6 +176,7 @@ namespace MSD {
 			AngMSDObject::GetObject(id)->Delete();
 			m_Magnetrons.erase(id);
 			m_MagnetronCount -= 1;
+			std::cout << "Magnetron with ID: " << id << " was successfully erased \n";
 		}
 		else std::cout << "There is no such magnetron present in the model.\n";
 	}

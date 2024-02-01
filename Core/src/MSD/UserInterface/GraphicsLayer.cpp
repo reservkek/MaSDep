@@ -134,6 +134,7 @@ namespace MSD {
 
 		UpdateObjectStates();
 	}
+
 	void GraphicsLayer::UpdateObjectStates()
 	{
 		auto& substrate = m_Model->m_Substrate;

@@ -23,6 +23,9 @@ namespace MSD {
 		static void DeleteObject(unsigned int val);
 		void Delete();
 
+		virtual void RotateAroundCenter(float rotationangle = 0) = 0;
+		virtual void Rotate(float rotationangle = 0, glm::vec3 axis = glm::vec3(0, 0, 1)) = 0;
+
 		float* GetPosX() { return &(msdpos.x); }
 		float* GetPosY() { return &(msdpos.y); }
 		float* GetPosZ() { return &(msdpos.z); }
@@ -44,6 +47,7 @@ namespace MSD {
 		void SetGraphicsObject(Object* obj) { m_Object = obj; }
 		Object* GetGraphicsObject() const { return m_Object; }
 
+
 		friend class MainLayer;
 	protected:
 		unsigned int m_ID;
@@ -54,6 +58,7 @@ namespace MSD {
 		Object* m_Object = nullptr;
 
 		std::shared_ptr<Arrow> m_NormalVectorArrow;
+		float m_RotationAngle = 0;
 
 		std::string m_Type;
 
@@ -70,7 +75,9 @@ namespace MSD {
 		Magnetron(const vec3& pos = { 0.0, 25.0, 0.0 }, const vec3& normal = { 0.0, -1.0, 0.0 }, const float& radius = 4.5);
 		~Magnetron();
 
-		void Rotate();
+		virtual void RotateAroundCenter(float rotationangle = 0) override;
+		virtual void Rotate(float rotationangle = 0, glm::vec3 axis = glm::vec3(0,0,1)) override;
+
 		void WriteDepRate();
 		void WriteGamma(const float& gamma);
 		void WritePhi(const float& phi);
@@ -107,24 +114,27 @@ namespace MSD {
 		std::map<float, float> m_SputRates;
 
 		float m_CurrentDepRate = 0;
+		float m_RotationAngle = 0;
 
 		// Result containers
 		std::vector<float> m_DepRates; // Deposition rates onto substrate;
 		std::vector<float> m_GammaAngles; 
 		std::vector<float> m_PhiAngles;
 
-		// Flux scattering
-		float m_pd = 0;
-
 		char* m_InputFilePath = new char();
 
 		unsigned int m_Index = 0;
-		float m_RotationAngle = 0;
 
 		bool m_FilePathErr = false;
 		std::string m_ErrorMsg = "";
 
 		std::string m_Type = "Magnetron";
+
+				// Flux scattering
+		float m_pd = 0;
+
+		// Reactive Model
+		float m_Coverage = 0.0f;
 	};
 
 	class Substrate : public AngMSDObject
@@ -135,7 +145,8 @@ namespace MSD {
 
 		Substrate* clone();
 
-		void Rotate();
+		virtual void RotateAroundCenter(float rotationangle = 0) override;
+		virtual void Rotate(float rotationangle = 0, glm::vec3 axis = glm::vec3(0, 0, 1)) override;
 		void Update();
 		void WriteDepEvolution();
 

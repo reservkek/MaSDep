@@ -179,6 +179,7 @@ namespace MSD {
 			if (ImGui::IsMouseReleased(ImGuiMouseButton_Left) && toBeSelected)
 			{
 				SetSelectedObject(hoveredID);
+				ImGui::SetWindowFocus("Object tree");
 			}
 
 			if (hoveredID == 99999)
@@ -186,8 +187,8 @@ namespace MSD {
 				///
 			}
 
-			std::cout << "ID: " << hoveredID << "\n";
-			std::cout << "Selected Object: " << Renderer::GetSelectedItemID() << "\n";
+			//std::cout << "ID: " << hoveredID << "\n";
+			//std::cout << "Selected Object: " << Renderer::GetSelectedItemID() << "\n";
 
 			if (Renderer::GetSelectedItemID() != -1 && !model.GetStatus())
 			{
@@ -495,6 +496,7 @@ namespace MSD {
 				show_app_periodic_table = true;
 				m_SelectedElement = &model.m_ReactiveGas;
 			}
+			ImGui::SliderFloat("Reactive gas ratio", &model.m_GasRatio, 0.0f, 1.0f, "%.2f");
 		}
 
 		ImGui::Text("Scattering Coeff: %.3f", model.m_ScatteringCoeff);

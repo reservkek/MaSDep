@@ -57,6 +57,14 @@ namespace MSD {
 		return *this;
 	}
 
+	vec3& vec3::operator=(const glm::vec3& a)
+	{
+		x = a.x;
+		y = a.y;
+		z = a.z;
+		return *this;
+	}
+
 	vec3 vec3::operator*(const float& a)
 	{
 		return vec3(x * a, y * a, z * a);

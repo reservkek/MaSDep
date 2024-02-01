@@ -20,12 +20,16 @@ namespace MSD {
 	glm::vec2 Controller::s_ObjectPos = glm::vec2(0.0f, 0.0f);
 	glm::vec2 Controller::s_ObjectPosVirtual = glm::vec2(0.0f, 0.0f);
 	glm::vec2 Controller::s_WindowSizeRatio = glm::vec2(0.0f, 0.0f);
+	float Controller::s_ObjectRotation = 0.0f;
+	float Controller::s_ObjectRotationRounded = 0.0f;
 
 
 	bool Controller::s_CameraDraggable = false;
 	bool Controller::s_EnableCameraEvents = true;
 
 	bool Controller::s_DragObject = false;
+
+	bool Controller::s_RotateObject = false;
 
 	ControllerState Controller::s_ControllerState = ControllerState::View;
 
@@ -253,6 +257,13 @@ namespace MSD {
 		s_DragObject = false;
 	}
 
+	void Controller::SetState(ControllerState state)
+	{
+		s_DragObject = false;
+		s_RotateObject = false;
+		s_ControllerState = state;
+	}
+
 	bool Controller::ObjectEventMouseButtonPressed(MouseButtonPressedEvent& event)
 	{
 		if (event.GetMouseButton() == 0)
@@ -276,6 +287,15 @@ namespace MSD {
 	{
 		if (event.GetKeyCode() == GLFW_KEY_LEFT_SHIFT)
 			s_ObjectSticking = true;
+		else if (event.GetKeyCode() == GLFW_KEY_DELETE && s_TransformingObject != nullptr)
+		{
+			AngMSD& model = ApplicationCore::Get().GetModel();
+			model.DeleteMagnetron(s_TransformingObject->GetID());
+			if (s_TransformingObject->GetType() == "Magnetron") s_TransformingObject->Delete();
+			ApplicationCore::Get().GetGraphicsLayer()->UpdateObjects();
+		}
+		else if (event.GetKeyCode() == GLFW_KEY_R)
+			s_RotateObject = !s_RotateObject;
 		return true;
 	}
 
@@ -312,6 +332,31 @@ namespace MSD {
 				}
 			}
 
+		}
+
+		else if (s_RotateObject)
+		{
+			if (s_TransformingObject != nullptr)
+			{
+				s_ObjectRotation = s_Delta.y * 0.05f;
+
+				// TO DO: REWORK STICKING TO ABSOLUTE ANGLES
+				if (s_ObjectSticking)
+				{
+					s_ObjectRotationRounded += std::round(s_ObjectRotation * 360 / PI)/4;
+					std::cout << "rounded: " << s_ObjectRotationRounded << std::endl;
+
+					if (std::abs(s_ObjectRotationRounded) > 15) {
+						s_TransformingObject->Rotate(s_ObjectRotationRounded * PI / (360));
+						s_ObjectRotationRounded = 0;
+					}
+				}
+				else
+				{
+					std::cout << "raw: " << s_ObjectRotation << std::endl;
+					s_TransformingObject->Rotate(s_ObjectRotation);
+				}
+			}
 		}
 
 		return true;

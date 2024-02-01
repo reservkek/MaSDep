@@ -32,7 +32,7 @@ namespace MSD {
 		static void DragObjectStart();
 		static void DragObjectStop();
 
-		static void SetState(ControllerState state) { s_ControllerState = state; };
+		static void SetState(ControllerState state);
 
 		static const float GetCameraZoomLevel() { return s_ZoomValue; };
 		static const float GetCameraRotation() { return s_CameraRotation; };
@@ -83,6 +83,9 @@ namespace MSD {
 		static glm::vec2 s_ObjectPosVirtual;
 		static glm::vec2 s_WindowSizeRatio;
 
+		static float s_ObjectRotation;
+		static float s_ObjectRotationRounded;
+
 		static bool s_CameraDraggable;
 		static bool s_EnableCameraEvents;
 
@@ -96,6 +99,7 @@ namespace MSD {
 
 	public:
 		static bool s_DragObject;
+		static bool s_RotateObject;
 	};
 
 }

@@ -2,6 +2,7 @@
 
 #include "../../vendor/glm/glm.hpp"
 #include "../../vendor/glm/gtc/matrix_transform.hpp"
+#include "../../vendor/glm/gtx/rotate_vector.hpp"
 
 #include "Graphics/Buffer.h"
 

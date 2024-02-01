@@ -37,9 +37,17 @@ namespace MSD {
 		if (val == 0) validID = true;
 		if (!validID)
 		{
-			std::cout << "ID " << val <<" is already taken. Trying next...\n";
-			SetID(val + 1);
-			return;
+			if (s_Objects[val] == nullptr)
+			{
+				s_Objects.erase(val);
+				validID = true;
+			}
+			else
+			{
+				std::cout << "ID " << val << " is already taken. Trying next...\n";
+				SetID(val + 1);
+				return;
+			}
 		}
 		s_Objects.emplace(std::make_pair(val, this));
 		s_KeyValues.push_back(val);
@@ -90,11 +98,22 @@ namespace MSD {
 		std::cout << "ID " << m_ID << " was set free when " << GetType() << " was deleted.\n";
 	}
 
-	void Magnetron::Rotate()
+	void Magnetron::RotateAroundCenter(float rotationangle)
 	{
-		m_RotationAngle = m_RotationAngle * PI / 180;
-		msdpos = RotateAroundZ(msdpos, -m_RotationAngle);
-		msdnormal = RotateAroundZ(msdnormal, -m_RotationAngle);
+		if (rotationangle == 0) rotationangle = m_RotationAngle * PI / 180;
+		msdpos = RotateAroundZ(msdpos, -rotationangle);
+		msdnormal = RotateAroundZ(msdnormal, -rotationangle);
+
+		integrationvectorI = FindOrthogonal(msdnormal);
+		integrationvectorJ = CrossProduct(msdnormal, integrationvectorI);
+
+		m_RotationAngle = 0;
+	}
+
+	void Magnetron::Rotate(float rotationangle, glm::vec3 axis)
+	{
+		if (rotationangle == 0) rotationangle = m_RotationAngle * PI / 180;
+		msdnormal = glm::rotate(glm::vec3(msdnormal), -rotationangle, axis);
 
 		integrationvectorI = FindOrthogonal(msdnormal);
 		integrationvectorJ = CrossProduct(msdnormal, integrationvectorI);
@@ -206,11 +225,11 @@ namespace MSD {
 		return new Substrate(msdpos, msdnormal, RPM, subRPM);
 	}
 
-	void Substrate::Rotate()
+	void Substrate::RotateAroundCenter(float rotationangle)
 	{
-		m_RotationAngle = m_RotationAngle * PI / 180;
-		msdpos = RotateAroundZ(msdpos, -m_RotationAngle);
-		msdnormal = RotateAroundZ(msdnormal, -m_RotationAngle);
+		if (rotationangle == 0) rotationangle = m_RotationAngle * PI / 180;
+		msdpos = RotateAroundZ(msdpos, -rotationangle);
+		msdnormal = RotateAroundZ(msdnormal, -rotationangle);
 		m_RotationAngle = 0;
 	}
 
@@ -229,6 +248,13 @@ namespace MSD {
 		if (m_TotalAngle < 0) m_TotalAngle += 2 * PI;
 		if (m_TotalSubAngle >= 2 * PI) m_TotalSubAngle -= 2 * PI;
 		if (m_TotalSubAngle < 0) m_TotalSubAngle += 2 * PI;
+	}
+
+	void Substrate::Rotate(float rotationangle, glm::vec3 axis)
+	{
+		if (rotationangle == 0) rotationangle = m_RotationAngle * PI / 180;
+		msdnormal = glm::rotate(glm::vec3(msdnormal), -rotationangle, axis);
+		m_RotationAngle = 0;
 	}
 
 	void Substrate::WriteDepEvolution()
