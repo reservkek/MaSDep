@@ -53,7 +53,7 @@ namespace MSD {
 		extern friend class MainLayer;
 		extern friend class GraphicsLayer;
 	private:
-		ModelType m_ModelType = ANGMSD_REACTIVE;
+		int m_ModelType = ANGMSD_REACTIVE;
 
 		// Время в модели
 		int m_TimeTicksCounter = 0; // Счётчик времени в тиках

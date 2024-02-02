@@ -44,7 +44,7 @@ vec4 grid(vec3 fragPos3D, float scale) {
     if (line < 1.0) line = 0.0;
     float minimumy = min(derivative.y, 1);
     float minimumx = min(derivative.x, 1);
-    vec4 color = vec4(0.5, 0.5, 0.5, 1.0 - min(line, 1.0));
+    vec4 color = vec4(0.4, 0.4, 0.4, 1.0 - min(line, 1.0));
 
 
     // y axis

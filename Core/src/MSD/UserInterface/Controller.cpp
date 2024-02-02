@@ -169,13 +169,13 @@ namespace MSD {
 		{
 			dispatcher.Dispatch<MouseButtonPressedEvent>(BIND_EVENT_FN_STATIC(Controller::ObjectEventMouseButtonPressed));
 			dispatcher.Dispatch<MouseButtonReleasedEvent>(BIND_EVENT_FN_STATIC(Controller::ObjectEventMouseButtonReleased));
+			dispatcher.Dispatch<KeyPressedEvent>(BIND_EVENT_FN_STATIC(Controller::ObjectEventKeyPressed));
+			dispatcher.Dispatch<KeyReleasedEvent>(BIND_EVENT_FN_STATIC(Controller::ObjectEventKeyReleased));
 
 			if (!s_EnableCameraEvents) return;
 
 			dispatcher.Dispatch<MouseMovedEvent>(BIND_EVENT_FN_STATIC(Controller::ObjectEventMouseMoved));
 			dispatcher.Dispatch<MouseScrolledEvent>(BIND_EVENT_FN_STATIC(Controller::CameraEventMouseScrolled));
-			dispatcher.Dispatch<KeyPressedEvent>(BIND_EVENT_FN_STATIC(Controller::ObjectEventKeyPressed));
-			dispatcher.Dispatch<KeyReleasedEvent>(BIND_EVENT_FN_STATIC(Controller::ObjectEventKeyReleased));
 		}
 
 	}

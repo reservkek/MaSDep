@@ -12,6 +12,8 @@ namespace MSD {
 
 	using namespace Database;
 
+	enum CalculationParams : int { MSD_USE_FILE, MSD_CALC_RAW };
+
 	class AngMSDObject
 	{
 	public:
@@ -125,6 +127,12 @@ namespace MSD {
 
 		unsigned int m_Index = 0;
 
+		int m_CalculationParameters = MSD_USE_FILE;
+		int m_Voltage = 300;
+		float m_Current = 5.0;
+		float m_Power = m_Current * m_Voltage;
+
+
 		bool m_FilePathErr = false;
 		std::string m_ErrorMsg = "";
 
@@ -135,6 +143,8 @@ namespace MSD {
 
 		// Reactive Model
 		float m_Coverage = 0.0f;
+
+		friend class MainLayer;
 	};
 
 	class Substrate : public AngMSDObject

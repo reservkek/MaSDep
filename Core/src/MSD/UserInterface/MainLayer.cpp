@@ -179,7 +179,6 @@ namespace MSD {
 			if (ImGui::IsMouseReleased(ImGuiMouseButton_Left) && toBeSelected)
 			{
 				SetSelectedObject(hoveredID);
-				ImGui::SetWindowFocus("Object tree");
 			}
 
 			if (hoveredID == 99999)
@@ -205,6 +204,11 @@ namespace MSD {
 		m_SelectedObjectID = id;
 		app.GetGraphicsLayer()->SetSelectedItem(id);
 		if (id == -1 or id == 0) Controller::SetState(ControllerState::View);
+		else
+		{
+			ImGui::SetWindowFocus("Object tree");
+			ImGui::SetWindowFocus("Model Viewport");
+		}
 	}
 
 	// STATIC FUNCTIONS
@@ -374,7 +378,8 @@ namespace MSD {
 				AngMSD& model = app.GetModel();
 				bool& running = app.GetModel().GetStatus();
 
-				ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(5.0f, 8.0f));
+				ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(20.0f, 8.0f));
+				ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.5f);
 				if (ImGui::Button(!running ? "Run Program###Run" : "Stop Program###Run"))
 				{
 					ImGui::SetWindowFocus("Model Parameters");
@@ -417,7 +422,7 @@ namespace MSD {
 					ImGui::SameLine();
 					ImGui::EndPopup();
 				}
-				ImGui::PopStyleVar();
+				ImGui::PopStyleVar(2);
 				ImGui::EndMenuBar();
 			}
 			ImGui::End();
@@ -445,18 +450,27 @@ namespace MSD {
 
 		m_ProgressBar = model.GetCurrentProgress();
 		ImGui::ProgressBar(m_ProgressBar);
+		ImGui::Text("Ticks: %d", model.m_TimeTicksCounter);
+		ImGui::Text("Simulation time: %.2f s", model.m_SimulationTime);
 
 
 		ImGui::Separator();
 
-		ImGui::Text("Ticks: %d", model.m_TimeTicksCounter);
-		ImGui::Text("Magnetrons: %d", model.m_Magnetrons.size());
-		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
-		ImGui::Text("Simulation time: %.2f s", model.m_SimulationTime);
+		ImGui::Text("Magnetrons in the model: %d", model.m_Magnetrons.size());
+		ImGui::Text("Substrates in the model: 1");
+		//ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+
+		bool disable = model.m_ModelRunning;
+		if (disable) ImGui::BeginDisabled();
+
+		ImGui::Text("Finish simulation when:");
+
+		ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.5f);
 
 		if (ImGui::InputFloat("Rotation Limit", &model.m_RotationLimit)) {
 			if (model.m_RotationLimit < 0) model.m_RotationLimit = 0;
 		};
+
 		if (ImGui::InputInt("Time Limit", &model.m_TimeLimit))
 		{
 			if (model.m_TimeLimit < 0) model.m_TimeLimit = 0;
@@ -465,11 +479,18 @@ namespace MSD {
 		{
 			if (model.m_TicksPerSecond < 1) model.m_TicksPerSecond = 1;
 		};
+
+
 		ImGui::Separator();
 
 		ImGui::Checkbox("Show real time movement of objects", &model.m_ShowMovementRealTime);
 
 		ImGui::Checkbox("Enable flux scattering calculation", &model.m_EnableFluxScattering);
+
+		ImGui::RadioButton("Standard", &model.m_ModelType, ANGMSD_STANDARD);
+		ImGui::SameLine();
+		ImGui::RadioButton("Reactive", &model.m_ModelType, ANGMSD_REACTIVE);
+
 		if (model.m_EnableFluxScattering or model.m_ModelType == ANGMSD_REACTIVE)
 		{
 			if (ImGui::InputFloat("Pressure (Pa)", &model.m_Pressure)) {
@@ -507,8 +528,14 @@ namespace MSD {
 			model.AddMagnetron();
 			graphicsLayer->UpdateObjects();
 			ImGui::SetWindowFocus("Object tree");
+			ImGui::SetWindowFocus("Model Viewport");
 			SetSelectedObject(model.m_RecentMagnetronID);
 		}
+
+		ImGui::PopStyleVar();
+
+		if (disable) ImGui::EndDisabled();
+
 		ImGui::End();
 	}
 
@@ -619,15 +646,28 @@ namespace MSD {
 			m_SelectedElement = &magnetron->GetElement();
 		}
 		ImGui::Separator();
-		ImGui::Text("Sput rates input");
-		ImGui::InputText("###SputRates",*magnetron->GetInputFilePath(), sizeof(*magnetron->GetInputFilePath()), ImGuiInputTextFlags_ReadOnly);
+		ImGui::RadioButton("Calculate sput rates", &magnetron->m_CalculationParameters, MSD_CALC_RAW);
 		ImGui::SameLine();
-		if (ImGui::Button("Browse"))
+		ImGui::RadioButton("Use file", &magnetron->m_CalculationParameters, MSD_USE_FILE);
+		if (magnetron->m_CalculationParameters == MSD_CALC_RAW)
 		{
-			//if (!m_AllowInputWindow) return;
-			//m_AllowInputWindow = false;
-			m_FileResult = NFD_OpenDialog(NULL, NULL, &m_OutPath);
-			*magnetron->GetInputFilePath() = m_OutPath;
+			ImGui::Text("Enter magnetron parameters:");
+			ImGui::InputInt("Voltage (V)", &magnetron->m_Voltage);
+			ImGui::InputFloat("Current (A)", &magnetron->m_Current);
+
+		}
+		else if (magnetron->m_CalculationParameters == MSD_USE_FILE)
+		{
+			ImGui::Text("Sput rates input:");
+			ImGui::InputText("###SputRates", *magnetron->GetInputFilePath(), sizeof(*magnetron->GetInputFilePath()), ImGuiInputTextFlags_ReadOnly);
+			ImGui::SameLine();
+			if (ImGui::Button("Browse"))
+			{
+				//if (!m_AllowInputWindow) return;
+				//m_AllowInputWindow = false;
+				m_FileResult = NFD_OpenDialog(NULL, NULL, &m_OutPath);
+				*magnetron->GetInputFilePath() = m_OutPath;
+			}
 		}
 	}
 
@@ -681,6 +721,7 @@ namespace MSD {
 				model.AddMagnetron();
 				graphicsLayer->UpdateObjects();
 				ImGui::SetWindowFocus("Object tree");
+				ImGui::SetWindowFocus("Model Viewport");
 				SetSelectedObject(model.m_RecentMagnetronID);
 			}
 			ImGui::EndPopup();

@@ -9,7 +9,7 @@ namespace MSD {
 
 	void Renderer::Clear() const
 	{
-		//glClearColor(0.94f, 0.94f, 0.94f, 1.0f);
+		//glClearColor(0.6f, 0.6f, 0.6f, 1.0f);
 		glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 	}
@@ -69,6 +69,7 @@ namespace MSD {
 
 		glEnable(GL_LINE_SMOOTH);
 		glEnable(GL_POLYGON_SMOOTH);
+		glEnable(GL_MULTISAMPLE);
 
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
