@@ -206,7 +206,7 @@ namespace MSD {
 	{
 		if (map.begin() == map.end())
 		{
-			return 100.0f;
+			return 0.0f;
 		}
 
 		std::map<float, float>::iterator iterUpper, iterLower;
@@ -223,7 +223,7 @@ namespace MSD {
 		iterLower = iterUpper;
 		--iterLower;
 		res = iterLower->second + (iterUpper->second - iterLower->second) / (iterUpper->first - iterLower->first) * (radius - iterLower->first);
-		if (res < 0) res = 0;
+		if (res < 0) return 0;
 		return res;
 	}
 

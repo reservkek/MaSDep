@@ -654,7 +654,18 @@ namespace MSD {
 			ImGui::Text("Enter magnetron parameters:");
 			ImGui::InputInt("Voltage (V)", &magnetron->m_Voltage);
 			ImGui::InputFloat("Current (A)", &magnetron->m_Current);
-
+			if (ImGui::CollapsingHeader("Magnetic field distribution"))
+			{
+				if (ImPlot::BeginPlot("###plt"))
+				{
+					auto& data = magnetron->m_MagneticFieldDistributionInput;
+					ImPlot::SetupAxes("distance from center","radial magnetic field (a.u.)");
+					std::vector<float> keys = { std::views::keys(data).begin(), std::views::keys(data).end() };
+					std::vector<float> values = { std::views::values(data).begin(), std::views::values(data).end() };
+					if (data.size() != 0) ImPlot::PlotLine("", keys.data(), values.data(), (int)data.size());
+					ImPlot::EndPlot();
+				}
+			}
 		}
 		else if (magnetron->m_CalculationParameters == MSD_USE_FILE)
 		{
@@ -686,10 +697,14 @@ namespace MSD {
 		}
 		ImGui::PushItemWidth(110.0f);
 		ImGui::InputFloat("RPM", substrate->GetRPM());
+		if (ImGui::IsItemHovered())
+			ImGui::SetTooltip("\"Rotations per minute\". \nSets the number of rotations of substrate around the origin.");
 		ImGui::SameLine();
 		ImGui::Dummy(ImVec2(20.0f, ImGui::GetFrameHeight()));
 		ImGui::SameLine();
 		ImGui::InputFloat("Sub RPM", substrate->GetSubRPM());
+		if (ImGui::IsItemHovered())
+			ImGui::SetTooltip("\"Substrate rotations per minute\". \nSets the number of rotations of substrate around the own axis.");
 		ImGui::PopItemWidth();
 	}
 

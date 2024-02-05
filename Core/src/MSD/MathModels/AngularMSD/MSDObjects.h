@@ -13,6 +13,10 @@ namespace MSD {
 	using namespace Database;
 
 	enum CalculationParams : int { MSD_USE_FILE, MSD_CALC_RAW };
+	enum MagneticFieldVariant : int { ANGMSD_MAGFIELD_STANDARD, ANGMSD_MAGFIELD_FROMFILE };
+
+	template <typename T>
+	std::map<T, T> InputFromFile(const char* filepath);
 
 	class AngMSDObject
 	{
@@ -84,6 +88,7 @@ namespace MSD {
 		void WriteGamma(const float& gamma);
 		void WritePhi(const float& phi);
 		void InputSputRates(const char* filepath, const float& integrationDelta);
+		void RawCalcSputRates(float integrationDelta);
 		void Clear();
 
 		virtual std::string GetType() const override { return m_Type; };
@@ -96,6 +101,8 @@ namespace MSD {
 		float& GetCurrentDepRate() { return m_CurrentDepRate; }
 		float& GetPD() { return m_pd; }
 		char** GetInputFilePath() { return &m_InputFilePath; }
+
+		float GetPower() { return m_Voltage * m_Current; }
 
 		std::vector<float>& GetDepRates() { return m_DepRates; }
 
@@ -127,10 +134,15 @@ namespace MSD {
 
 		unsigned int m_Index = 0;
 
+
+		// For raw calculations
 		int m_CalculationParameters = MSD_USE_FILE;
 		int m_Voltage = 300;
 		float m_Current = 5.0;
 		float m_Power = m_Current * m_Voltage;
+		int m_MagneticField = ANGMSD_MAGFIELD_STANDARD;
+		std::map<float, float> m_MagneticFieldDistributionInput = InputFromFile<float>("../assets/data/standartmagneticfield.txt");
+		std::map<float, float> m_MagneticFieldDistribution; // used for calculations
 
 
 		bool m_FilePathErr = false;
@@ -186,4 +198,43 @@ namespace MSD {
 
 		std::string m_Type = "Substrate";
 	};
+
+	template <typename T>
+	std::map<T, T> InputFromFile(const char* filepath)
+	{
+		std::map<T, T> result;
+		std::ifstream stream(filepath);
+		if (!stream.good())
+		{
+			stream.close();
+			return std::map<T,T>();
+		}
+
+		std::string line;
+		size_t pos = 0;
+		auto linecount = 0;
+		float key, value;
+
+		while (std::getline(stream, line))
+		{
+			if (!line.length())
+			{
+				stream.close();
+				return std::map<T, T>();
+			}
+			++linecount;
+			auto keycount = 0;
+			while ((pos = line.find(" ")) != std::string::npos and keycount < 1)
+			{
+				key = (T)std::stod(line.substr(0, pos));
+				++keycount;
+				line.erase(0, line.find(" ") + 1);
+			}
+			value = (T)std::stod(line);
+			result.insert({ key , value });
+		}
+
+		return result;
+	}
+
 }

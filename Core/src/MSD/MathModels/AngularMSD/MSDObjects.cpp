@@ -180,6 +180,27 @@ namespace MSD {
 		stream.close();
 	}
 
+	void Magnetron::RawCalcSputRates(float integrationDelta)
+	{
+		float localRadius = 0;
+		float localMagneticField = 0;
+		float localSputRate = 0;
+
+		for (auto i = -m_Radius; i < m_Radius; i += integrationDelta)
+		{
+			for (auto j = -m_Radius; j < m_Radius; j += integrationDelta)
+			{
+				if ((localRadius = sqrt(i * i + j * j)) > m_Radius) continue;
+
+				localMagneticField = Approx(localRadius, m_MagneticFieldDistribution);
+				float localCurrent = localMagneticField * m_Current;
+
+
+				m_SputRates.insert({ localRadius, localSputRate });
+			}
+		}
+	}
+
 	void Magnetron::Clear()
 	{
 		m_DepRates.clear();

@@ -16,6 +16,7 @@
 
 #include <string>
 #include <vector>
+#include <ranges>
 #include <map>
 #include <cmath>
 #include <unordered_map>
