@@ -16,10 +16,11 @@
 
 #include <string>
 #include <vector>
-#include <ranges>
 #include <map>
 #include <cmath>
 #include <unordered_map>
+#include <ranges>
+#include <numeric>
 
 
 #ifdef MSD_PLATFORM_WINDOWS

@@ -38,12 +38,18 @@ namespace MSD {
 			auto& m = mpair.second;
 			m->Clear();
 
-			m->InputSputRates(*(m->GetInputFilePath()), m_IntegrationDelta);
-			if (m->GetFilePathErr())
+			if (m->SputRatesCalculationType() == ANGMSD_USE_FILE) {
+				m->InputSputRates(*(m->GetInputFilePath()), m_IntegrationDelta);
+				if (m->GetFilePathErr())
+				{
+					m_ErrorMsg = m->GetErrorMessage();
+					m_ModelRunning = false;
+					return false;
+				}
+			}
+			else if (m->SputRatesCalculationType() == ANGMSD_CALC_RAW)
 			{
-				m_ErrorMsg = m->GetErrorMessage();
-				m_ModelRunning = false;
-				return false;
+				m->RawCalcSputRates(m_IntegrationDelta, m_Gas);
 			}
 		}
 
@@ -218,8 +224,25 @@ namespace MSD {
 			fullDepRate *= m_ScatteringCoeff;
 		}
 
-		const static float atomicDensity = GetAtomicDensity(magnetron->GetElement());
-		substrate->GetTotalDeposited() += fullDepRate * m_TimePerTick * atomicDensity;
+		
+		switch (m_TotalDepositedType)
+		{
+		case ANGMSD_DEPOSITED_PARTICLES:
+			static float atomicDensity = GetAtomicDensity(magnetron->GetElement());
+			substrate->GetTotalDeposited() += fullDepRate * m_TimePerTick * atomicDensity;
+			break;
+		case ANGMSD_DEPOSITED_THICKNESS_M:
+			substrate->GetTotalDeposited() += fullDepRate * m_TimePerTick;
+			break;
+		case ANGMSD_DEPOSITED_THICKNESS_MCM:
+			substrate->GetTotalDeposited() += fullDepRate * m_TimePerTick * 1e6f;
+			break;
+		case ANGMSD_DEPOSITED_THICKNESS_NM:
+			substrate->GetTotalDeposited() += fullDepRate * m_TimePerTick * 1e9f;
+			break;
+		default:
+			substrate->GetTotalDeposited() += fullDepRate * m_TimePerTick;
+		}
 
 		if (write) substrate->WriteDepEvolution();
 

@@ -47,6 +47,11 @@ namespace MSD {
 
 		inline static void SetCameraSpeed(float speed) { s_CameraSpeed = speed; }
 
+		static bool s_DragObject;
+		static bool s_RotateObject;
+
+		static bool s_EnableEvents;
+
 	private:
 	// GLOBAL EVENTS 
 		static bool GlobalEventMouseMoved(MouseMovedEvent& event);
@@ -96,10 +101,6 @@ namespace MSD {
 		static AngMSDObject* s_TransformingObject;
 
 		static bool s_ObjectSticking;
-
-	public:
-		static bool s_DragObject;
-		static bool s_RotateObject;
 	};
 
 }

@@ -31,6 +31,8 @@ namespace MSD {
 
 	bool Controller::s_RotateObject = false;
 
+	bool Controller::s_EnableEvents = false;
+
 	ControllerState Controller::s_ControllerState = ControllerState::View;
 
 	OrthographicCamera* Controller::s_Camera = nullptr;
@@ -152,15 +154,15 @@ namespace MSD {
 		EventDispatcher dispatcher(event);
 		
 		dispatcher.Dispatch<MouseMovedEvent>(BIND_EVENT_FN_STATIC(Controller::GlobalEventMouseMoved));
-		
+
 		if (s_ControllerState == ControllerState::View)
 		{
 			dispatcher.Dispatch<MouseButtonPressedEvent>(BIND_EVENT_FN_STATIC(Controller::CameraEventMouseButtonPressed));
 			dispatcher.Dispatch<MouseButtonReleasedEvent>(BIND_EVENT_FN_STATIC(Controller::CameraEventMouseButtonReleased));
-
-			if (!s_EnableCameraEvents) return;
-
 			dispatcher.Dispatch<MouseMovedEvent>(BIND_EVENT_FN_STATIC(Controller::CameraEventMouseMoved));
+
+			if (!s_EnableCameraEvents or !s_EnableEvents) return;
+
 			dispatcher.Dispatch<MouseScrolledEvent>(BIND_EVENT_FN_STATIC(Controller::CameraEventMouseScrolled));
 			dispatcher.Dispatch<MouseButtonDoubleClickedEvent>(BIND_EVENT_FN_STATIC(Controller::CameraEventMouseDoubleClicked));
 		}
@@ -172,7 +174,7 @@ namespace MSD {
 			dispatcher.Dispatch<KeyPressedEvent>(BIND_EVENT_FN_STATIC(Controller::ObjectEventKeyPressed));
 			dispatcher.Dispatch<KeyReleasedEvent>(BIND_EVENT_FN_STATIC(Controller::ObjectEventKeyReleased));
 
-			if (!s_EnableCameraEvents) return;
+			if (!s_EnableCameraEvents or !s_EnableEvents) return;
 
 			dispatcher.Dispatch<MouseMovedEvent>(BIND_EVENT_FN_STATIC(Controller::ObjectEventMouseMoved));
 			dispatcher.Dispatch<MouseScrolledEvent>(BIND_EVENT_FN_STATIC(Controller::CameraEventMouseScrolled));

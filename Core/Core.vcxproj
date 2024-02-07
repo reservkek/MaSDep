@@ -221,6 +221,7 @@
     <ClCompile Include="src\MSD\Graphics\Buffer.cpp" />
     <ClCompile Include="src\MSD\Graphics\Cameras.cpp" />
     <ClCompile Include="src\MSD\Graphics\FrameBuffer.cpp" />
+    <ClCompile Include="src\MSD\Logging.ixx" />
     <ClCompile Include="src\MSD\MathModels\MSDModules\EnergyDistribution.ixx" />
     <ClCompile Include="src\MSD\MathModels\MSDModules\FluxScattering.ixx" />
     <ClCompile Include="src\MSD\MathModels\MSDModules\ReactiveMSD.ixx" />

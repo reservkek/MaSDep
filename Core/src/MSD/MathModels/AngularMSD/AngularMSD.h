@@ -7,7 +7,6 @@
 #include "imgui.h"
 
 import ReactiveMSD;
-import SputteringRates;
 import EnergyDistribution;
 import FluxScattering;
 
@@ -17,6 +16,14 @@ namespace MSD {
 	{
 		ANGMSD_STANDARD = 1,
 		ANGMSD_REACTIVE = 2
+	};
+
+	enum TotalDepositedType : int
+	{
+		ANGMSD_DEPOSITED_PARTICLES,
+		ANGMSD_DEPOSITED_THICKNESS_M,
+		ANGMSD_DEPOSITED_THICKNESS_MCM,
+		ANGMSD_DEPOSITED_THICKNESS_NM
 	};
 
 	class AngMSD {
@@ -53,9 +60,27 @@ namespace MSD {
 		extern friend class MainLayer;
 		extern friend class GraphicsLayer;
 	private:
-		int m_ModelType = ANGMSD_REACTIVE;
+		int m_ModelType = ANGMSD_STANDARD;
 
-		// Время в модели
+		static AngMSD* s_Instance;
+
+		bool m_ModelRunning = false;
+		bool m_ToBeCleared = false;
+		bool m_MeanFluxAngleCalculation = false;
+		bool m_ShowMovementRealTime = false;
+
+		// Прогресс-шкала
+		float m_CurrentProgress = 0;
+		float m_CurrentProgressDelta = 0;
+
+		// Simulation time calculations
+		float m_SimulationTime = 0.0f;
+		std::chrono::time_point<std::chrono::system_clock> m_TimePointStart;
+
+		// Error logging
+		std::string m_ErrorMsg = "";
+
+		// Time in a model
 		int m_TimeTicksCounter = 0; // Счётчик времени в тиках
 		int m_TicksPerSecond = 5; // Количество тиков в секунду
 		float m_TimePerTick = 1.0f / m_TicksPerSecond; // Количество времени за 1 тик.
@@ -63,23 +88,18 @@ namespace MSD {
 		int m_TimeLimit = 60; // Ограничения моделирования по времени в секундах
 		float m_CurrentTime = 0;
 
-		// Пространство в модели
-		// unsigned int m_SpaceRatio = 100; // Разделение 1 метра пространства на виртуальные отрезки
-
-		// Другие параметры
+		// Simulation limits
 		float m_RotationLimit = 1;
 		float m_RotationCounter = 0;
+		
+		// Defines the grid for magnetron targets
+		float m_IntegrationDelta = 0.1f;
 
-		float m_IntegrationDelta = 0.05f;
 
 		vec3 m_CurrentFluxVector;
 		float m_CurrentGamma = 0; //  Incident angle to substrate
 		float m_CurrentPhi = 0; // Angle between flux and target
 		float m_MeanFluxAngle = 0; // Mean incident angle
-
-		// Прогресс-шкала
-		float m_CurrentProgress = 0;
-		float m_CurrentProgressDelta = 0;
 
 		// Объекты (Начальные значения)
 		Substrate* m_Substrate = new Substrate();
@@ -94,9 +114,13 @@ namespace MSD {
 		// Контейнер для значений по времени
 		std::vector<float> m_TimeValues = {};
 
-		// Данные для вывода в текстовый файл.
+		// Контейнеры для вывода в текстовый файл.
 		std::vector<std::vector<float>*> m_ExportData = {};
 		std::vector<std::string> m_ExportDataColumnNames = {};
+
+		// Total deposited particles type
+		int m_TotalDepositedType = ANGMSD_DEPOSITED_THICKNESS_M;
+		float m_CoatingDensity = 1.0f;
 
 		// FLUX SCATTERING
 		bool m_EnableFluxScattering = 0;
@@ -104,18 +128,6 @@ namespace MSD {
 		float m_Temperature = 300.0f;
 		float m_ScatteringCoeff = 1.0f;
 		Element m_Gas = Ar;
-
-		// Simulation time calculations
-		float m_SimulationTime = 0.0f;
-		std::chrono::time_point<std::chrono::system_clock> m_TimePointStart;
-
-		static AngMSD* s_Instance;
-		bool m_ModelRunning = false;
-		bool m_ToBeCleared = false;
-		bool m_MeanFluxAngleCalculation = false;
-		bool m_ShowMovementRealTime = false;
-
-		std::string m_ErrorMsg = "";
 
 		// REACTIVE MODEL
 		Element m_ReactiveGas = N;

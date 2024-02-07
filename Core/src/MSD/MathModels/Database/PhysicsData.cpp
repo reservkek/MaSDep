@@ -6,8 +6,7 @@ namespace MSD {
 
 	namespace Database {
 
-		// (number of particles/m3)
-		float GetAtomicDensity(Element element)
+		float GetAtomicDensity(Element element) // (number of particles/m3)
 		{
 			switch (element)
 			{

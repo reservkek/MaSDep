@@ -1,8 +1,11 @@
 #pragma once
 
 namespace MSD {
+	
+	constexpr float E_CHARGE = 1.60217e-19f;
 
 	namespace Database {
+
 
 		enum Element : int
 		{

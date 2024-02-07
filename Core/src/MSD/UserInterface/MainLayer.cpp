@@ -150,7 +150,7 @@ namespace MSD {
 		auto mouseX = (int)m_ViewportMousePosX;
 		auto mouseY = (int)m_ViewportMousePosY;
 
-		if (mouseX > 0 && mouseY > 0 && mouseX < (int)fbSize && mouseY < (int)fbSize)
+		if (mouseX > 0 && mouseY > 0 && mouseX < (int)fbSize && mouseY < (int)fbSize && Controller::s_EnableEvents)
 		{
 			framebuffer->Bind();
 			auto hoveredID = framebuffer->ReadPixel(1, mouseX, mouseY);
@@ -523,6 +523,20 @@ namespace MSD {
 		ImGui::Text("Scattering Coeff: %.3f", model.m_ScatteringCoeff);
 		ImGui::Separator();
 
+		if (ImGui::CollapsingHeader("Results parameters"))
+		{
+			ImGui::PushItemWidth(10.0f);
+			if (ImGui::BeginMenu("Total deposited units"))
+			{
+				if (ImGui::MenuItem("Total particles")) model.m_TotalDepositedType = ANGMSD_DEPOSITED_PARTICLES;
+				if (ImGui::MenuItem("Meters")) model.m_TotalDepositedType = ANGMSD_DEPOSITED_THICKNESS_M;
+				if (ImGui::MenuItem("Micrometers")) model.m_TotalDepositedType = ANGMSD_DEPOSITED_THICKNESS_MCM;
+				if (ImGui::MenuItem("Nanometers")) model.m_TotalDepositedType = ANGMSD_DEPOSITED_THICKNESS_NM;
+				ImGui::EndMenu();
+			}
+			ImGui::PopItemWidth();
+		}
+
 		if (ImGui::Button("Add Magnetron"))
 		{
 			model.AddMagnetron();
@@ -622,9 +636,13 @@ namespace MSD {
 		ImGui::End();
 	}
 
+	static bool sigmund = 0;
+
 	void MainLayer::MagnetronParameters(Magnetron* magnetron)
 	{
 		if (magnetron == nullptr) return;
+
+		ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.5f);
 
 		ImGui::Button("Magnetron Properties", ImVec2(ImGui::GetContentRegionAvail().x, 20));
 		ImGui::InputFloat("Radius (cm)", magnetron->GetRadius());
@@ -646,20 +664,31 @@ namespace MSD {
 			m_SelectedElement = &magnetron->GetElement();
 		}
 		ImGui::Separator();
-		ImGui::RadioButton("Calculate sput rates", &magnetron->m_CalculationParameters, MSD_CALC_RAW);
+		ImGui::RadioButton("Calculate sput rates", &magnetron->m_CalculationParameters, ANGMSD_CALC_RAW);
 		ImGui::SameLine();
-		ImGui::RadioButton("Use file", &magnetron->m_CalculationParameters, MSD_USE_FILE);
-		if (magnetron->m_CalculationParameters == MSD_CALC_RAW)
+		ImGui::RadioButton("Use file", &magnetron->m_CalculationParameters, ANGMSD_USE_FILE);
+		if (magnetron->m_CalculationParameters == ANGMSD_CALC_RAW)
 		{
 			ImGui::Text("Enter magnetron parameters:");
 			ImGui::InputInt("Voltage (V)", &magnetron->m_Voltage);
 			ImGui::InputFloat("Current (A)", &magnetron->m_Current);
+			if (magnetron->m_SputteringYieldType != ANGMSD_YIELD_CUSTOM) ImGui::BeginDisabled();
+			ImGui::Text("Sputtering Yield :");
+			ImGui::SameLine();
+			ImGui::PushItemWidth(60.0f);
+			ImGui::InputFloat("###SputYield", &magnetron->m_SputteringYield);
+			ImGui::PopItemWidth();
+			ImGui::SameLine();
+			if (magnetron->m_SputteringYieldType != ANGMSD_YIELD_CUSTOM) ImGui::EndDisabled();
+			ImGui::Checkbox("Sigmund calculation", &sigmund);
+			if (sigmund) magnetron->m_SputteringYieldType = ANGMSD_YIELD_SIGMUND;
+			else magnetron->m_SputteringYieldType = ANGMSD_YIELD_CUSTOM;
 			if (ImGui::CollapsingHeader("Magnetic field distribution"))
 			{
-				if (ImPlot::BeginPlot("###plt"))
+				if (ImPlot::BeginPlot("###mfd", ImVec2(300,200), ImPlotFlags_CanvasOnly | ImPlotFlags_NoInputs))
 				{
 					auto& data = magnetron->m_MagneticFieldDistributionInput;
-					ImPlot::SetupAxes("distance from center","radial magnetic field (a.u.)");
+					ImPlot::SetupAxes("distance from center (cm)","radial magnetic field (a.u.)");
 					std::vector<float> keys = { std::views::keys(data).begin(), std::views::keys(data).end() };
 					std::vector<float> values = { std::views::values(data).begin(), std::views::values(data).end() };
 					if (data.size() != 0) ImPlot::PlotLine("", keys.data(), values.data(), (int)data.size());
@@ -667,7 +696,7 @@ namespace MSD {
 				}
 			}
 		}
-		else if (magnetron->m_CalculationParameters == MSD_USE_FILE)
+		else if (magnetron->m_CalculationParameters == ANGMSD_USE_FILE)
 		{
 			ImGui::Text("Sput rates input:");
 			ImGui::InputText("###SputRates", *magnetron->GetInputFilePath(), sizeof(*magnetron->GetInputFilePath()), ImGuiInputTextFlags_ReadOnly);
@@ -680,6 +709,9 @@ namespace MSD {
 				*magnetron->GetInputFilePath() = m_OutPath;
 			}
 		}
+
+		ImGui::PopStyleVar();
+
 	}
 
 	void MainLayer::SubstrateParameters(Substrate* substrate)
@@ -727,6 +759,8 @@ namespace MSD {
 			ImGui::End();
 			return;
 		}
+
+		Controller::s_EnableEvents = ImGui::IsWindowHovered();
 
 		ImGui::SetNextItemWidth(200);
 		if (ImGui::BeginPopupContextWindow())

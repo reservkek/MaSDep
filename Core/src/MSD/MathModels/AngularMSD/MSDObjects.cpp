@@ -2,6 +2,8 @@
 
 #include "MSDObjects.h"
 
+import SputteringRates;
+
 namespace MSD {
 
 	////////////////////////////////
@@ -180,11 +182,47 @@ namespace MSD {
 		stream.close();
 	}
 
-	void Magnetron::RawCalcSputRates(float integrationDelta)
+	void Magnetron::RawCalcSputRates(float integrationDelta, Element gas)
 	{
 		float localRadius = 0;
 		float localMagneticField = 0;
 		float localSputRate = 0;
+		float totalCurrentSum = 0;
+		int pieces = 0;
+		auto& mfd = m_MagneticFieldDistribution;
+
+		switch (m_SputteringYieldType)
+		{
+		case ANGMSD_YIELD_CUSTOM:
+			break;
+		case ANGMSD_YIELD_SIGMUND:
+			m_SputteringYield = SputteringRates::SputteringYield(gas, this);
+			break;
+		default:
+			break;
+		}
+
+		for (auto i = -m_Radius; i < m_Radius; i += integrationDelta)
+		{
+			for (auto j = -m_Radius; j < m_Radius; j += integrationDelta)
+			{
+				if ((localRadius = sqrt(i * i + j * j)) > m_Radius) continue;
+				pieces++;
+				localMagneticField = Approx(localRadius, m_MagneticFieldDistributionInput);
+				mfd.insert({ localRadius, localMagneticField });
+			}
+		}
+
+		m_MagneticFieldDistribution = Normalize(m_MagneticFieldDistribution, (float)pieces/(float)(std::size(mfd)));
+
+		float mfdsum = 0;
+		for (auto& val : std::views::values(mfd))
+		{
+			mfdsum += val;
+		}
+		std::cout << "Total MFD: " << mfdsum << std::endl;
+
+		std::cout << "Size of mfd map: " << std::size(m_MagneticFieldDistribution) << " / Pieces: " << pieces << std::endl;
 
 		for (auto i = -m_Radius; i < m_Radius; i += integrationDelta)
 		{
@@ -192,13 +230,20 @@ namespace MSD {
 			{
 				if ((localRadius = sqrt(i * i + j * j)) > m_Radius) continue;
 
-				localMagneticField = Approx(localRadius, m_MagneticFieldDistribution);
-				float localCurrent = localMagneticField * m_Current;
+				if (auto it = m_MagneticFieldDistribution.find(localRadius); it != m_MagneticFieldDistribution.end())
+				{
+					localMagneticField = it->second;
+				}
+				else localMagneticField = 0.0f;
 
-
+				float localCurrent = m_Current * localMagneticField / (integrationDelta*integrationDelta);
+				totalCurrentSum += localCurrent * integrationDelta*integrationDelta;
+				localSputRate = m_SputteringYield * localCurrent * 10000.0f / (E_CHARGE * GetAtomicDensity(m_Element));
 				m_SputRates.insert({ localRadius, localSputRate });
 			}
 		}
+
+		std::cout << "Total current: " << totalCurrentSum << std::endl;
 	}
 
 	void Magnetron::Clear()
@@ -206,6 +251,8 @@ namespace MSD {
 		m_DepRates.clear();
 		m_GammaAngles.clear();
 		m_PhiAngles.clear();
+
+		m_SputRates.clear();
 	}
 
 	float Magnetron::FindSputRate(const float& radius)

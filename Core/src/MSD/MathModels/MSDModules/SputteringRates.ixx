@@ -16,7 +16,7 @@ export namespace SputteringRates
 	{
 		float m1 = GetAtomicMass(gas);
 		float m2 = GetAtomicMass(magnetron->GetElement());
-		float y = 4.0f * m1 * m2 / (pow((m1 + m2), 2));
+		float y = 4.0f * m1 * m2 / (pow((m1 + m2), 2.0f));
 		float alpha = 0.1f + 0.16f * pow((m2 / m1), 0.7f);
 
 		float yield = 0.0539535f * alpha * y * magnetron->GetPower() / GetBindingEnergy(magnetron->GetElement());

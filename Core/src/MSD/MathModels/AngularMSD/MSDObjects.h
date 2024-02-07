@@ -12,11 +12,14 @@ namespace MSD {
 
 	using namespace Database;
 
-	enum CalculationParams : int { MSD_USE_FILE, MSD_CALC_RAW };
+	enum CalculationParams : int { ANGMSD_USE_FILE, ANGMSD_CALC_RAW };
 	enum MagneticFieldVariant : int { ANGMSD_MAGFIELD_STANDARD, ANGMSD_MAGFIELD_FROMFILE };
+	enum SputteringYieldType : int { ANGMSD_YIELD_CUSTOM, ANGMSD_YIELD_SIGMUND };
 
 	template <typename T>
 	std::map<T, T> InputFromFile(const char* filepath);
+	template <typename T>
+	std::map<T, T>Normalize(const std::map<T, T>& map, float coeff = 1);
 
 	class AngMSDObject
 	{
@@ -88,8 +91,10 @@ namespace MSD {
 		void WriteGamma(const float& gamma);
 		void WritePhi(const float& phi);
 		void InputSputRates(const char* filepath, const float& integrationDelta);
-		void RawCalcSputRates(float integrationDelta);
+		void RawCalcSputRates(float integrationDelta, Element gas);
 		void Clear();
+
+		const int SputRatesCalculationType() { return m_CalculationParameters; }
 
 		virtual std::string GetType() const override { return m_Type; };
 
@@ -136,13 +141,15 @@ namespace MSD {
 
 
 		// For raw calculations
-		int m_CalculationParameters = MSD_USE_FILE;
+		int m_CalculationParameters = ANGMSD_USE_FILE;
 		int m_Voltage = 300;
+		int m_SputteringYieldType = ANGMSD_YIELD_CUSTOM;
+		float m_SputteringYield = 1.0f;
 		float m_Current = 5.0;
 		float m_Power = m_Current * m_Voltage;
 		int m_MagneticField = ANGMSD_MAGFIELD_STANDARD;
 		std::map<float, float> m_MagneticFieldDistributionInput = InputFromFile<float>("../assets/data/standartmagneticfield.txt");
-		std::map<float, float> m_MagneticFieldDistribution; // used for calculations
+		std::map<float, float> m_MagneticFieldDistribution;
 
 
 		bool m_FilePathErr = false;
@@ -231,10 +238,26 @@ namespace MSD {
 				line.erase(0, line.find(" ") + 1);
 			}
 			value = (T)std::stod(line);
-			result.insert({ key , value });
+			result.insert({ key * 100 , value });
 		}
 
 		return result;
+	}
+
+	template<typename T>
+	std::map<T, T> Normalize(const std::map<T, T>& map, float coeff)
+	{
+		auto copy = map;
+		float sum = 0.0f;
+		for (auto& val : copy | std::views::values)
+		{
+			sum += val;
+		}
+		for (auto& val : copy | std::views::values)
+		{
+			val /= (sum*coeff);
+		}
+		return copy;
 	}
 
 }
