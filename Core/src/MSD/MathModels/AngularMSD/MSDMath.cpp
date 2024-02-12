@@ -88,6 +88,12 @@ namespace MSD {
 		return vec3(-x, -y, -z);
 	}
 
+	bool vec3::operator==(const vec3& a) const
+	{
+		if (x == a.x && y == a.y && z == a.z) return true;
+		return false;
+	}
+
 	float Magnitude(const MSD::vec3& a)
 	{
 		return sqrt(a.x * a.x + a.y * a.y + a.z * a.z);

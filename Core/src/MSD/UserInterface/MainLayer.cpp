@@ -1,4 +1,4 @@
-#include "msdpch.h"
+﻿#include "msdpch.h"
 
 #include "MainLayer.h"
 #include "Controller.h"
@@ -15,6 +15,8 @@ namespace MSD {
 	MainLayer::~MainLayer()
 	{
 	}
+
+	static std::map<std::string, ImFont*> Fonts;
 
 	// IMGUI LAYER CREATION AND RENDERING FUNCTIONS
 	void MainLayer::OnAttach()
@@ -40,7 +42,12 @@ namespace MSD {
 		};
 
 		io.Fonts->Clear();
-		io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\Segoeui.ttf", 15.0f, &font_config, ranges);
+		ImFont* mainfont = io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\Segoeui.ttf", 15.0f, &font_config, ranges);
+		ImFont* bold = io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\Segoeuib.ttf", 15.0f, &font_config, ranges);
+		ImFont* bold17 = io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\Segoeuib.ttf", 17.0f, &font_config, ranges);
+		Fonts.insert({ "mainfont", mainfont });
+		Fonts.insert({ "bold", bold });
+		Fonts.insert({ "bold17", bold17 });
 
 		io.BackendFlags |= ImGuiBackendFlags_HasMouseCursors;
 		io.BackendFlags |= ImGuiBackendFlags_HasSetMousePos;
@@ -161,13 +168,14 @@ namespace MSD {
 			{
 				toBeSelected = true;
 
+				if (Controller::RotateObjectStop())
+				{
+					toBeSelected = false;
+				}
+
 				if (hoveredID == Renderer::GetSelectedItemID() && hoveredID != -1)
 				{
 					Controller::DragObjectStart();
-				}
-				else
-				{
-					Controller::DragObjectStop();
 				}
 			}
 
@@ -176,24 +184,14 @@ namespace MSD {
 				toBeSelected = false;
 			}
 
-			if (ImGui::IsMouseReleased(ImGuiMouseButton_Left) && toBeSelected)
+			if (ImGui::IsMouseReleased(ImGuiMouseButton_Left))
 			{
-				SetSelectedObject(hoveredID);
-			}
-
-			if (hoveredID == 99999)
-			{
-				///
+				Controller::DragObjectStop();
+				if (toBeSelected) SetSelectedObject(hoveredID);
 			}
 
 			//std::cout << "ID: " << hoveredID << "\n";
 			//std::cout << "Selected Object: " << Renderer::GetSelectedItemID() << "\n";
-
-			if (Renderer::GetSelectedItemID() != -1 && !model.GetStatus())
-			{
-				Controller::DisableCameraEvents();
-				Controller::ObjectStartTransform(AngMSDObject::GetObject(Renderer::GetSelectedItemID()));
-			}
 		}
 	}
 
@@ -208,6 +206,7 @@ namespace MSD {
 		{
 			ImGui::SetWindowFocus("Object tree");
 			ImGui::SetWindowFocus("Model Viewport");
+			Controller::ObjectStartTransform(AngMSDObject::GetObject(id));
 		}
 	}
 
@@ -270,24 +269,51 @@ namespace MSD {
 		float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
 		ImVec2 buttonSize = { lineHeight + 3.0f, lineHeight };
 
+		auto red = ImVec4(1.0f, 0.2f, 0.25f, 1.0f);
+		auto blue = ImVec4(0.3f, 0.5f, 1.0f, 1.0f);
+		auto green = ImVec4(0.4f, 1.0f, 0.3f, 1.0f);
+		auto textcolor = ImVec4(0.2f, 0.2f, 0.2f, 1.0f);
+
+		ImGui::PushStyleColor(ImGuiCol_Button, red);
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, red);
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, red);
+		ImGui::PushFont(Fonts["bold"]);
+		ImGui::PushStyleColor(ImGuiCol_Text, textcolor);
 		if (ImGui::Button("X", buttonSize)) {};
+		ImGui::PopStyleColor();
+		ImGui::PopFont();
 		ImGui::SameLine();
 		ImGui::InputFloat("##X", &data[0], 0, 0, "%.1f");
 		ImGui::PopItemWidth();
 		ImGui::SameLine();
 
+		ImGui::PushStyleColor(ImGuiCol_Button, green);
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, green);
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, green);
+		ImGui::PushFont(Fonts["bold"]);
+		ImGui::PushStyleColor(ImGuiCol_Text, textcolor);
 		if (ImGui::Button("Y", buttonSize)) {};
+		ImGui::PopStyleColor();
+		ImGui::PopFont();
 		ImGui::SameLine();
 		ImGui::InputFloat("##Y", &data[1], 0, 0, "%.1f");
 		ImGui::PopItemWidth();
 		ImGui::SameLine();
 
+		ImGui::PushStyleColor(ImGuiCol_Button, blue);
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, blue);
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, blue);
+		ImGui::PushFont(Fonts["bold"]);
+		ImGui::PushStyleColor(ImGuiCol_Text, textcolor);
 		if (ImGui::Button("Z", buttonSize)) {};
+		ImGui::PopStyleColor();
+		ImGui::PopFont();
 		ImGui::SameLine();
 		ImGui::InputFloat("##Z", &data[2], 0, 0, "%.1f");
 		ImGui::PopItemWidth();
 		ImGui::PopStyleVar();
 
+		ImGui::PopStyleColor(9);
 		ImGui::NextColumn();
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(5.0f, 5.0f));
 		ImGui::Text(label.c_str());
@@ -322,6 +348,13 @@ namespace MSD {
 		}
 	}
 
+	static void TextCentered(std::string text) {
+		auto windowWidth = ImGui::GetWindowSize().x;
+		auto textWidth = ImGui::CalcTextSize(text.c_str()).x;
+
+		ImGui::SetCursorPosX((windowWidth - textWidth) * 0.5f);
+		ImGui::Text(text.c_str());
+	}
 
 	///////////////////
 	// IMGUI WINDOWS //
@@ -380,8 +413,12 @@ namespace MSD {
 
 				ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(20.0f, 8.0f));
 				ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.5f);
+				ImGui::PushFont(Fonts["bold17"]);
+				ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.3f, 0.2f, 0.3f, 1.0f));
 				if (ImGui::Button(!running ? "Run Program###Run" : "Stop Program###Run"))
 				{
+					ImGui::PopFont();
+					ImGui::PopStyleColor();
 					ImGui::SetWindowFocus("Model Parameters");
 					m_SelectedObjectID = -1;
 					Renderer::GetSelectedItemID() = -1;
@@ -392,7 +429,7 @@ namespace MSD {
 					else
 					{
 						if (app.GetModel().m_Magnetrons.size())
-						{ 
+						{
 							if (!model.Run())
 							{
 								ImGui::SetWindowFocus("Object tree");
@@ -404,6 +441,10 @@ namespace MSD {
 							ImGui::OpenPopup("No magnetrons");
 						}
 					}
+				}
+				else {
+					ImGui::PopFont();
+					ImGui::PopStyleColor();
 				}
 				SetHandCursor();
 
@@ -430,6 +471,8 @@ namespace MSD {
 		};
 	}
 
+	static std::string axesDepEvolution[2] = { "Time (s)", "Number of deposited atoms (m)" };
+	static std::string axesDepRates[2] = { "Time (s)", "Deposition rate (m/s)" };
 
 	// MODEL PARAMETERS 
 	void MainLayer::ModelParametersWindow(bool* p_open)
@@ -525,22 +568,31 @@ namespace MSD {
 
 		if (ImGui::CollapsingHeader("Results parameters"))
 		{
-			ImGui::PushItemWidth(10.0f);
-			if (ImGui::BeginMenu("Total deposited units"))
+			ImGui::Combo("Total deposited units", &model.m_TotalDepositedType, "Total Particles\0Meters\0Micrometers\0Nanometers\0\0");
+			switch (model.m_TotalDepositedType)
 			{
-				if (ImGui::MenuItem("Total particles")) model.m_TotalDepositedType = ANGMSD_DEPOSITED_PARTICLES;
-				if (ImGui::MenuItem("Meters")) model.m_TotalDepositedType = ANGMSD_DEPOSITED_THICKNESS_M;
-				if (ImGui::MenuItem("Micrometers")) model.m_TotalDepositedType = ANGMSD_DEPOSITED_THICKNESS_MCM;
-				if (ImGui::MenuItem("Nanometers")) model.m_TotalDepositedType = ANGMSD_DEPOSITED_THICKNESS_NM;
-				ImGui::EndMenu();
+			case ANGMSD_DEPOSITED_PARTICLES:
+				axesDepEvolution[1] = "Number of deposited atoms (1/m2)";
+				break;
+			case ANGMSD_DEPOSITED_THICKNESS_M:
+				axesDepEvolution[1] = "Number of deposited atoms (m)";
+				break;
+			case ANGMSD_DEPOSITED_THICKNESS_MCM:
+				axesDepEvolution[1] = "Number of deposited atoms (mcm)";
+				break;
+			case ANGMSD_DEPOSITED_THICKNESS_NM:
+				axesDepEvolution[1] = "Number of deposited atoms (nm)";
+				break;
+			default:
+				break;
 			}
-			ImGui::PopItemWidth();
 		}
 
 		if (ImGui::Button("Add Magnetron"))
 		{
 			model.AddMagnetron();
 			graphicsLayer->UpdateObjects();
+			if (!show_app_model_objecttree) show_app_model_objecttree = true;
 			ImGui::SetWindowFocus("Object tree");
 			ImGui::SetWindowFocus("Model Viewport");
 			SetSelectedObject(model.m_RecentMagnetronID);
@@ -571,10 +623,39 @@ namespace MSD {
 		ImGuiIO& io = ImGui::GetIO();
 		ImGuiWindowFlags window_flags = ImGuiWindowFlags_HorizontalScrollbar;
 
+		ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.92f, 0.97f, 1.0f, 1.0f));
+		ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 5.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 2.0f);
 		ImGui::BeginChild("ChildObjectTree", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y*0.5f), false, window_flags);
+		
+		if (m_SelectedObjectID > 0)
+		{
+			auto& objects = AngMSDObject::s_Objects;
+			auto& keys = AngMSDObject::s_KeyValues;
+
+			auto pos = std::find(keys.begin(), keys.end(), m_SelectedObjectID);
+
+			if (ImGui::IsKeyPressed(ImGuiKey_DownArrow))
+			{
+				if ((pos + 1) != keys.end())
+				{
+					SetSelectedObject(*(pos + 1));
+				}
+			}
+
+			if (ImGui::IsKeyPressed(ImGuiKey_UpArrow))
+			{
+				if ((pos - 1) >= keys.begin())
+				{
+					SetSelectedObject(*(pos - 1));
+				}
+			}
+		}
+
+		//if (ImGui::IsItemClicked) SetSelectedObject(0);
+
 
 		bool is_selected = false;
-		unsigned int selectedElement = 0;
 
 		unsigned int count = 1;
 		auto& objects = AngMSDObject::s_Objects;
@@ -600,6 +681,8 @@ namespace MSD {
 		}
 
 		ImGui::EndChild();
+		ImGui::PopStyleColor();
+		ImGui::PopStyleVar(2);
 		ImGui::Separator();
 
 		if (m_SelectedObjectID == -1 or m_SelectedObjectID == 0)
@@ -625,15 +708,35 @@ namespace MSD {
 
 			if (ImGui::Button("Delete magnetron"))
 			{
-				model.DeleteMagnetron(m_SelectedObjectID);
-				graphicsLayer->UpdateObjects();
-				m_SelectedObjectID = 0;
+				DeleteObject(m_SelectedObjectID);
 			}
-
 
 		}
 
 		ImGui::End();
+	}
+
+	void MainLayer::DeleteObject(unsigned int id)
+	{
+		ApplicationCore& app = ApplicationCore::Get();
+		AngMSD& model = app.GetModel();
+		GraphicsLayer* graphicsLayer = app.GetGraphicsLayer();
+
+		auto& objects = AngMSDObject::s_Objects;
+		auto& keys = AngMSDObject::s_KeyValues;
+
+		unsigned int temp = 0;
+
+		if (objects[m_SelectedObjectID]->GetType() == "Magnetron")
+		{
+			temp = keys[keys.at(id) - 1];
+			model.DeleteMagnetron(id);
+			graphicsLayer->UpdateObjects();
+			m_SelectedObjectID = temp;
+		}
+
+		if (objects[m_SelectedObjectID] == nullptr) m_SelectedObjectID = 0;
+		SetSelectedObject(m_SelectedObjectID);
 	}
 
 	static bool sigmund = 0;
@@ -644,7 +747,9 @@ namespace MSD {
 
 		ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.5f);
 
-		ImGui::Button("Magnetron Properties", ImVec2(ImGui::GetContentRegionAvail().x, 20));
+		ImGui::PushFont(Fonts["bold"]);
+		ImGui::Button("Magnetron properties", ImVec2(ImGui::GetContentRegionAvail().x, 20));
+		ImGui::PopFont();
 		ImGui::InputFloat("Radius (cm)", magnetron->GetRadius());
 		float* pos[3] = { magnetron->GetPosX(), magnetron->GetPosY(), magnetron->GetPosZ() };
 		DrawVec3Control("Magnetron position (cm)", *pos);
@@ -672,6 +777,13 @@ namespace MSD {
 			ImGui::Text("Enter magnetron parameters:");
 			ImGui::InputInt("Voltage (V)", &magnetron->m_Voltage);
 			ImGui::InputFloat("Current (A)", &magnetron->m_Current);
+			ImGui::Text("Energy transmission coefficients: ");
+			ImGui::PushMultiItemsWidths(2, ImGui::CalcItemWidth()/2);
+			ImGui::InputFloat("Current coefficient", &magnetron->m_CoeffCurr);
+			ImGui::SameLine();
+			ImGui::PopItemWidth();
+			ImGui::InputFloat("Voltage coefficient", &magnetron->m_CoeffVoltage);
+			ImGui::PopItemWidth();
 			if (magnetron->m_SputteringYieldType != ANGMSD_YIELD_CUSTOM) ImGui::BeginDisabled();
 			ImGui::Text("Sputtering Yield :");
 			ImGui::SameLine();
@@ -716,7 +828,10 @@ namespace MSD {
 
 	void MainLayer::SubstrateParameters(Substrate* substrate)
 	{
-		ImGui::Button("Substrate Properties", ImVec2(ImGui::GetContentRegionAvail().x, 20));
+		ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.5f);
+		ImGui::PushFont(Fonts["bold"]);
+		ImGui::Button("Substrate properties", ImVec2(ImGui::GetContentRegionAvail().x, 20));
+		ImGui::PopFont();
 		float* pos[3] = { substrate->GetPosX(), substrate->GetPosY(), substrate->GetPosZ() };
 		DrawVec3Control("Magnetron position", *pos);
 		float* normal[3] = { substrate->GetNormalX(), substrate->GetNormalY(), substrate->GetNormalZ() };
@@ -736,8 +851,9 @@ namespace MSD {
 		ImGui::SameLine();
 		ImGui::InputFloat("Sub RPM", substrate->GetSubRPM());
 		if (ImGui::IsItemHovered())
-			ImGui::SetTooltip("\"Substrate rotations per minute\". \nSets the number of rotations of substrate around the own axis.");
+			ImGui::SetTooltip("\"Substrate rotations per minute\". \nSets the number of rotations of substrate around its own axis.");
 		ImGui::PopItemWidth();
+		ImGui::PopStyleVar();
 	}
 
 
@@ -751,6 +867,7 @@ namespace MSD {
 		ApplicationCore& app = ApplicationCore::Get();
 		AngMSD& model = app.GetModel();
 		GraphicsLayer* graphicsLayer = app.GetGraphicsLayer();
+		auto& objects = AngMSDObject::s_Objects;
 
 		if (!ImGui::Begin("Model Viewport", p_open, ImGuiWindowFlags_NoScrollbar
 			| ImGuiWindowFlags_NoScrollWithMouse))
@@ -769,6 +886,7 @@ namespace MSD {
 			{
 				model.AddMagnetron();
 				graphicsLayer->UpdateObjects();
+				if (!show_app_model_objecttree) show_app_model_objecttree = true;
 				ImGui::SetWindowFocus("Object tree");
 				ImGui::SetWindowFocus("Model Viewport");
 				SetSelectedObject(model.m_RecentMagnetronID);
@@ -850,12 +968,23 @@ namespace MSD {
 		mouseY *= 0.1;
 
 		// MOUSE COORDS CORNER BOX //
-		std::string str = std::format("{:.3f} cm", mouseX) + " ; " + std::format("{:.3f} cm", mouseY);
+		std::string str = "";
+		if (Controller::GetState() == ControllerState::View)
+		{
+			str = std::format("{:.3f} cm", mouseX) + " ; " + std::format("{:.3f} cm", mouseY);
+		}
+		else if (Controller::GetState() == ControllerState::Tranform && objects[m_SelectedObjectID] != nullptr)
+		{
+			auto x = *objects[m_SelectedObjectID]->GetPosX();
+			auto y = *objects[m_SelectedObjectID]->GetPosY();
+			str = std::format("{:.3f} cm", x) + " ; " + std::format("{:.3f} cm", y);
+		}
 		str += std::string("###CoordBox");
 		const char* name = str.c_str();
-		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 1.0f, 0.8f, 0.5f));
-		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(1.0f, 1.0f, 0.8f, 0.5f));
-		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1.0f, 1.0f, 0.8f, 0.5f));
+		auto boxColor = ImVec4(0.65f, 0.8f, 1.0f, 0.5f);
+		ImGui::PushStyleColor(ImGuiCol_Button, boxColor);
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, boxColor);
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, boxColor);
 		if (ImGui::Button(name, ImVec2(130.0f, 0.0f))) {}
 		ImGui::PopStyleColor(3);
 		//////////////
@@ -867,7 +996,11 @@ namespace MSD {
 	// RESULTS
 	void MainLayer::ModelResultsWindow(bool* p_open)
 	{
+		ApplicationCore& app = ApplicationCore::Get();
+		AngMSD& model = app.GetModel();
+
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2(400, 400));
+		ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.5f);
 
 		if (!ImGui::Begin("Model results", p_open))
 		{
@@ -875,22 +1008,20 @@ namespace MSD {
 			ImGui::End();
 			return;
 		}
-		ImGui::PopStyleVar();
-
-		ApplicationCore& app = ApplicationCore::Get();
-		AngMSD& model = app.GetModel();
 
 		std::vector<std::vector<float>*> depRatesData;
 
-		if (ImGui::CollapsingHeader("Deposition Evolution"))
+		if (ImGui::CollapsingHeader("Substrate deposition evolution"))
 		{
-			ApplicationCore& app = ApplicationCore::Get();
-			AngMSD& model = app.GetModel();
-
 			std::vector<float>& data = model.m_SubstrateBuffer->GetDepEvolution();
-
-			DynamicPlot(FindPlotCond(), data, axesDepEvolution);
+			const char* axes[2] = { axesDepEvolution[0].c_str(), axesDepEvolution[1].c_str() };
+			DynamicPlot(FindPlotCond(), data, axes);
 			ExportButton(model.m_ExportData, model.m_ExportDataColumnNames);
+			ImGui::PushFont(Fonts["bold"]);
+			TextCentered("Other results:");
+			ImGui::Text("Mean incident angle: %f", model.m_SubstrateBuffer->MeanIncidentAngle);
+			ImGui::PopFont();
+
 			ImGui::Separator();
 		}
 
@@ -902,14 +1033,24 @@ namespace MSD {
 			depRatesData.push_back(&depRates);
 
 			ImGui::PushID(count);
-			std::string countstr = "Deposition rate of magnetron " + std::to_string(magnetron->GetID());;
+			std::string countstr = "Deposition from magnetron " + std::to_string(magnetron->GetID());;
 			if (ImGui::CollapsingHeader((const char*)countstr.c_str()))
 			{
-				DynamicPlot(FindPlotCond(), depRates, axesDepRates);
+				const char* axes[2] = { axesDepRates[0].c_str(), axesDepRates[1].c_str() };
+				DynamicPlot(FindPlotCond(), depRates, axes);
+
+				ImGui::PushFont(Fonts["bold"]);
+				TextCentered("Other results:");
+				ImGui::PopFont();
+				ImGui::Text("");
+				ImGui::Separator();
 			}
 			count++;
 			ImGui::PopID();
 		}
+
+		ImGui::PopStyleVar(2);
+
 		ImGui::End();
 		depRatesData.clear();
 	}
@@ -918,15 +1059,15 @@ namespace MSD {
 	{
 		ImGuiStyle& style = ImGui::GetStyle();
 
-		float alignment = 0.5f;
-		float size = ImGui::CalcTextSize("Export CSV File").x + style.FramePadding.x * 2.0f;
-		float avail = ImGui::GetContentRegionAvail().x;
+		//float alignment = 0.5f;
+		//float size = ImGui::CalcTextSize("Export CSV File").x + style.FramePadding.x * 2.0f;
+		//float avail = ImGui::GetContentRegionAvail().x;
 
-		float off = (avail - size) * alignment;
-		if (off > 0.0f)
-			ImGui::SetCursorPosX(ImGui::GetCursorPosX() + off);
+		//float off = (avail - size) * alignment;
+		//if (off > 0.0f)
+		//	ImGui::SetCursorPosX(ImGui::GetCursorPosX() + off);
 
-		if (ImGui::Button("Export CSV file"))
+		if (ImGui::Button("Export CSV file", ImVec2(ImGui::GetContentRegionAvail().x, 20)))
 		{
 			m_OutPath = (nfdchar_t*)(projectDirPath.c_str());
 			m_FileResult = NFD_SaveDialog("csv", NULL, &m_OutPath);
@@ -944,6 +1085,10 @@ namespace MSD {
 	// PLOTS
 	void MainLayer::DynamicPlot(ImPlotCond cond, std::vector<float>& data, const char* axes[2])
 	{
+		std::mutex mut;
+
+		mut.lock();
+
 		auto x_values = ApplicationCore::Get().GetModel().GetTimeValues();
 
 		auto x_min = 0;
@@ -963,6 +1108,9 @@ namespace MSD {
 			if (data.size() != 0) ImPlot::PlotLine("", x_values.data(), data.data(), (int)data.size());
 			ImPlot::EndPlot();
 		}
+
+		mut.unlock();
+
 	}
 
 	ImPlotCond MainLayer::FindPlotCond()

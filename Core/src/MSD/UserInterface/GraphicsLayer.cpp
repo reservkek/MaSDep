@@ -23,6 +23,8 @@ namespace MSD {
 		Controller::CameraOnEvent(event);
 	}
 
+	static Shader* circleShader;
+
 	void GraphicsLayer::OnAttach()
 	{
 		va.reset(new VertexArray);
@@ -46,7 +48,7 @@ namespace MSD {
 
 		gridShader = new Shader("../assets/shaders/Grid.glsl");
 
-
+		circleShader = new Shader("../assets/shaders/Circle.glsl");
 	}
 
 	void GraphicsLayer::OnDetach()
@@ -75,10 +77,13 @@ namespace MSD {
 		
 		gridShader->Bind();
 		gridShader->SetUniformMat4("u_ViewProjection", camera->GetViewProjectionMatrix());
-		renderer.DrawGrid(gridShader);
+		renderer.DrawGrid();
 
 		shader->Bind();
 		shader->SetUniform4fv("u_Color", color);
+
+		circleShader->Bind();
+		
 
 		renderer.DrawScene();
 

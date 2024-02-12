@@ -40,6 +40,7 @@ namespace MSD {
 		vec3 operator+(const vec3& a) const;
 		vec3 operator-(const vec3& a) const;
 		vec3 operator-() const;
+		bool operator==(const vec3& a) const;
 
 		operator glm::vec3() const { return { x,y,z }; }
 	};

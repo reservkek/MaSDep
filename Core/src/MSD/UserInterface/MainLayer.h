@@ -60,6 +60,7 @@ namespace MSD {
 		bool GetViewportStatus() { return show_app_model_viewport; }
 		void ReadViewPortObjects();
 		void SetSelectedObject(unsigned int id);
+		void DeleteObject(unsigned int id);
 
 		ImPlotCond FindPlotCond();
 	private:
@@ -91,9 +92,6 @@ namespace MSD {
 
 		std::string errorMsg = "";
 		std::string projectDirPath = "C:/users/eeo5/Documents/";
-
-		const char* axesDepEvolution[2] = { "Time (s)", "Number of deposited atoms (1/m2)" };
-		const char* axesDepRates[2] = { "Time (s)", "Deposition rate (m/s)" } ;
 
 		nfdchar_t* m_OutPath = (nfdchar_t*)"";
 		bool m_AllowInputWindow = true;

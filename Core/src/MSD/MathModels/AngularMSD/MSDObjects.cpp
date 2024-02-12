@@ -191,6 +191,8 @@ namespace MSD {
 		int pieces = 0;
 		auto& mfd = m_MagneticFieldDistribution;
 
+		float effectiveCurrent = m_Current * m_CoeffCurr * m_CoeffVoltage;
+
 		switch (m_SputteringYieldType)
 		{
 		case ANGMSD_YIELD_CUSTOM:
@@ -236,7 +238,7 @@ namespace MSD {
 				}
 				else localMagneticField = 0.0f;
 
-				float localCurrent = m_Current * localMagneticField / (integrationDelta*integrationDelta);
+				float localCurrent = effectiveCurrent * localMagneticField / (integrationDelta*integrationDelta);
 				totalCurrentSum += localCurrent * integrationDelta*integrationDelta;
 				localSputRate = m_SputteringYield * localCurrent * 10000.0f / (E_CHARGE * GetAtomicDensity(m_Element));
 				m_SputRates.insert({ localRadius, localSputRate });
@@ -316,6 +318,8 @@ namespace MSD {
 		if (m_TotalAngle < 0) m_TotalAngle += 2 * PI;
 		if (m_TotalSubAngle >= 2 * PI) m_TotalSubAngle -= 2 * PI;
 		if (m_TotalSubAngle < 0) m_TotalSubAngle += 2 * PI;
+
+		CalcMeanAngle();
 	}
 
 	void Substrate::Rotate(float rotationangle, glm::vec3 axis)
@@ -328,6 +332,18 @@ namespace MSD {
 	void Substrate::WriteDepEvolution()
 	{
 		m_DepEvolution.push_back(m_TotalDeposited);
+	}
+
+
+	void Substrate::CalcMeanAngle()
+	{
+		MeanIncidentAngle = (180 / PI) * MeanIncidentAngle_raw / m_TotalDeposited_raw;
+	}
+
+	void Substrate::Clear()
+	{
+		m_TimeEvolution.clear();
+		m_DepEvolution.clear();
 	}
 
 }

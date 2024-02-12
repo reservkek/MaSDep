@@ -17,10 +17,12 @@ namespace MSD {
 
 	bool AngMSD::Run()
 	{
+		m_Substrate->Clear();
+
 		m_MagnetronsBuffer = m_Magnetrons;
 		m_SubstrateBuffer = m_Substrate->clone();
 
-		m_TimeValues = {};
+		m_TimeValues.clear();
 
 		float vel = *(m_SubstrateBuffer->GetRPM());
 		m_TimePerTick = 1.0f / m_TicksPerSecond;
@@ -57,9 +59,9 @@ namespace MSD {
 
 		m_ToBeCleared = true;
 		m_ModelRunning = true;
-
-		m_TimePointStart = std::chrono::system_clock::now();
 		
+		m_TimePointStart = std::chrono::system_clock::now();
+
 		if (!m_EnableFluxScattering) return true;
 
 		for (auto mpair : m_MagnetronsBuffer)
@@ -75,8 +77,6 @@ namespace MSD {
 		}
 
 		return true;
-
-
 	}
 
 	void AngMSD::Stop()
@@ -98,6 +98,9 @@ namespace MSD {
 
 		m_ExportData.clear();
 		m_ExportDataColumnNames.clear();
+		
+		m_Substrate->Clear();
+		m_SubstrateBuffer->Clear();
 	}
 
 	void AngMSD::Complete()
@@ -125,12 +128,18 @@ namespace MSD {
 
 	void AngMSD::OnUpdate()
 	{
+		std::mutex mut;
+
+		mut.lock();
+
 		Clear();
 
 		if (m_ModelRunning == false)
 		{
 			return;
 		}
+
+		mut.unlock();
 
 		if (m_RotationCounter >= m_RotationLimit or m_CurrentTime >= m_TimeLimit)
 		{
@@ -212,8 +221,12 @@ namespace MSD {
 				localSputRate = magnetron->FindSputRate(localRadius);
 				localDepRate = localSputRate * m_IntegrationDelta * m_IntegrationDelta * cos(m_CurrentPhi) * cos(m_CurrentGamma) / (PI * (float)pow(Magnitude(m_CurrentFluxVector), 2));
 				fullDepRate += localDepRate;
+
+				substrate->MeanIncidentAngle_raw += m_CurrentGamma * localDepRate;
 			}
 		}
+
+		substrate->GetTotalDepositedRaw() += fullDepRate;
 
 		if (m_EnableFluxScattering)
 		{
@@ -224,7 +237,6 @@ namespace MSD {
 			fullDepRate *= m_ScatteringCoeff;
 		}
 
-		
 		switch (m_TotalDepositedType)
 		{
 		case ANGMSD_DEPOSITED_PARTICLES:
@@ -244,7 +256,10 @@ namespace MSD {
 			substrate->GetTotalDeposited() += fullDepRate * m_TimePerTick;
 		}
 
-		if (write) substrate->WriteDepEvolution();
+		if (write)
+		{
+			substrate->WriteDepEvolution();
+		}
 
 		m_CurrentFluxVector = FindVector(substrate->GetPos(), magnetron->GetPos());
 		m_CurrentGamma = Angle(m_CurrentFluxVector, substrate->GetNormal());
@@ -256,8 +271,6 @@ namespace MSD {
 		magnetron->WriteDepRate();
 		magnetron->WriteGamma(m_CurrentGamma);
 		magnetron->WritePhi(m_CurrentPhi);
-
-		CalculateMeanFluxAngle(magnetron->AngleContainerSize());
 	}
 
 	void AngMSD::CalculateMeanFluxAngle(int count)

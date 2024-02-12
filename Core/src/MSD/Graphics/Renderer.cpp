@@ -62,7 +62,7 @@ namespace MSD {
 		glDrawElements(GL_POINTS, va->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
 	}
 
-	void Renderer::DrawGrid(Shader* shader)
+	void Renderer::DrawGrid()
 	{
 		glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
 		glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
@@ -162,7 +162,7 @@ namespace MSD {
 
 
 		m_va->Bind();
-		DrawLines(m_va, 4);
+		DrawLines(m_va, 5);
 
 		m_ib.reset(new IndexBuffer(Arrow::indicesHead, 3));
 		m_va->SetIndexBuffer(m_ib);
@@ -184,6 +184,13 @@ namespace MSD {
 		{
 			DrawObject(obj);
 		}
+	}
+
+	void Renderer::DrawCircle(Object* obj)
+	{
+		if (obj == nullptr) return;
+
+		Circle* circle = (Circle*)obj;
 	}
 
 	void Renderer::AddExistingObject(Object* obj)

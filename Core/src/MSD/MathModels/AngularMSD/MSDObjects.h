@@ -145,8 +145,10 @@ namespace MSD {
 		int m_Voltage = 300;
 		int m_SputteringYieldType = ANGMSD_YIELD_CUSTOM;
 		float m_SputteringYield = 1.0f;
-		float m_Current = 5.0;
+		float m_Current = 5.0f;
 		float m_Power = m_Current * m_Voltage;
+		float m_CoeffCurr = 0.9f;
+		float m_CoeffVoltage = 0.75f;
 		int m_MagneticField = ANGMSD_MAGFIELD_STANDARD;
 		std::map<float, float> m_MagneticFieldDistributionInput = InputFromFile<float>("../assets/data/standartmagneticfield.txt");
 		std::map<float, float> m_MagneticFieldDistribution;
@@ -177,7 +179,10 @@ namespace MSD {
 		virtual void RotateAroundCenter(float rotationangle = 0) override;
 		virtual void Rotate(float rotationangle = 0, glm::vec3 axis = glm::vec3(0, 0, 1)) override;
 		void Update();
+		void Clear();
+
 		void WriteDepEvolution();
+		void CalcMeanAngle();
 
 		float* GetRPM() { return &RPM; }
 		float* GetSubRPM() { return &subRPM; }
@@ -187,10 +192,14 @@ namespace MSD {
 		float& GetTotalSubAngle() { return m_TotalSubAngle; }
 		float& GetTotalSubAngleDelta() { return m_TotalSubAngleDelta; }
 		float& GetTotalDeposited() { return m_TotalDeposited; }
+		float& GetTotalDepositedRaw() { return m_TotalDeposited_raw; }
 
 		virtual std::string GetType() const override { return m_Type; };
 
 		std::vector<float>& GetDepEvolution() { return m_DepEvolution; }
+
+		float MeanIncidentAngle_raw;
+		float MeanIncidentAngle;
 	private:
 		float RPM, subRPM; // Rotations per minute
 		float m_RotationAngle = 0;
@@ -199,6 +208,7 @@ namespace MSD {
 		float m_TotalSubAngle = 0;
 		float m_TotalSubAngleDelta = 0;
 		float m_TotalDeposited = 0;
+		float m_TotalDeposited_raw = 0;
 
 		std::vector<float> m_TimeEvolution;
 		std::vector<float> m_DepEvolution;

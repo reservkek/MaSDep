@@ -89,6 +89,8 @@ namespace MSD
 		 10.0f, 75.0f, 0.0f  // Arrow head vertex 3
 	};
 
+	float Circle::coords[3] = { 0.0f, 0.0f, 0.0f };
+
 	unsigned int Arrow::indicesLine[2] = { 0, 1 };
 
 	unsigned int Arrow::indicesHead[3] = { 2, 3, 4 };

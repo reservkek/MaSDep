@@ -90,6 +90,17 @@ namespace MSD {
 		virtual const ObjectType GetType() const { return ObjectType::Arrow; };
 	};
 
+	class Circle : protected Object
+	{
+	public:
+		static float coords[3];
+		glm::vec3 LocalPosition;
+		float Radius = 100.0f;
+		float Thickness = 1.0f;
+		float Fade = 0.005f;
+		int Segments = 7;
+	};
+
 	class Grid
 	{
 	public:

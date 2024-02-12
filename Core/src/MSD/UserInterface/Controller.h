@@ -31,8 +31,11 @@ namespace MSD {
 
 		static void DragObjectStart();
 		static void DragObjectStop();
+		inline static bool isDragging() { return Controller::s_DragObject; };
+		static bool RotateObjectStop();
 
 		static void SetState(ControllerState state);
+		inline static const ControllerState GetState() { return Controller::s_ControllerState; }
 
 		static const float GetCameraZoomLevel() { return s_ZoomValue; };
 		static const float GetCameraRotation() { return s_CameraRotation; };
@@ -91,7 +94,7 @@ namespace MSD {
 		static float s_ObjectRotation;
 		static float s_ObjectRotationRounded;
 
-		static bool s_CameraDraggable;
+		static int s_CameraDraggable;
 		static bool s_EnableCameraEvents;
 
 		static ControllerState s_ControllerState;

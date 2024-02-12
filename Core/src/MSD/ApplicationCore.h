@@ -16,7 +16,7 @@
 
 import MSDLog;
 
-#define MSD_VERSION 0.6.1
+#define MSD_VERSION 0.6.2
 
 namespace MSD {
 
@@ -38,6 +38,7 @@ namespace MSD {
 		inline AngMSD& GetModel() { return *m_Model; }
 
 		GraphicsLayer* GetGraphicsLayer() { return m_GraphicsLayer; }
+		MainLayer* GetMainLayer() { return m_MainLayer; }
 
 		void ModelUpdate();
 		void WindowUpdate();

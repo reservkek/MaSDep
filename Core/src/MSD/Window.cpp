@@ -63,7 +63,7 @@ namespace MSD {
 
 		int width, height;
 		int channels;
-		unsigned char* pixels = stbi_load("C:/Users/eeo5/Documents/Научная работа/VSProjects/CppGUI/Core/res/images/msd-logo.png",&width, &height, &channels, 4);
+		unsigned char* pixels = stbi_load("../res/images/msd-logo.png",&width, &height, &channels, 4);
 
 		GLFWimage images[1];
 		images[0].width = width;
