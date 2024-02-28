@@ -3,6 +3,8 @@
 #include "MathModels/Database/PhysicsData.h"
 #include "MathModels/AngularMSD/MSDObjects.h"
 
+#pragma warning(disable:5201)
+
 export module SputteringRates;
 
 export namespace MSD

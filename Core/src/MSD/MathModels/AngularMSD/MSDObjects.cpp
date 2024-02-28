@@ -129,14 +129,19 @@ namespace MSD {
 
 		float localRadius = 0;
 		float localSputRate = 0;
+		float overallSputRate = 0;
+		int pieces = 0;
 		float key = NULL;
 		float value = NULL;
+
+		m_InputSputRates.clear();
+		m_SputRates.clear();
 
 		std::ifstream stream(filepath);
 		if (!stream.good())
 		{
 			m_FilePathErr = true;
-			m_ErrorMsg = std::string("Couldn't find the file for the magnetron.") + std::string("\nPlease make sure that the path is correct \n\n");
+			m_ErrorMsg = std::string(MSDSTR_FILEPATHERROR_NOFILE);
 			stream.close();
 			return;
 		}
@@ -149,9 +154,7 @@ namespace MSD {
 		{
 			if (!line.length())
 			{
-				m_ErrorMsg = std::string("An error occured while reading input file for the magnetron #");
-				m_ErrorMsg.append(std::to_string(m_Index));
-				m_ErrorMsg.append("\nPlease make sure that the file has correct format.\n\n");
+				m_ErrorMsg = std::string(MSDSTR_FILEPATHERROR_FILECORRUPT);
 				m_FilePathErr = true;
 				stream.close();
 				return;
@@ -160,9 +163,26 @@ namespace MSD {
 			auto keycount = 0;
 			while ((pos = line.find(" ")) != std::string::npos and keycount < 1)
 			{
+				try
+				{
 				key = (float)std::stod(line.substr(0, pos));
 				++keycount;
 				line.erase(0, line.find(" ") + 1);
+				}
+				catch (const std::invalid_argument&)
+				{
+					m_ErrorMsg = std::string(MSDSTR_FILEPATHERROR_FILECORRUPT);
+					m_FilePathErr = true;
+					stream.close();
+					return;
+				}
+				catch (const std::out_of_range&)
+				{
+					m_ErrorMsg = std::string(MSDSTR_FILEPATHERROR_FILECORRUPT);
+					m_FilePathErr = true;
+					stream.close();
+					return;
+				}
 			}
 			value = (float)std::stod(line);
 			m_InputSputRates.insert({ key * 100, value });
@@ -173,12 +193,14 @@ namespace MSD {
 			for (auto j = -m_Radius; j < m_Radius; j += integrationDelta)
 			{
 				if ((localRadius = sqrt(i * i + j * j)) > m_Radius) continue;
-
+				pieces++;
 				localSputRate = Approx(localRadius, m_InputSputRates);
+				overallSputRate += localSputRate;
 				m_SputRates.insert({ localRadius, localSputRate });
 			}
 		}
 
+		m_OverallSputteringRate = 1e9f * overallSputRate / ((float)pieces * GetAtomicDensity(m_Element));
 		stream.close();
 	}
 
@@ -187,6 +209,7 @@ namespace MSD {
 		float localRadius = 0;
 		float localMagneticField = 0;
 		float localSputRate = 0;
+		float overallSputRate = 0;
 		float totalCurrentSum = 0;
 		int pieces = 0;
 		auto& mfd = m_MagneticFieldDistribution;
@@ -240,12 +263,13 @@ namespace MSD {
 
 				float localCurrent = effectiveCurrent * localMagneticField / (integrationDelta*integrationDelta);
 				totalCurrentSum += localCurrent * integrationDelta*integrationDelta;
-				localSputRate = m_SputteringYield * localCurrent * 10000.0f / (E_CHARGE * GetAtomicDensity(m_Element));
+				localSputRate = m_SputteringYield * localCurrent * 10000.0f / (q_electron);
+				overallSputRate += localSputRate;
 				m_SputRates.insert({ localRadius, localSputRate });
 			}
 		}
 
-		std::cout << "Total current: " << totalCurrentSum << std::endl;
+		m_OverallSputteringRate = 1e9f * overallSputRate / (float)pieces / GetAtomicDensity(m_Element);
 	}
 
 	void Magnetron::Clear()
@@ -266,9 +290,25 @@ namespace MSD {
 		return 0.0f;
 	}
 
+	void Magnetron::CalcMeanDepRate()
+	{
+		m_MeanDepRate = 1e9f * std::reduce(m_DepRates.begin(),m_DepRates.end()) / (float)m_DepRates.size() / GetAtomicDensity(m_Element);
+	}
+
+	void Magnetron::CalcEnergyDistribution(Element gas)
+	{
+		float m1 = GetAtomicMass(gas);
+		float m2 = GetAtomicMass(m_Element);
+		float en_bind = GetBindingEnergy(m_Element);
+		float en_ion = GetMeanIonEnergy();
+		m_EnergyDistribution.Calculate(m1, m2, en_bind, en_ion);
+	}
+
 	void Magnetron::WriteDepRate()
 	{
 		m_DepRates.push_back(m_CurrentDepRate);
+
+		CalcMeanDepRate();
 	}
 
 	void Magnetron::WriteGamma(const float& gamma)
@@ -320,6 +360,7 @@ namespace MSD {
 		if (m_TotalSubAngle < 0) m_TotalSubAngle += 2 * PI;
 
 		CalcMeanAngle();
+		CalcComposition();
 	}
 
 	void Substrate::Rotate(float rotationangle, glm::vec3 axis)
@@ -337,7 +378,17 @@ namespace MSD {
 
 	void Substrate::CalcMeanAngle()
 	{
-		MeanIncidentAngle = (180 / PI) * MeanIncidentAngle_raw / m_TotalDeposited_raw;
+		MeanIncidentAngle = (180 / PI) * MeanIncidentAngle_raw / (m_TotalDepositedRaw);
+	}
+
+	void Substrate::CalcComposition()
+	{
+		m_Composition = m_CompositionRaw;
+		for (auto& pair : m_Composition)
+		{
+			pair.second /= m_TotalDepositedRaw;
+			pair.second *= 100;
+		}
 	}
 
 	void Substrate::Clear()

@@ -15,6 +15,8 @@ namespace MSD {
 			case Al:	   return 6.023e28f;
 			case Ti:	   return 5.633e28f;
 			case Cu:	   return 8.497e28f;
+			case Y:		   return 3.029e28f;
+			case Ce:	   return 2.904e28f;
 			}
 			return 0;
 		}
@@ -29,6 +31,8 @@ namespace MSD {
 			case Al:	   return 2700.0f;
 			case Ti:	   return 4505.0f;
 			case Cu:	   return 8960.0f;
+			case Y:		   return 4472.0f;
+			case Ce:	   return 6757.0f;
 			}
 			return 0;
 		}
@@ -43,6 +47,8 @@ namespace MSD {
 			case Ti: return 47.867f;
 			case Cu: return 63.546f;
 			case Ar: return 39.948f;
+			case Y:  return 88.906f;
+			case Ce: return 140.116f;
 			}
 			return 0.0f;
 		}
@@ -58,6 +64,8 @@ namespace MSD {
 			case Ti: return 1.47f;
 			case Cu: return 1.28f;
 			case Ar: return 1.51f;
+			case Y:	 return 1.8f;
+			case Ce: return 1.818f;
 			}
 			return 0.0f;
 		}
@@ -72,6 +80,8 @@ namespace MSD {
 			case Ti: return 3.8f;
 			case Cu: return 3.58f;
 			case Ar: return 0.0f;
+			case Y:  return 3.801f;
+			case Ce: return 4.131f;
 			}
 			return 0.0f;
 		}
@@ -92,6 +102,8 @@ namespace MSD {
 			case Cu:	   return "Copper";
 			case Ar:	   return "Argon";
 			case N:		   return "Nitrogen";
+			case Y:		   return "Yttrium";
+			case Ce:	   return "Cerium";
 			}
 			return "Null";
 		}
@@ -107,6 +119,8 @@ namespace MSD {
 			case Cu:	   return "Cu";
 			case Ar:	   return "Ar";
 			case N:		   return "N";
+			case Y:        return "Y";
+			case Ce:	   return "Ce";
 			}
 			return "Null";
 		}

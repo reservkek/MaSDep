@@ -188,9 +188,31 @@ namespace MSD {
 
 	void Renderer::DrawCircle(Object* obj)
 	{
-		if (obj == nullptr) return;
+		if (obj == nullptr) obj = new Circle;
 
 		Circle* circle = (Circle*)obj;
+
+		m_va.reset(new VertexArray());
+		m_vb.reset(new VertexBuffer(Circle::coords, 3 * sizeof(float)));
+		m_ib.reset(new IndexBuffer(Circle::indices, 1));
+
+		m_vb->SetLayout(obj->GetLayout());
+		m_va->AddVertexBuffer(m_vb);
+		m_va->SetIndexBuffer(m_ib);
+
+		m_shader->Bind();
+		m_shader->SetUniform4fv("u_Color", obj->GetColor());
+		m_shader->SetUniform1i("u_ID", obj->GetID());
+		m_shader->SetUniform1f("u_Thickness", circle->Thickness);
+		m_shader->SetUniform1f("u_Fade", circle->Fade);
+		m_shader->SetUniform2fv("u_LocalPosition", circle->LocalPosition);
+
+		DrawPoints(m_va);
+	}
+
+	void Renderer::SetShader(Shader* shader)
+	{
+		m_shader = shader;
 	}
 
 	void Renderer::AddExistingObject(Object* obj)

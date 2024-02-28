@@ -116,6 +116,11 @@ namespace MSD {
 		glUniform4f(GetUniformLocation(name), v0, v1, v2, v3);
 	}
 
+	void Shader::SetUniform2fv(const std::string& name, const glm::vec2& vec)
+	{
+		glUniform2fv(GetUniformLocation(name), 1, &vec[0]);
+	}
+
 	void Shader::SetUniform4fv(const std::string& name, const glm::vec4& vec)
 	{
 		glUniform4fv(GetUniformLocation(name), 1, &vec[0]);

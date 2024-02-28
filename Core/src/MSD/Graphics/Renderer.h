@@ -31,6 +31,7 @@ namespace MSD {
 		void DrawArrow(Object* arrow = nullptr);
 		void DrawScene();
 		void DrawCircle(Object* circle = nullptr);
+		void SetShader(Shader* shader);
 
 		void AddExistingObject(Object* obj);
 

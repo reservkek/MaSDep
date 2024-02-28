@@ -79,7 +79,7 @@ namespace MSD {
 	class Arrow : public Object
 	{
 	public:
-		virtual void SetPosition(const glm::vec3& pos) override;
+		void SetPosition(const glm::vec3& pos) override;
 
 		static float coords[3*5];
 		static unsigned int indicesLine[2];
@@ -90,11 +90,15 @@ namespace MSD {
 		virtual const ObjectType GetType() const { return ObjectType::Arrow; };
 	};
 
-	class Circle : protected Object
+	class Circle : public Object
 	{
 	public:
+		Circle();
+
 		static float coords[3];
-		glm::vec3 LocalPosition;
+		static unsigned int indices[1];
+
+		glm::vec2 LocalPosition = glm::vec2(1.0f,1.0f);
 		float Radius = 100.0f;
 		float Thickness = 1.0f;
 		float Fade = 0.005f;

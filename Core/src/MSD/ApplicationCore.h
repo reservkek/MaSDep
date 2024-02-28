@@ -16,7 +16,7 @@
 
 import MSDLog;
 
-#define MSD_VERSION 0.6.2
+#define MSD_VERSION 0.6.3
 
 namespace MSD {
 

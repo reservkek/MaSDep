@@ -17,93 +17,73 @@ namespace MSD {
 		View = 0, Tranform = 1
 	};
 
-	class Controller
+	namespace Controller
 	{
-	public:
-		Controller() {}
+		extern OrthographicCamera* s_Camera;
+		extern float s_CameraSpeed;
+		extern float s_CameraRotation;
+		extern float s_CameraRotationVertical;
+		extern float s_CameraRotationSpeed;
+		extern float s_ZoomValue;
+		extern glm::vec3 s_CameraPosition;
+		extern glm::vec2 s_CurrMousePos;
+		extern glm::vec2 s_LastMousePos;
+		extern glm::vec2 s_Delta;
+		extern glm::vec2 s_ObjectPos;
+		extern glm::vec2 s_ObjectPosVirtual;
+		extern glm::vec2 s_WindowSizeRatio;
+		extern float s_ObjectRotation;
+		extern float s_ObjectRotationRounded;
+		extern int s_CameraDraggable;
+		extern bool s_EnableCameraEvents;
+		extern ControllerState s_ControllerState;
+		extern AngMSDObject* s_TransformingObject;
+		extern bool s_ObjectSticking;
+		extern bool s_DragObject;
+		extern bool s_RotateObject;
+		extern bool s_EnableEvents;
+		extern const glm::mat4 s_NullMatrix;
+		extern std::unique_ptr<Object> s_ObjectBeforeTransform;
 
-		static void HandleCameraInputs(OrthographicCamera* camera, Timestep* timestep);
-		static void EnableCameraEvents();
-		static void DisableCameraEvents();
-		static void ResetCameraPosition();
-		static void CameraOnUpdate(Timestep* timestep);
-		static void CameraOnEvent(Event& event);
+		void HandleCameraInputs(OrthographicCamera* camera, Timestep* timestep);
+		void EnableCameraEvents();
+		void DisableCameraEvents();
+		void ResetCameraPosition();
+		void CameraOnUpdate(Timestep* timestep);
+		void CameraOnEvent(Event& event);
+		void DragObjectStart();
+		void DragObjectStop();
+		bool RotateObjectStop();
+		void SetState(ControllerState state);
 
-		static void DragObjectStart();
-		static void DragObjectStop();
-		inline static bool isDragging() { return Controller::s_DragObject; };
-		static bool RotateObjectStop();
+		inline bool						isDragging()			{ return s_DragObject; };
+		inline const ControllerState	GetState()				{ return s_ControllerState; }
+		inline const float				GetCameraZoomLevel()	{ return s_ZoomValue; };
+		inline const float				GetCameraRotation()		{ return s_CameraRotation; };
+		inline const glm::vec3&			GetCameraPosition()		{ return s_CameraPosition;  }
+		const glm::mat4& GetViewMatrix();
+		const glm::mat4& GetProjectionMatrix();
+		const glm::mat4& GetViewProjectionMatrix();
 
-		static void SetState(ControllerState state);
-		inline static const ControllerState GetState() { return Controller::s_ControllerState; }
+		void ObjectOnUpdate(Timestep* timestep);
+		void ObjectStartTransform(AngMSDObject* object);
+		inline void SetCameraSpeed(float speed) { s_CameraSpeed = speed; }
 
-		static const float GetCameraZoomLevel() { return s_ZoomValue; };
-		static const float GetCameraRotation() { return s_CameraRotation; };
-		static const glm::vec3& GetCameraPosition() { return s_CameraPosition;  }
-		static const glm::mat4& GetViewMatrix();
-		static const glm::mat4& GetProjectionMatrix();
-		static const glm::mat4& GetViewProjectionMatrix();
-
-		static void ObjectOnUpdate(Timestep* timestep);
-
-		static void ObjectStartTransform(AngMSDObject* object);
-
-		inline static void SetCameraSpeed(float speed) { s_CameraSpeed = speed; }
-
-		static bool s_DragObject;
-		static bool s_RotateObject;
-
-		static bool s_EnableEvents;
-
-	private:
 	// GLOBAL EVENTS 
-		static bool GlobalEventMouseMoved(MouseMovedEvent& event);
+		bool GlobalEventMouseMoved(MouseMovedEvent& event);
 	// CAMERA EVENTS
-		static bool CameraEventMouseScrolled(MouseScrolledEvent& event);
-		static bool CameraEventMouseDoubleClicked(MouseButtonDoubleClickedEvent& event);
-		static bool CameraEventMouseButtonPressed(MouseButtonPressedEvent& event);
-		static bool CameraEventMouseButtonReleased(MouseButtonReleasedEvent& event);
-		static bool CameraEventMouseMoved(MouseMovedEvent& event);
-
+		bool CameraEventMouseScrolled(MouseScrolledEvent& event);
+		bool CameraEventMouseDoubleClicked(MouseButtonDoubleClickedEvent& event);
+		bool CameraEventMouseButtonPressed(MouseButtonPressedEvent& event);
+		bool CameraEventMouseButtonReleased(MouseButtonReleasedEvent& event);
+		bool CameraEventMouseMoved(MouseMovedEvent& event);
 	// OBJECT EVENTS
-		static bool ObjectEventMouseButtonPressed(MouseButtonPressedEvent& event);
-		static bool ObjectEventMouseButtonReleased(MouseButtonReleasedEvent& event);
-		static bool ObjectEventKeyPressed(KeyPressedEvent& event);
-		static bool ObjectEventKeyReleased(KeyReleasedEvent& event);
-		static bool ObjectEventMouseMoved(MouseMovedEvent& event);
-	private:
-		static OrthographicCamera* s_Camera;
+		bool ObjectEventMouseButtonPressed(MouseButtonPressedEvent& event);
+		bool ObjectEventMouseButtonReleased(MouseButtonReleasedEvent& event);
+		bool ObjectEventKeyPressed(KeyPressedEvent& event);
+		bool ObjectEventKeyReleased(KeyReleasedEvent& event);
+		bool ObjectEventMouseMoved(MouseMovedEvent& event);
 
-		static const glm::mat4 s_NullMatrix;
-
-		static float s_CameraSpeed;
-		static float s_CameraRotation;
-		static float s_CameraRotationVertical;
-		static float s_CameraRotationSpeed;
-		static float s_ZoomValue;
-		static glm::vec3 s_CameraPosition;
-
-		static glm::vec2 s_CurrMousePos;
-		static glm::vec2 s_LastMousePos;
-		static glm::vec2 s_Delta;
-
-		static glm::vec2 s_ObjectPos;
-		static glm::vec2 s_ObjectPosVirtual;
-		static glm::vec2 s_WindowSizeRatio;
-
-		static float s_ObjectRotation;
-		static float s_ObjectRotationRounded;
-
-		static int s_CameraDraggable;
-		static bool s_EnableCameraEvents;
-
-		static ControllerState s_ControllerState;
-
-		// Containers
-		static std::unique_ptr<Object> s_ObjectBeforeTransform;
-		static AngMSDObject* s_TransformingObject;
-
-		static bool s_ObjectSticking;
 	};
 
 }

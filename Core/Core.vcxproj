@@ -277,6 +277,7 @@
     <ClInclude Include="src\MSD\Graphics\Renderer.h" />
     <ClInclude Include="src\MSD\Graphics\Shader.h" />
     <ClInclude Include="src\MSD\Graphics\VertexArray.h" />
+    <ClInclude Include="src\MSD\UserInterface\Languages.h" />
     <ClInclude Include="src\MSD\UserInterface\MainLayer.h" />
     <ClInclude Include="src\MSD\ApplicationCore.h" />
     <ClInclude Include="src\MSD.h" />

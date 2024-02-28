@@ -24,12 +24,12 @@ namespace MSD {
 
 		m_TimeValues.clear();
 
-		float vel = *(m_SubstrateBuffer->GetRPM());
+		float vel = m_SubstrateBuffer->GetRPM();
 		m_TimePerTick = 1.0f / m_TicksPerSecond;
 
 		m_SubstrateBuffer->GetTotalAngleDelta() = m_TimePerTick * vel * PI / 30;
 
-		vel = *(m_SubstrateBuffer->GetSubRPM());
+		vel = m_SubstrateBuffer->GetSubRPM();
 		m_SubstrateBuffer->GetTotalSubAngleDelta() = m_TimePerTick * vel * PI / 30;
 
 		float expectedRotationTicks = (m_RotationLimit * 2 * PI) / m_SubstrateBuffer->GetTotalAngleDelta();
@@ -40,16 +40,17 @@ namespace MSD {
 			auto& m = mpair.second;
 			m->Clear();
 
-			if (m->SputRatesCalculationType() == ANGMSD_USE_FILE) {
+			if (m->GetSputRatesCalculationType() == ANGMSD_USE_FILE) {
 				m->InputSputRates(*(m->GetInputFilePath()), m_IntegrationDelta);
 				if (m->GetFilePathErr())
 				{
 					m_ErrorMsg = m->GetErrorMessage();
 					m_ModelRunning = false;
+					m_problemObjectID = m->GetID();
 					return false;
 				}
 			}
-			else if (m->SputRatesCalculationType() == ANGMSD_CALC_RAW)
+			else if (m->GetSputRatesCalculationType() == ANGMSD_CALC_RAW)
 			{
 				m->RawCalcSputRates(m_IntegrationDelta, m_Gas);
 			}
@@ -61,6 +62,14 @@ namespace MSD {
 		m_ModelRunning = true;
 		
 		m_TimePointStart = std::chrono::system_clock::now();
+
+		if (m_EnableEnergyDistribution)
+		{
+			for (auto mpair : m_MagnetronsBuffer)
+			{
+				mpair.second->CalcEnergyDistribution(m_Gas);
+			}
+		}
 
 		if (!m_EnableFluxScattering) return true;
 
@@ -128,18 +137,12 @@ namespace MSD {
 
 	void AngMSD::OnUpdate()
 	{
-		std::mutex mut;
-
-		mut.lock();
-
 		Clear();
 
 		if (m_ModelRunning == false)
 		{
 			return;
 		}
-
-		mut.unlock();
 
 		if (m_RotationCounter >= m_RotationLimit or m_CurrentTime >= m_TimeLimit)
 		{
@@ -198,12 +201,13 @@ namespace MSD {
 
 	void AngMSD::CalculateFlux(Magnetron* magnetron, Substrate* substrate, bool write)
 	{
-		auto radius = *(magnetron->GetRadius());
+		auto radius = magnetron->GetRadius();
 		float localRadius = 0;
 		float localSputRate = 0;
 		float localDepRate = 0;
 		float fullDepRate = 0;
 		vec3 localPos;
+		static std::mutex mutex;
 
 		for (auto i = -radius; i < radius; i += m_IntegrationDelta)
 		{
@@ -226,7 +230,11 @@ namespace MSD {
 			}
 		}
 
-		substrate->GetTotalDepositedRaw() += fullDepRate;
+		substrate->TotalDepositedRaw() += fullDepRate;
+		auto& el = magnetron->GetElement();
+		auto& compositionraw = substrate->CompositionRaw();
+		if (compositionraw.count(el)) compositionraw[el] += fullDepRate;
+		else compositionraw.insert({ el, fullDepRate });
 
 		if (m_EnableFluxScattering)
 		{
@@ -241,42 +249,38 @@ namespace MSD {
 		{
 		case ANGMSD_DEPOSITED_PARTICLES:
 			static float atomicDensity = GetAtomicDensity(magnetron->GetElement());
-			substrate->GetTotalDeposited() += fullDepRate * m_TimePerTick * atomicDensity;
+			substrate->TotalDeposited() += fullDepRate * m_TimePerTick;
 			break;
 		case ANGMSD_DEPOSITED_THICKNESS_M:
-			substrate->GetTotalDeposited() += fullDepRate * m_TimePerTick;
+			substrate->TotalDeposited() += fullDepRate * m_TimePerTick / atomicDensity;
 			break;
 		case ANGMSD_DEPOSITED_THICKNESS_MCM:
-			substrate->GetTotalDeposited() += fullDepRate * m_TimePerTick * 1e6f;
+			substrate->TotalDeposited() += fullDepRate * m_TimePerTick * 1e6f / atomicDensity;
 			break;
 		case ANGMSD_DEPOSITED_THICKNESS_NM:
-			substrate->GetTotalDeposited() += fullDepRate * m_TimePerTick * 1e9f;
+			substrate->TotalDeposited() += fullDepRate * m_TimePerTick * 1e9f / atomicDensity;
 			break;
 		default:
-			substrate->GetTotalDeposited() += fullDepRate * m_TimePerTick;
-		}
-
-		if (write)
-		{
-			substrate->WriteDepEvolution();
+			substrate->TotalDeposited() += fullDepRate * m_TimePerTick;
 		}
 
 		m_CurrentFluxVector = FindVector(substrate->GetPos(), magnetron->GetPos());
 		m_CurrentGamma = Angle(m_CurrentFluxVector, substrate->GetNormal());
 		m_CurrentPhi = Angle(-m_CurrentFluxVector, magnetron->GetNormal());
 
-		if (write) m_TimeValues.push_back(m_CurrentTime);
+		std::lock_guard<std::mutex> lock(mutex);
+
+		if (write)
+		{
+			substrate->WriteDepEvolution();
+			m_TimeValues.push_back(m_CurrentTime);
+		}
 
 		magnetron->GetCurrentDepRate() = fullDepRate;
 		magnetron->WriteDepRate();
 		magnetron->WriteGamma(m_CurrentGamma);
 		magnetron->WritePhi(m_CurrentPhi);
+
 	}
 
-	void AngMSD::CalculateMeanFluxAngle(int count)
-	{
-		if (!m_MeanFluxAngleCalculation) return;
-
-		m_MeanFluxAngle = m_MeanFluxAngle * (1 - 1 / count) + 1 / count * m_CurrentPhi;
-	}
 }
