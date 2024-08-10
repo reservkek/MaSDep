@@ -17,6 +17,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "shaders", "shaders", "{C744DC20-B1F2-4FC8-8660-185F9E7BD59F}"
 	ProjectSection(SolutionItems) = preProject
 		assets\shaders\Basic.glsl = assets\shaders\Basic.glsl
+		assets\shaders\Circle.glsl = assets\shaders\Circle.glsl
 		assets\shaders\Grid.glsl = assets\shaders\Grid.glsl
 	EndProjectSection
 EndProject

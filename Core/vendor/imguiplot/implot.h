@@ -772,7 +772,8 @@ IMPLOT_API void SetupFinish();
 // using a preceding button or slider widget to change the plot limits). In
 // this case, you can use the `SetNext` API below. While this is not as feature
 // rich as the Setup API, most common needs are provided. These functions can be
-// called anwhere except for inside of `Begin/EndPlot`. For example:
+// called anwhere 
+// for inside of `Begin/EndPlot`. For example:
 
 // if (ImGui::Button("Center Plot"))
 //     ImPlot::SetNextPlotLimits(-1,1,-1,1);

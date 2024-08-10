@@ -17,6 +17,8 @@
 
 #include "../NFD/include/nfd.h"
 
+#include "Languages.h"
+
 namespace MSD {
 
 	class MSD_API MainLayer : public Layer
@@ -43,6 +45,8 @@ namespace MSD {
 		void ModelResultsWindow(bool* p_open);
 		void ModelViewportWindow(bool* p_open);
 		void PeriodicTableWindow(bool* p_open, Element* element);
+		void PeriodicTableWindowNew(bool* p_open, Element* element);
+	
 
 		// SUBSECTIONS
 		void MagnetronParameters(Magnetron* magnetron);
@@ -54,12 +58,14 @@ namespace MSD {
 
 		// POPUPS
 		void SuccessPopup(bool* p_open);
-		void FilePathErrPopup(bool* p_open, std::string* error_msg);
+		void FilePathErrPopup(bool* p_open);
 
 		// FUNCTIONS
 		bool GetViewportStatus() { return show_app_model_viewport; }
 		void ReadViewPortObjects();
 		void SetSelectedObject(unsigned int id);
+		void DeleteObject(unsigned int id);
+		void ContextMenu_AddMagnetron();
 
 		ImPlotCond FindPlotCond();
 	private:
@@ -91,9 +97,6 @@ namespace MSD {
 
 		std::string errorMsg = "";
 		std::string projectDirPath = "C:/users/eeo5/Documents/";
-
-		const char* axesDepEvolution[2] = { "Time (s)", "Number of deposited atoms (1/m2)" };
-		const char* axesDepRates[2] = { "Time (s)", "Deposition rate (m/s)" } ;
 
 		nfdchar_t* m_OutPath = (nfdchar_t*)"";
 		bool m_AllowInputWindow = true;

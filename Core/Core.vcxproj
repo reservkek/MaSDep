@@ -94,7 +94,7 @@
       <UndefineAllPreprocessorDefinitions>false</UndefineAllPreprocessorDefinitions>
       <UndefinePreprocessorDefinitions>%(UndefinePreprocessorDefinitions)</UndefinePreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(SolutionDir)Core\vendor;$(SolutionDir)Core\vendor\GLFW\include;$(SolutionDir)Core\vendor\imgui;$(SolutionDir)Core\src\MSD;$(SolutionDir)Glad\include;$(ProjectDir)vendor\NFD\include;$(SolutionDir)Core\src</AdditionalIncludeDirectories>
-      <FloatingPointModel>Strict</FloatingPointModel>
+      <FloatingPointModel>Precise</FloatingPointModel>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>msdpch.h</PrecompiledHeaderFile>
@@ -132,11 +132,12 @@
       <UndefineAllPreprocessorDefinitions>false</UndefineAllPreprocessorDefinitions>
       <UndefinePreprocessorDefinitions>%(UndefinePreprocessorDefinitions)</UndefinePreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(SolutionDir)Core\vendor;$(SolutionDir)Core\vendor\GLFW\include;$(SolutionDir)Core\vendor\imgui;$(SolutionDir)Core\src\MSD;$(SolutionDir)Glad\include;$(ProjectDir)vendor\NFD\include;$(SolutionDir)Core\src</AdditionalIncludeDirectories>
-      <FloatingPointModel>Strict</FloatingPointModel>
+      <FloatingPointModel>Precise</FloatingPointModel>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>msdpch.h</PrecompiledHeaderFile>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -172,7 +173,7 @@
       <PreprocessorDefinitions>GLFW_INCLUDE_NONE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <UndefinePreprocessorDefinitions>%(UndefinePreprocessorDefinitions)</UndefinePreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <FloatingPointModel>Strict</FloatingPointModel>
+      <FloatingPointModel>Precise</FloatingPointModel>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>msdpch.h</PrecompiledHeaderFile>
       <UndefineAllPreprocessorDefinitions>false</UndefineAllPreprocessorDefinitions>
@@ -197,11 +198,12 @@
       <PreprocessorDefinitions>GLFW_INCLUDE_NONE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <UndefinePreprocessorDefinitions>%(UndefinePreprocessorDefinitions)</UndefinePreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <FloatingPointModel>Strict</FloatingPointModel>
+      <FloatingPointModel>Precise</FloatingPointModel>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>msdpch.h</PrecompiledHeaderFile>
       <UndefineAllPreprocessorDefinitions>false</UndefineAllPreprocessorDefinitions>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
     </ClCompile>
     <Lib>
       <AdditionalDependencies>glfw3_mt.lib;glad.lib</AdditionalDependencies>
@@ -221,6 +223,11 @@
     <ClCompile Include="src\MSD\Graphics\Buffer.cpp" />
     <ClCompile Include="src\MSD\Graphics\Cameras.cpp" />
     <ClCompile Include="src\MSD\Graphics\FrameBuffer.cpp" />
+    <ClCompile Include="src\MSD\Logging.ixx" />
+    <ClCompile Include="src\MSD\MathModels\MSDModules\EnergyDistribution.ixx" />
+    <ClCompile Include="src\MSD\MathModels\MSDModules\FluxScattering.ixx" />
+    <ClCompile Include="src\MSD\MathModels\MSDModules\ReactiveMSD.ixx" />
+    <ClCompile Include="src\MSD\MathModels\MSDModules\SputteringRates.ixx" />
     <ClCompile Include="src\MSD\UserInterface\Controller.cpp" />
     <ClCompile Include="src\MSD\MathModels\Database\PhysicsData.cpp" />
     <ClCompile Include="src\MSD\UserInterface\GraphicsLayer.cpp" />
@@ -270,6 +277,7 @@
     <ClInclude Include="src\MSD\Graphics\Renderer.h" />
     <ClInclude Include="src\MSD\Graphics\Shader.h" />
     <ClInclude Include="src\MSD\Graphics\VertexArray.h" />
+    <ClInclude Include="src\MSD\UserInterface\Languages.h" />
     <ClInclude Include="src\MSD\UserInterface\MainLayer.h" />
     <ClInclude Include="src\MSD\ApplicationCore.h" />
     <ClInclude Include="src\MSD.h" />

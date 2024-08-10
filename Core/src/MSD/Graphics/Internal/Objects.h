@@ -2,6 +2,7 @@
 
 #include "../../vendor/glm/glm.hpp"
 #include "../../vendor/glm/gtc/matrix_transform.hpp"
+#include "../../vendor/glm/gtx/rotate_vector.hpp"
 
 #include "Graphics/Buffer.h"
 
@@ -78,7 +79,7 @@ namespace MSD {
 	class Arrow : public Object
 	{
 	public:
-		virtual void SetPosition(const glm::vec3& pos) override;
+		void SetPosition(const glm::vec3& pos) override;
 
 		static float coords[3*5];
 		static unsigned int indicesLine[2];
@@ -87,6 +88,21 @@ namespace MSD {
 		static unsigned int outlineIndices[4];
 
 		virtual const ObjectType GetType() const { return ObjectType::Arrow; };
+	};
+
+	class Circle : public Object
+	{
+	public:
+		Circle();
+
+		static float coords[3];
+		static unsigned int indices[1];
+
+		glm::vec2 LocalPosition = glm::vec2(1.0f,1.0f);
+		float Radius = 100.0f;
+		float Thickness = 1.0f;
+		float Fade = 0.005f;
+		int Segments = 7;
 	};
 
 	class Grid

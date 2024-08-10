@@ -6,41 +6,41 @@
 
 namespace MSD {
 
-	float Controller::s_CameraSpeed = 1000.0f;
-	float Controller::s_CameraRotation = 180.0f;
-	float Controller::s_CameraRotationVertical = 0.0f;
-	float Controller::s_CameraRotationSpeed = 180.0f;
-	float Controller::s_ZoomValue = 1.0f;
+	namespace Controller {
 
+		float s_CameraSpeed = 1000.0f;
+		float s_CameraRotation = 180.0f;
+		float s_CameraRotationVertical = 0.0f;
+		float s_CameraRotationSpeed = 180.0f;
+		float s_ZoomValue = 1.0f;
+		float s_ObjectRotation = 0.0f;
+		float s_ObjectRotationRounded = 0.0f;
+		int   s_CameraDraggable = 0;
+		bool  s_EnableCameraEvents = true;
+		bool  s_DragObject = false;
+		bool  s_RotateObject = false;
+		bool  s_EnableEvents = false;
+		bool  s_ObjectSticking = false;
 
-	glm::vec3 Controller::s_CameraPosition = glm::vec3(0.0f, 0.0f, 0.0f);
-	glm::vec2 Controller::s_CurrMousePos = glm::vec2(0.0f, 0.0f);
-	glm::vec2 Controller::s_LastMousePos = glm::vec2(0.0f, 0.0f);
-	glm::vec2 Controller::s_Delta = glm::vec2(0.0f, 0.0f);
-	glm::vec2 Controller::s_ObjectPos = glm::vec2(0.0f, 0.0f);
-	glm::vec2 Controller::s_ObjectPosVirtual = glm::vec2(0.0f, 0.0f);
-	glm::vec2 Controller::s_WindowSizeRatio = glm::vec2(0.0f, 0.0f);
+		glm::vec3 s_CameraPosition = glm::vec3(0.0f, 0.0f, 0.0f);
+		glm::vec2 s_CurrMousePos = glm::vec2(0.0f, 0.0f);
+		glm::vec2 s_LastMousePos = glm::vec2(0.0f, 0.0f);
+		glm::vec2 s_Delta = glm::vec2(0.0f, 0.0f);
+		glm::vec2 s_ObjectPos = glm::vec2(0.0f, 0.0f);
+		glm::vec2 s_ObjectPosVirtual = glm::vec2(0.0f, 0.0f);
+		glm::vec2 s_WindowSizeRatio = glm::vec2(0.0f, 0.0f);
 
+		const glm::mat4			s_NullMatrix = glm::mat4(1.0f);
+		std::unique_ptr<Object> s_ObjectBeforeTransform = nullptr;
+		ControllerState			s_ControllerState = ControllerState::View;
+		OrthographicCamera*		s_Camera = nullptr;
+		AngMSDObject*			s_TransformingObject = nullptr;
 
-	bool Controller::s_CameraDraggable = false;
-	bool Controller::s_EnableCameraEvents = true;
-
-	bool Controller::s_DragObject = false;
-
-	ControllerState Controller::s_ControllerState = ControllerState::View;
-
-	OrthographicCamera* Controller::s_Camera = nullptr;
-
-	const glm::mat4 Controller::s_NullMatrix = glm::mat4(1.0f);
-
-	std::unique_ptr<Object> Controller::s_ObjectBeforeTransform = nullptr;
-	AngMSDObject* Controller::s_TransformingObject = nullptr;
-
-	bool Controller::s_ObjectSticking = false;
+	}
 
 	static ImVec2 winSize = ImVec2(1.0f, 1.0f);
 	static ImVec2 lastWinPos = ImVec2(0.0f, 0.0f);
-
+	static vec3 term = vec3(0, 0, 0);
 
 	//////////////////////////////
 	/////// GLOBAL EVENTS ////////
@@ -50,7 +50,7 @@ namespace MSD {
 	{
 		ImGuiIO& io = ImGui::GetIO();
 
-		auto imguiWindow = ImGui::FindWindowByName("Model Viewport");
+		auto imguiWindow = ImGui::FindWindowByName(MSDSTR_MODELVIEWPORT);
 
 		if (imguiWindow != nullptr)
 		{
@@ -103,37 +103,24 @@ namespace MSD {
 	{
 		if (s_Camera == nullptr) return;
 
-		if (Input::IsKeyPressed(GLFW_KEY_LEFT))
+		if (s_EnableEvents)
 		{
-			s_CameraPosition.x += s_CameraSpeed * (*timestep);
-		}
-		if (Input::IsKeyPressed(GLFW_KEY_RIGHT))
-		{
-			s_CameraPosition.x -= s_CameraSpeed * (*timestep);
-		}
-		if (Input::IsKeyPressed(GLFW_KEY_UP))
-		{
-			s_CameraPosition.y -= s_CameraSpeed * (*timestep);
-		}
-		if (Input::IsKeyPressed(GLFW_KEY_DOWN))
-		{
-			s_CameraPosition.y += s_CameraSpeed * (*timestep);
-		}
-		if (Input::IsKeyPressed(GLFW_KEY_Q))
-		{
-			s_CameraRotation -= s_CameraRotationSpeed * (*timestep);
-		}
-		if (Input::IsKeyPressed(GLFW_KEY_E))
-		{
-			s_CameraRotation += s_CameraRotationSpeed * (*timestep);
-		}
-		if (Input::IsKeyPressed(GLFW_KEY_W))
-		{
-			s_CameraRotationVertical -= s_CameraRotationSpeed * (*timestep);
-		}
-		if (Input::IsKeyPressed(GLFW_KEY_S))
-		{
-			s_CameraRotationVertical += s_CameraRotationSpeed * (*timestep);
+			if (Input::IsKeyPressed(GLFW_KEY_Q))
+			{
+				s_CameraRotation -= s_CameraRotationSpeed * (*timestep);
+			}
+			if (Input::IsKeyPressed(GLFW_KEY_E))
+			{
+				s_CameraRotation += s_CameraRotationSpeed * (*timestep);
+			}
+			if (Input::IsKeyPressed(GLFW_KEY_W))
+			{
+				s_CameraRotationVertical -= s_CameraRotationSpeed * (*timestep);
+			}
+			if (Input::IsKeyPressed(GLFW_KEY_S))
+			{
+				s_CameraRotationVertical += s_CameraRotationSpeed * (*timestep);
+			}
 		}
 
 		s_Camera->SetPositon(s_CameraPosition);
@@ -148,16 +135,15 @@ namespace MSD {
 		EventDispatcher dispatcher(event);
 		
 		dispatcher.Dispatch<MouseMovedEvent>(BIND_EVENT_FN_STATIC(Controller::GlobalEventMouseMoved));
-		
+
+		dispatcher.Dispatch<MouseButtonPressedEvent>(BIND_EVENT_FN_STATIC(Controller::CameraEventMouseButtonPressed));
+		dispatcher.Dispatch<MouseButtonReleasedEvent>(BIND_EVENT_FN_STATIC(Controller::CameraEventMouseButtonReleased));
+		dispatcher.Dispatch<MouseMovedEvent>(BIND_EVENT_FN_STATIC(Controller::CameraEventMouseMoved));
+
 		if (s_ControllerState == ControllerState::View)
 		{
-			dispatcher.Dispatch<MouseButtonPressedEvent>(BIND_EVENT_FN_STATIC(Controller::CameraEventMouseButtonPressed));
-			dispatcher.Dispatch<MouseButtonReleasedEvent>(BIND_EVENT_FN_STATIC(Controller::CameraEventMouseButtonReleased));
+			if (!s_EnableCameraEvents or !s_EnableEvents) return;
 
-			if (!s_EnableCameraEvents) return;
-
-			dispatcher.Dispatch<MouseMovedEvent>(BIND_EVENT_FN_STATIC(Controller::CameraEventMouseMoved));
-			dispatcher.Dispatch<MouseScrolledEvent>(BIND_EVENT_FN_STATIC(Controller::CameraEventMouseScrolled));
 			dispatcher.Dispatch<MouseButtonDoubleClickedEvent>(BIND_EVENT_FN_STATIC(Controller::CameraEventMouseDoubleClicked));
 		}
 
@@ -165,14 +151,13 @@ namespace MSD {
 		{
 			dispatcher.Dispatch<MouseButtonPressedEvent>(BIND_EVENT_FN_STATIC(Controller::ObjectEventMouseButtonPressed));
 			dispatcher.Dispatch<MouseButtonReleasedEvent>(BIND_EVENT_FN_STATIC(Controller::ObjectEventMouseButtonReleased));
-
-			if (!s_EnableCameraEvents) return;
-
-			dispatcher.Dispatch<MouseMovedEvent>(BIND_EVENT_FN_STATIC(Controller::ObjectEventMouseMoved));
-			dispatcher.Dispatch<MouseScrolledEvent>(BIND_EVENT_FN_STATIC(Controller::CameraEventMouseScrolled));
 			dispatcher.Dispatch<KeyPressedEvent>(BIND_EVENT_FN_STATIC(Controller::ObjectEventKeyPressed));
 			dispatcher.Dispatch<KeyReleasedEvent>(BIND_EVENT_FN_STATIC(Controller::ObjectEventKeyReleased));
+			dispatcher.Dispatch<MouseMovedEvent>(BIND_EVENT_FN_STATIC(Controller::ObjectEventMouseMoved));
 		}
+
+		if (!s_EnableCameraEvents or !s_EnableEvents) return;
+		dispatcher.Dispatch<MouseScrolledEvent>(BIND_EVENT_FN_STATIC(Controller::CameraEventMouseScrolled));
 
 	}
 
@@ -203,11 +188,20 @@ namespace MSD {
 		return true;
 	}
 
+	static bool prevObjectDragState = false;
+
 	bool Controller::CameraEventMouseButtonPressed(MouseButtonPressedEvent& event)
 	{
 		if (event.GetMouseButton() == 0)
 		{
 			s_CameraDraggable = true;
+		}
+
+		if (event.GetMouseButton() == 2)
+		{
+			s_CameraDraggable = 2;
+			prevObjectDragState = s_DragObject;
+			s_DragObject = false;
 		}
 		return true;
 	}
@@ -218,12 +212,17 @@ namespace MSD {
 		{
 			s_CameraDraggable = false;
 		}
+		if (event.GetMouseButton() == 2)
+		{
+			s_CameraDraggable = false;
+			s_DragObject = prevObjectDragState;
+		}
 		return true;
 	}
 
 	bool Controller::CameraEventMouseMoved(MouseMovedEvent& event)
 	{
-		if (s_CameraDraggable)
+		if ((s_CameraDraggable && !s_DragObject) or s_CameraDraggable > 1)
 		{
 			float angle = s_CameraRotation * PI / 180;
 
@@ -253,22 +252,30 @@ namespace MSD {
 		s_DragObject = false;
 	}
 
+	bool Controller::RotateObjectStop()
+	{
+		if (s_RotateObject)
+		{
+			s_RotateObject = false;
+			return true;
+		}
+		return false;
+	}
+
+	void Controller::SetState(ControllerState state)
+	{
+		s_DragObject = false;
+		s_RotateObject = false;
+		s_ControllerState = state;
+	}
+
 	bool Controller::ObjectEventMouseButtonPressed(MouseButtonPressedEvent& event)
 	{
-		if (event.GetMouseButton() == 0)
-		{
-			s_CameraDraggable = true;
-		}
 		return true;
 	}
 
 	bool Controller::ObjectEventMouseButtonReleased(MouseButtonReleasedEvent& event)
 	{
-		if (event.GetMouseButton() == 0)
-		{
-			s_CameraDraggable = false;
-		}
-
 		return true;
 	}
 
@@ -276,6 +283,18 @@ namespace MSD {
 	{
 		if (event.GetKeyCode() == GLFW_KEY_LEFT_SHIFT)
 			s_ObjectSticking = true;
+		if (event.GetKeyCode() == GLFW_KEY_DELETE && s_TransformingObject != nullptr)
+		{
+			AngMSD& model = ApplicationCore::Get().GetModel();
+			MainLayer* mainlayer = ApplicationCore::Get().GetMainLayer();
+			
+			mainlayer->DeleteObject(s_TransformingObject->GetID());
+		}
+		if (event.GetKeyCode() == GLFW_KEY_R && s_TransformingObject != nullptr)
+		{
+			term = s_TransformingObject->GetNormal();
+			s_RotateObject = !s_RotateObject;
+		}
 		return true;
 	}
 
@@ -288,7 +307,7 @@ namespace MSD {
 
 	bool Controller::ObjectEventMouseMoved(MouseMovedEvent& event)
 	{
-		if (s_CameraDraggable && s_DragObject)
+		if (s_DragObject)
 		{
 			float angle = s_CameraRotation * PI / 180;
 
@@ -312,6 +331,31 @@ namespace MSD {
 				}
 			}
 
+		}
+
+		else if (s_RotateObject)
+		{
+			if (s_TransformingObject != nullptr)
+			{
+				s_ObjectRotation = s_Delta.y * 0.05f;
+
+				// TO DO: REWORK STICKING TO ABSOLUTE ANGLES
+				if (s_ObjectSticking)
+				{
+					s_ObjectRotationRounded = std::round(180 * Angle(term, vec3(0, 1, 0)) / PI);
+					term = RotateAroundZ(term, s_ObjectRotation);
+					bool doStick = ((int)(180 * Angle(term, vec3(0, 1, 0)) / PI) % 15) == 0;
+					if (doStick)
+					{
+						s_TransformingObject->Rotate(s_ObjectRotation);
+						term = s_TransformingObject->GetNormal();
+					}
+				}
+				else
+				{
+					s_TransformingObject->Rotate(s_ObjectRotation);
+				}
+			}
 		}
 
 		return true;

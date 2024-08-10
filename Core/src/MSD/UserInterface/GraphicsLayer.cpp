@@ -23,6 +23,8 @@ namespace MSD {
 		Controller::CameraOnEvent(event);
 	}
 
+	static Shader* circleShader;
+
 	void GraphicsLayer::OnAttach()
 	{
 		va.reset(new VertexArray);
@@ -46,7 +48,7 @@ namespace MSD {
 
 		gridShader = new Shader("../assets/shaders/Grid.glsl");
 
-
+		circleShader = new Shader("../assets/shaders/Circle.glsl");
 	}
 
 	void GraphicsLayer::OnDetach()
@@ -70,19 +72,17 @@ namespace MSD {
 
 		fb->ClearAttachment(1, -1);
 		fb->ClearAttachment(2, 0);
- 
-		glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
 		
 		gridShader->Bind();
 		gridShader->SetUniformMat4("u_ViewProjection", camera->GetViewProjectionMatrix());
-		renderer.DrawGrid(gridShader);
+		renderer.DrawGrid();
 
-		shader->Bind();
-		shader->SetUniform4fv("u_Color", color);
-
+		//renderer.SetShader(circleShader);
+		//renderer.DrawCube();
 		renderer.DrawScene();
 
 		/*renderer.DrawRect(nullptr, { 0.0f, 0.0f, 0.0f });*/
+		//renderer.DrawCircle();
 
 		shader->SetUniformMat4("u_ViewProjection", camera->GetViewProjectionMatrix());
 
@@ -98,12 +98,13 @@ namespace MSD {
 		renderer.Flush();
 
 		// Adding substrate
-		auto& substrate = m_Model->m_Substrate;
+		auto substrate = m_Model->m_Substrate;
 		auto s = substrate->GetGraphicsObject();
 		renderer.AddExistingObject(s);
 
 		s->SetID(substrate->GetID());
-		s->SetColor({ 0.9f, 0.05f, 0.05f, 1.0f });
+		s->SetColor({ 0.9f, 0.25f, 0.05f, 1.0f });
+		s->SetScale({ 0.2f, 0.03f, 1.0f });
 
 		// Adding substrate normal vector
 		auto s_arrow = substrate->GetArrow();
@@ -111,10 +112,13 @@ namespace MSD {
 
 		s_arrow->SetID(999999);
 		s_arrow->SetColor({ 0.9f, 0.05f, 0.9f, 1.0f });
+		s_arrow->SetScale({ 0.4f, 0.4f, 1.0f });
 
 		// Adding magnetrons and magnetron normal vectors
-		for (auto magnetron : m_Model->m_Magnetrons)
+		for (auto mpair : m_Model->m_Magnetrons)
 		{
+			auto& magnetron = mpair.second;
+
 			auto m = magnetron->GetGraphicsObject();
 			auto m_arrow = magnetron->GetArrow();
 
@@ -123,38 +127,50 @@ namespace MSD {
 
 			m->SetID(magnetron->GetID());
 
-			m_arrow->SetID((magnetron->GetID() + 10000)*50);
+			m_arrow->SetID(magnetron->GetID() + 50000);
 			m_arrow->SetColor({ 0.9f, 0.05f, 0.9f, 1.0f });
+			m_arrow->SetScale({ 0.4f, 0.4f, 1.0f });
 		}
 
 		UpdateObjectStates();
 	}
+
 	void GraphicsLayer::UpdateObjectStates()
 	{
 		auto& substrate = m_Model->m_Substrate;
 		auto s = substrate->GetGraphicsObject();
 		auto s_arrow = substrate->GetArrow();
 
-		auto pos = substrate->GetPos() * 10.0f;
-		auto angle = m_Model->m_Substrate->CalcAngle();
+		vec3 pos; float angle;
+		if (m_Model->m_ShowMovementRealTime and m_Model->m_ModelRunning)
+		{
+			auto& substratebuffer = m_Model->m_SubstrateBuffer;
+			pos = substratebuffer->GetPos() * 10.0f;
+			angle = substratebuffer->CalcAngle();
+		}
+		else
+		{
+			pos = substrate->GetPos() * 10.0f;
+			angle = substrate->CalcAngle();
+		};
 
 		s->SetPosition(pos);
-		s->SetScale({ 0.2f, 0.03f, 1.0f });
 		s->SetAngle(angle);
 
 		s->CalcModelMatrix();
 
 		s_arrow->SetPosition(pos);
 		s_arrow->SetAngle(angle);
-		s_arrow->SetScale({ 0.4f, 0.4f, 1.0f });
 
 		s_arrow->CalcModelMatrix();
 
-		for (auto magnetron : m_Model->m_Magnetrons)
+		for (auto mpair : m_Model->m_Magnetrons)
 		{
+			auto& magnetron = mpair.second;
+
 			auto m = magnetron->GetGraphicsObject();
 			auto m_arrow = magnetron->GetArrow();
-			float scaleX = *magnetron->GetRadius() / 10.0f;
+			float scaleX = magnetron->GetRadius() / 10.0f;
 
 			auto pos = magnetron->GetPos() * 10.0f;
 			auto angle = magnetron->CalcAngle();
@@ -165,7 +181,6 @@ namespace MSD {
 
 			m_arrow->SetPosition(pos);
 			m_arrow->SetAngle(angle);
-			m_arrow->SetScale({ 0.4f, 0.4f, 1.0f });
 			m_arrow->CalcModelMatrix();
 
 			m->CalcModelMatrix();

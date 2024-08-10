@@ -4,8 +4,6 @@
 
 #include "glad/glad.h"
 
-#include <thread>
-
 namespace MSD {
 
 	ApplicationCore* ApplicationCore::s_Instance = nullptr;

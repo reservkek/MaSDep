@@ -89,6 +89,10 @@ namespace MSD
 		 10.0f, 75.0f, 0.0f  // Arrow head vertex 3
 	};
 
+	float Circle::coords[3] = { 0.0f, 0.0f, 0.0f };
+
+	unsigned int Circle::indices[1] = { 0 };
+
 	unsigned int Arrow::indicesLine[2] = { 0, 1 };
 
 	unsigned int Arrow::indicesHead[3] = { 2, 3, 4 };
@@ -108,5 +112,9 @@ namespace MSD
 	void Arrow::SetPosition(const glm::vec3& pos)
 	{
 		m_Pos = pos;
+	}
+	Circle::Circle()
+	{
+		m_Color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 	}
 }

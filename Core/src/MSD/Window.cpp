@@ -8,6 +8,9 @@
 
 #include "glad/glad.h"
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb/stb_image.h"
+
 namespace MSD {
 
 	static std::chrono::time_point lastTime = std::chrono::high_resolution_clock::now();
@@ -51,11 +54,23 @@ namespace MSD {
 			s_GLFWInitialized = true;
 		}
 
+		glfwWindowHint(GLFW_SAMPLES, 4);
 		m_Window = glfwCreateWindow((int)props.Width, (int)props.Height, props.Title.c_str(), nullptr, nullptr);
 		glfwMakeContextCurrent(m_Window);
 		int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 		glfwSetWindowUserPointer(m_Window, &m_Data);
 		glfwSwapInterval(0);
+
+		int width, height;
+		int channels;
+		unsigned char* pixels = stbi_load("../res/images/msd-logo.png",&width, &height, &channels, 4);
+
+		GLFWimage images[1];
+		images[0].width = width;
+		images[0].height = height;
+		images[0].pixels = pixels;
+
+		glfwSetWindowIcon(m_Window,1,images);
 
 		// Setting Event Callbacks
 		glfwSetWindowSizeCallback(m_Window, [](GLFWwindow* window, int width, int height)

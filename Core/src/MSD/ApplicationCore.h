@@ -14,6 +14,10 @@
 
 #include "../glm/gtc/matrix_transform.hpp"
 
+import MSDLog;
+
+#define MSD_VERSION 0.6.3
+
 namespace MSD {
 
 	class MSD_API ApplicationCore
@@ -34,6 +38,7 @@ namespace MSD {
 		inline AngMSD& GetModel() { return *m_Model; }
 
 		GraphicsLayer* GetGraphicsLayer() { return m_GraphicsLayer; }
+		MainLayer* GetMainLayer() { return m_MainLayer; }
 
 		void ModelUpdate();
 		void WindowUpdate();

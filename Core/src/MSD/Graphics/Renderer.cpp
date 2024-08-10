@@ -9,7 +9,7 @@ namespace MSD {
 
 	void Renderer::Clear() const
 	{
-		//glClearColor(0.94f, 0.94f, 0.94f, 1.0f);
+		//glClearColor(0.6f, 0.6f, 0.6f, 1.0f);
 		glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 	}
@@ -62,13 +62,14 @@ namespace MSD {
 		glDrawElements(GL_POINTS, va->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
 	}
 
-	void Renderer::DrawGrid(Shader* shader)
+	void Renderer::DrawGrid()
 	{
 		glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
 		glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
 
 		glEnable(GL_LINE_SMOOTH);
 		glEnable(GL_POLYGON_SMOOTH);
+		glEnable(GL_MULTISAMPLE);
 
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -161,7 +162,7 @@ namespace MSD {
 
 
 		m_va->Bind();
-		DrawLines(m_va, 4);
+		DrawLines(m_va, 5);
 
 		m_ib.reset(new IndexBuffer(Arrow::indicesHead, 3));
 		m_va->SetIndexBuffer(m_ib);
@@ -183,6 +184,35 @@ namespace MSD {
 		{
 			DrawObject(obj);
 		}
+	}
+
+	void Renderer::DrawCircle(Object* obj)
+	{
+		if (obj == nullptr) obj = new Circle;
+
+		Circle* circle = (Circle*)obj;
+
+		m_va.reset(new VertexArray());
+		m_vb.reset(new VertexBuffer(Circle::coords, 3 * sizeof(float)));
+		m_ib.reset(new IndexBuffer(Circle::indices, 1));
+
+		m_vb->SetLayout(obj->GetLayout());
+		m_va->AddVertexBuffer(m_vb);
+		m_va->SetIndexBuffer(m_ib);
+
+		m_shader->Bind();
+		m_shader->SetUniform4fv("u_Color", obj->GetColor());
+		m_shader->SetUniform1i("u_ID", obj->GetID());
+		m_shader->SetUniform1f("u_Thickness", circle->Thickness);
+		m_shader->SetUniform1f("u_Fade", circle->Fade);
+		m_shader->SetUniform2fv("u_LocalPosition", circle->LocalPosition);
+
+		DrawPoints(m_va);
+	}
+
+	void Renderer::SetShader(Shader* shader)
+	{
+		m_shader = shader;
 	}
 
 	void Renderer::AddExistingObject(Object* obj)

@@ -8,6 +8,8 @@
 #include <utility>
 #include <chrono>
 #include <format>
+#include <thread>
+#include <mutex>
 
 #include <sstream>
 #include <iostream>
@@ -17,7 +19,10 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <cmath>
 #include <unordered_map>
+#include <ranges>
+#include <numeric>
 
 
 #ifdef MSD_PLATFORM_WINDOWS

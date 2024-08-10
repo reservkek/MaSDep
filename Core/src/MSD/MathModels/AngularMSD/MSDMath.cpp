@@ -57,6 +57,14 @@ namespace MSD {
 		return *this;
 	}
 
+	vec3& vec3::operator=(const glm::vec3& a)
+	{
+		x = a.x;
+		y = a.y;
+		z = a.z;
+		return *this;
+	}
+
 	vec3 vec3::operator*(const float& a)
 	{
 		return vec3(x * a, y * a, z * a);
@@ -78,6 +86,12 @@ namespace MSD {
 	vec3 vec3::operator-() const
 	{
 		return vec3(-x, -y, -z);
+	}
+
+	bool vec3::operator==(const vec3& a) const
+	{
+		if (x == a.x && y == a.y && z == a.z) return true;
+		return false;
 	}
 
 	float Magnitude(const MSD::vec3& a)
@@ -198,7 +212,7 @@ namespace MSD {
 	{
 		if (map.begin() == map.end())
 		{
-			return 100.0f;
+			return 0.0f;
 		}
 
 		std::map<float, float>::iterator iterUpper, iterLower;
@@ -215,7 +229,7 @@ namespace MSD {
 		iterLower = iterUpper;
 		--iterLower;
 		res = iterLower->second + (iterUpper->second - iterLower->second) / (iterUpper->first - iterLower->first) * (radius - iterLower->first);
-		if (res < 0) res = 0;
+		if (res < 0) return 0;
 		return res;
 	}
 
